@@ -1,0 +1,269 @@
+XL "Extension Language"
+=======================
+Assembled into bytecode (BXL) that gets stored as an array of bytes
+in the cartridge. Here are the possible instructions:
+
+OPCODE MNEMONIC ARGS             MEANING
+   
+   60  (sysc)                    Opcodes 60-120 are
+   ..  (sysc)                    system calls.
+   119 (sysc)
+
+   124 SET      varID val        Set variable to value.
+   125 RET                       Return to caller.
+   126 CMP      varID val        Compare variable to value.
+   127 RND      varID val1 val2  Generates a random integer between
+                                 val1 and val2 inclusive, assigns
+                                 it to variable varID.
+   128 ECHO     val              Echoes the given byte to console
+                                 (for debugging).
+   129 ANDC     var val          ANDs the variable with the COMPLEMENT
+                                 of the given byte (e.g., to unset a
+                                 bit).
+   130 OR       var val          ORs the variable with the given byte
+   131 AND      var val          ANDs the variable with the given byte
+   132 TEST     var val          Tests the variable against the given
+                                 byte mask with AND, and compares
+                                 the result to 0. Follow with JZ
+                                 or JNZ.
+   134 ADD      var val         Sets var1 to var+val
+   135 SUB      var val         Sets var1 to var+val
+   136 MUL      var val         Sets var1 to var+val
+   137 DIV      var val         Sets var1 to var+val
+   138 MOD      var val         Sets var1 to var+val
+   139 REAB     var val         Reads byte from address val,
+                                stores in variable var.
+   140 REAW     var val         Reads word from address val,
+                                stores in variable var.
+
+   144 SND0                     Sets all argument variables to 0.
+   145 SND1     val             Sets VAR_ARG1 to val, all other arg vars to 0
+   146 SND2     val1, val2      Sets VAR_ARG1 to val, VAR_ARG2 to val2,
+                                all other arg vars to 0.
+   147 SND3     3 x val         (same idea...)
+   ...
+   159 SND15   15 x val         (same idea...)
+
+   160 REC0                     No-op. Receive 0 variables?
+   161 REC1     var             Receive 1 values into variables
+   162 REC2     var,var         Receive 2 values into variables
+   163 REC3     var,var,var     Receive 3 values into variables
+   ...
+   175 REC15    15 x var        Receive 15 values into variables.
+        Receiving n values means that VAR_ARG1, VAR_ARG2, ... VAR_ARGn
+        get copied into the given local variables.
+
+   176 PAR0                     Receive 0 parameters.
+   177 PAR1                     Receive 1 parameter.
+   ...
+   191 PAR15                    Receive 15 parameters.
+       Receiving n parameters means taking VAR_ARG1, ... VAR_ARGn
+       and setting them to local variables 1, 2, 3, ... in order.
+
+   212 JMP      addr (word)      Jumps (unconditionally).
+   213 JE       addr (word)      Jump if == (alias: JZ)
+   214 JNE      addr (word)      Jump if != (alias: JNZ)
+   215 JG       addr (word)      Jump if >
+   216 JGE      addr (word)      Jump if >=
+   217 JL       addr (word)      Jump if <
+   218 JLE      addr (word)      Jump if <=
+   219 CALL     addr (word)     Call procedure (unconditionally).
+   220 CE       addr (word)     Call procedure if == (alias: CZ)
+   221 CNE      addr (word)     Call procedure if != (alias: CNZ)
+   222 CG       addr (word)     Call procedure if >
+   223 CGE      addr (word)     Call procedure if >=
+   224 CL       addr (word)     Call procedure if <
+   225 CLE      addr (word)     Call procedure if <=
+   226 CMPZ     var             Compare variable with 0
+
+NOTE: An argument of type "val" can be an immediate byte, immediate
+word or a variable reference. They are passed as a sequence of bytes:
+  For immediate byte:
+     255, immediate byte
+  For immediate word:
+     254, low byte, high byte
+  For variable ref:
+     253, varID
+  Abbreviated variable ref, 1-10:
+     243  var 1
+     244  var 2
+     245  var 3
+     246  var 4
+     247  var 5
+     248  var 6
+     249  var 7
+     250  var 8
+     251  var 9
+     252  var 10
+  Any other value for the 1st byte means an immediate byte of
+  that value.
+
+VARIABLE IDs: Variable IDs 0-127 are local, 128-255 are global.
+
+
+
+
+
+
+----------- DEPRECATED: -------------------------------------------
+
+
+
+
+[[ STATEMENTS ]]
+
+.LABEL:
+  This defines the LOCAL label LABEL to be the memory address where
+  this appears. Compile-time only. Scoped to the current PROC.
+
+LABEL:
+  Defines the global label LABEL.
+
+PROC Name
+  Defines the start of a procedure. This is more than just a label
+  because for example LOCAL declarations survive until the next PROC.
+
+END
+  Defines the end of a PROC.
+
+DS Lorem ipsum
+  The literal data string "Lorem ipsum".
+
+DB 123
+  The literal byte 123.
+
+VAR x y z w
+  Defines local variables x y z w ...
+  These are just friendly names that map to numbers.
+
+[[ VARIABLES ]]
+When a procedure is called in XL, the VM maintains a table of local
+variables for that call. These are independent from local variables
+in other calls and gets discarded when the proc returns.
+
+VARIABLE IDs:
+        0: invalid variable ID.
+    1-127: local variables.
+  128-144: special global variables used for argument passing and
+           returning values from functions.
+  144-191: global variables for general use.
+  192-255: global variables set by the engine to represent the
+           state of the game.
+
+So each call frame has its own copy of variables 0-127, and there's
+a single global instance of each variable 128-255.
+
+  LOCAL foo bar qux  # local variables foo, bar, qux, auto-assigned
+                     # valid local variable IDs.
+  GLOBAL baz 145     # make "baz" be the name of global variable 145
+
+[[ ADDRESSING MODES ]]
+When an instruction takes arguments, they may be:
+  * a byte immediate
+  * a word immediate (including a proc address)
+  * a variable deref (indirect)
+
+The nature of these arguments is specified as part of the opcode's
+name by convention, when there are variants:
+
+  # Compare variable with byte immediate
+  CMP_VB playerX 12
+  # Compare variable with variable
+  CMP_VV playerX targetX
+
+  # Set a variable to an byte immediate.
+  SET_B playerX 123
+  # Set a variable to a word immediate.
+  SET_W playerX 3819
+  # Set a variable to the value of another variable.
+  SET_V playerX playerY
+
+Assembler alias: to set the special arg-passing variables, you can
+use the SEND pseudo-instruction:
+
+  SEND 3849 playerY 37
+
+This resolves to:
+  SET_W 128 3849
+  SET_V 129 playerY
+  SET_B 130 37
+
+Likewise, to receive returned values, use the RECV pseudo-instruction:
+
+  CALL SomeProc
+  RECV resultX resultY
+
+This emits:
+  CALL SomeProc
+  SET_V resultX 128
+  SET_V resultY 129
+  
+Also, PARAM is a pseudo-instruction that declares and receives:
+
+  PARAM x y z
+
+Is equivalent to:
+  LOCAL x y z
+  RECV x y z
+
+Which emits:
+  SET_W 1 128   # 1 is the VID associated with x
+  SET_V 2 129   # 2 is the VID associated with y
+  SET_B 3 130   # 3 is the VID associated with z
+
+
+[[ SHARED DEFINES ]]
+The file xl.defs has shared #defines between LUA code and XL code.
+This defines human-friendly names for numeric codes. All these names
+are prefixed with X_ for clarity.
+
+Example:
+
+# Riverview area interaction proc (run when the player presses
+# the action button on tiles).
+# Args: x,z: Tile that was interacted with.
+PROC RIVERVIEW_IACT
+ PARAM tileX tileZ
+ 
+ # Hut at 5,6?
+ CMP tileX 5; JNE .not56
+ CMP tileZ 6; JNE .not56
+ # Syscall X_SAY with arguments 218 .title .text
+ SEND 218 .title .text
+    # Expanded to something like:
+    #    ARG-b 218
+    #    ARG-w 4812
+    #    ARG-w 4891
+ SYS X_SAY
+ RET
+.not56:
+
+ # Lever at 10,12? It's a trap.
+ CMP tileX 10; JNE .not1012
+ CMP tileZ 12; JNE .not1012
+ # Syscall X_ATTACK_PLR to attack player.
+ SYS X_ATTACK_PLR 218 X_DMGK_PHYSICAL 30 .trap1012txt
+ # Expanded to something like:
+ #    ARG-b 15    # value of X_ATTACK_PLR
+ #    ARG-b 218   # literal
+ #    ARG-b 1     # value of X_DMGK_PHYSICAL
+ #    ARG-b 30    # literal
+ #    ARG-w 838   # address of .trap1012txt
+ RET
+.not1012:
+
+ # continue processing...
+
+ RET
+
+.title:
+ DS Villager
+.txt:
+ DB 3
+ DS Hoc est quod loquitur
+ DS cives. Lorem ipsum dolor
+ DS sit amet.
+.trap1012txt:
+ DS Oh no, a trap!
+END
+

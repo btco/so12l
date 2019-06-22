@@ -1,0 +1,355 @@
+# STRINGS used in XL code only (not exported to LUA).
+
+ANothing:
+ DB 1
+ DS Nothing in here.
+
+AStairsUp:
+ DB 1
+ DS Climb up the stairs?
+
+AStairsDown:
+ DB 1
+ DS Go down the stairs?
+
+DEFINE CHOICE_NO 1
+DEFINE CHOICE_YES 2
+ChoiceNoYes:
+ DB 2
+ DS No
+ DS Yes
+
+AChoose:
+ DB 1
+ DS Choose:
+
+ChoiceBuySell:
+ DB 2
+ DS Buy
+ DS Sell
+DEFINE CHOICE_BUY 1
+DEFINE CHOICE_SELL 2
+
+ALeave:
+ DB 1
+ DS Leave?
+
+ALeaveTown:
+ DB 1
+ DS Leave town?
+
+ALeaveCastle:
+ DB 1
+ DS Leave the castle?
+
+STownGate:
+ DS Town gate
+
+SOrchard:
+ DS Orchard
+
+ATunnel:
+ DB 2
+ DS This is the entrance to a deep
+ DS underground tunnel. Enter?
+
+AHutEmpty:
+ DB 1
+ DS This hut is empty.
+
+ASpellbook:
+ DB 1
+ DS Read the spellbook?
+
+SGrto:
+ DS Town of Indigo
+
+SGrtoMayor:
+ DS Town Mayor of Indigo
+
+AEnterCave:
+ DB 3
+ DS Old stairs lead into
+ DS the darkness below.
+ DS Descend?
+
+AExitCave:
+ DB 2
+ DS Stairs lead up to the outside.
+ DS Exit cave?
+
+SBlacksmith:
+ DS Blacksmith
+
+SPotionShop:
+ DS Apothecary
+
+SRingShop:
+ DS Ring Shop
+
+SScrollShop:
+ DS Scroll Shop
+
+SArmorShop:
+ DS Armor Shop
+
+SBootShop:
+ DS Boot Shop
+
+STownHall:
+ DS Town Hall
+
+STrainingHall:
+ DS Training Hall
+
+SGeneralStore:
+ DS General Store
+
+SInn:
+ DS Inn
+
+SSouthGate:
+ DS South Gate
+
+SNorthGate:
+ DS North Gate
+
+SCellar:
+ DS Cellar
+
+SGuard:
+ DS Guard
+
+STownOfRiverside:
+ DS Town of Riverside
+
+SSouthTemple:
+ DS South Temple
+
+STemple:
+ DS Temple
+
+STownOfSunPort:
+ DS Town of Sun Port
+
+AEnterTownOfRiverside:
+ DB 2
+ DS Enter the town of
+ DS Riverside?
+
+SVillager:
+ DS Villager
+
+SHealer:
+ DS Healer
+
+SCleric:
+ DS Cleric
+
+SHoodedFigure:
+ DS Hooded figure
+
+SMountainPass:
+ DS Mountain Pass
+
+AEnterMountainPass:
+ DB 3
+ DS A winding trail leads
+ DS into a mountain pass.
+ DS Enter?
+
+ALeaveMountainPass:
+ DB 3
+ DS A winding trail leads
+ DS out of the mountains.
+ DS Enter?
+
+STrain:
+ DS Train
+
+ATrainMaxedOut:
+ DB 2
+ DS There is nothing more
+ DS we can teach you here.
+
+STrainNotReady:
+ DB 4
+ DS You are not ready to
+ DS advance yet. Come back
+ DS later.
+ DS
+
+AConfirmTrain:
+ DB 2
+ DS Eligible to level up.
+ DS Do you wish to train?
+
+AWhoWillEat:
+ DB 1
+ DS Who will eat?
+
+AWhoWillDrink:
+ DB 1
+ DS Who will drink?
+
+ANothingHappened:
+ DB 1
+ DS Nothing happened.
+
+SLyla:
+ DS Lyla
+
+SVic:
+ DS Vic
+
+ASpellRequiresLevel3:
+ DB 5
+ DS Can't learn spell.
+ DS
+ DS You must be level 3
+ DS or above.
+
+ASpellRequiresLevel4:
+ DB 5
+ DS Can't learn spell.
+ DS
+ DS You must be level 4
+ DS or above.
+
+STrailToMTN:
+ DS Trail to Pinnacle Town
+
+SForestVillage:
+ DS Forest Village
+
+SPawnShop:
+ DS Pawn Shop
+
+SShopkeeper:
+ DS Shopkeeper
+
+SFruitShop:
+ DS Fruit Shop
+
+SCartographer:
+ DS Cartographer
+
+SVoice:
+ DS Voice
+
+SFletcher:
+ DS Fletcher
+
+SCondPoison:
+ DS POISON
+
+SCondAsleep:
+ DS ASLEEP
+
+SCondStrong:
+ DS STRONG
+
+SCondInvis:
+ DS INVIS.
+
+SCondFrozen:
+ DS FROZEN
+
+SCondAlert:
+ DS ALERT
+
+SCastleSouth:
+ DS Castle South
+
+SGate:
+ DS Gate
+
+SThroneRoom:
+ DS Throne Room
+
+SKing:
+ DS King of the South
+
+SQueen:
+ DS Queen of the South
+
+SMonastery:
+ DS Monastery
+
+SMerchant:
+ DS Merchant
+
+SBoatman:
+ DS Boatman
+
+AChoiceLootOrUndisturbed:
+ DB 2
+ DS Leave it undisturbed.
+ DS Loot it for valuables.
+
+SWizard:
+ DS Wizard
+
+STrader:
+ DS Trader
+
+AThanksAgain:
+ DB 2
+ DS Thanks again! Good luck
+ DS in your adventures!
+
+SNorthKeep:
+ DS North Keep
+
+SGhost:
+ DS Ghost
+
+STownOfGlacies:
+ DS Town of Glacies
+
+SThief:
+ DS Thief
+
+SMarkus:
+ DS Markus, vice-governor
+
+ACastOnWhom:
+ DT Cast on whom?
+
+SExpertShop:
+ DS Expert Shop
+
+SExpert:
+ DS Expert
+
+SRest:
+ DS Rest
+
+AIdWhat:
+ DT Identify what?
+
+SScholar:
+ DS Scholar
+
+AItExplodes:
+ DT It explodes as you
+ .. try to use it!
+
+LevelCutScenes:
+ DW LVLN_RSTO;       DB CSN_RSTO
+ DW LVLN_FOVI;       DB CSN_FOVI
+ DW LVLN_OTO1;       DB CSN_OTO
+ DW LVLN_MTN1;       DB CSN_MTN
+ DW LVLN_SUTO;       DB CSN_SUTO
+ DW LVLN_CAST;       DB CSN_CAST
+ DW LVLN_MONA;       DB CSN_MONA
+ DW LVLN_SAHA;       DB CSN_SAHA
+ DW LVLN_UGTO;       DB CSN_UGTO
+ DW LVLN_YNIS;       DB CSN_YNIS
+ DW LVLN_WPTO;       DB CSN_WPTO
+ DW LVLN_NOKE;       DB CSN_NOKE
+ DW LVLN_IGNI;       DB CSN_IGNI
+ DW LVLN_INTO;       DB CSN_INTO
+ DW LVLN_INTX;       DB CSN_INTO
+ DW 0
+

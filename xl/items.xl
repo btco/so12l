@@ -1,0 +1,995 @@
+
+
+EXPORT ItemDB:
+
+# ----------------------------------------------------------------
+# --- WEAPONS ----------------------------------------------------
+
+# Short sword
+DB ITEM_DEF_HDR
+DB ITID_SHORT_SWORD #@item
+  DS Short sword           # name
+  DB ITK_MWEAP             # @kind
+  DB 0                     # @flags
+  DB 50                    # @value
+  DB ITAC_FPA              # allowed classes @itac
+  DB 3                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Long sword
+DB ITEM_DEF_HDR
+DB ITID_LONG_SWORD #@item
+  DS Long Sword            # name
+  DB ITK_MWEAP             # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 3                     # @value
+  DB ITAC_FPA              # allowed classes @itac
+  DB 5                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Broad sword
+DB ITEM_DEF_HDR
+DB ITID_BROAD_SWORD #@item
+  DS Broad Sword           # name
+  DB ITK_MWEAP             # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 7                     # @value
+  DB ITAC_FPA              # allowed classes @itac
+  DB 8                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Mace
+DB ITEM_DEF_HDR
+DB ITID_MACE #@item
+  DS Mace                  # name
+  DB ITK_MWEAP             # @kind
+  DB 0                     # @flags
+  DB 65                    # @value
+  DB ITAC_FPA              # allowed classes @itac
+  DB 2                     # attack/defense score @attdef
+  DB 0                     # description
+ 
+# Quaterstaff
+DB ITEM_DEF_HDR
+DB ITID_QUARTERSTAFF #@item
+  DS Quaterstaff           # name
+  DB ITK_MWEAP             # @kind
+  DB 0                     # @flags
+  DB 30                    # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 1                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Dagger
+DB ITEM_DEF_HDR
+DB ITID_DAGGER #@item
+  DS Dagger                # name
+  DB ITK_MWEAP             # @kind
+  DB 0                     # @flags
+  DB 30                    # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 2                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Axe
+DB ITEM_DEF_HDR
+DB ITID_AXE #@item
+  DS Hand axe              # name
+  DB ITK_MWEAP             # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 20                    # @value
+  DB ITAC_FP               # allowed classes @itac
+  DB 10                    # attack/defense score @attdef
+  DB 0                     # description
+
+# Short bow.
+DB ITEM_DEF_HDR
+DB ITID_SHORT_BOW #@item
+  DS Short bow             # name
+  DB ITK_RWEAP             # @kind
+  DB 0                     # @flags
+  DB 250                   # @value
+  DB ITAC_FPA              # allowed classes @itac
+  DB 5                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Long bow.
+DB ITEM_DEF_HDR
+DB ITID_LONG_BOW #@item
+  DS Long bow              # name
+  DB ITK_RWEAP             # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 12                    # @value
+  DB ITAC_FPA              # allowed classes @itac
+  DB 8                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Crossbow.
+DB ITEM_DEF_HDR
+DB ITID_CROSSBOW #@item
+  DS Crossbow              # name
+  DB ITK_RWEAP             # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 35                    # @value
+  DB ITAC_ARCHER           # allowed classes @itac
+  DB 12                    # attack/defense score @attdef
+  DB 0                     # description
+
+# Emerald Crossbow.
+DB ITEM_DEF_HDR
+DB ITID_ECROSSBOW #@item
+  DS Emerald Crossbow      # name
+  DB ITK_RWEAP             # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 50                    # @value
+  DB ITAC_ARCHER           # allowed classes @itac
+  DB 20                    # attack/defense score @attdef
+  DB 0                     # description
+
+# Two-handed sword.
+DB ITEM_DEF_HDR
+DB ITID_TWO_HANDED_SWORD #@item
+  DS Two-handed sword      # name
+  DB ITK_MWEAP             # @kind
+  DB BOR(ITF_TWO_HANDED,ITF_VALUE_X100) # @flags
+  DB 40                    # @value
+  DB ITAC_FIGHTER          # allowed classes @itac
+  DB 15                    # attack/defense score @attdef
+  DB 0                     # description
+
+# Battle hammer.
+DB ITEM_DEF_HDR
+DB ITID_BATTLE_HAMMER #@item
+  DS Battle Hammer         # name
+  DB ITK_MWEAP             # @kind
+  DB BOR(ITF_TWO_HANDED,ITF_VALUE_X100) # @flags
+  DB 70                    # @value
+  DB ITAC_FIGHTER          # allowed classes @itac
+  DB 18                    # attack/defense score @attdef
+  DB 0                     # description
+
+# Battle axe.
+DB ITEM_DEF_HDR
+DB ITID_BATTLE_AXE #@item
+  DS Battle Axe            # name
+  DB ITK_MWEAP             # @kind
+  DB BOR(ITF_TWO_HANDED,ITF_VALUE_X100) # @flags
+  DB 95                    # @value
+  DB ITAC_FIGHTER          # allowed classes @itac
+  DB 25                    # attack/defense score @attdef
+  DB 0                     # description
+
+# ----------------------------------------------------------------
+# --- ARMOR ------------------------------------------------------
+
+# Clothes
+DB ITEM_DEF_HDR
+DB ITID_CLOTHES #@item
+  DS Clothes               # name
+  DB ITK_ARMOR             # @kind
+  DB 0                     # @flags
+  DB 10                    # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DB 0
+
+# Leather armor
+DB ITEM_DEF_HDR
+DB ITID_LEATHER_ARMOR #@item
+  DS Leather armor         # name
+  DB ITK_ARMOR             # @kind
+  DB 0                     # @flags
+  DB 150                   # @value
+  DB ITAC_FPA              # allowed classes @itac
+  DB 1                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Brigandine
+DB ITEM_DEF_HDR
+DB ITID_BRIGANDINE #@item
+  DS Brigandine            # name
+  DB ITK_ARMOR             # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 7                     # @value
+  DB ITAC_FPA              # allowed classes @itac
+  DB 2                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Scale armor
+DB ITEM_DEF_HDR
+DB ITID_SCALE_ARMOR #@item
+  DS Scale armor           # name
+  DB ITK_ARMOR             # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 12                    # @value
+  DB ITAC_FPA              # allowed classes @itac
+  DB 4                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Ring armor
+DB ITEM_DEF_HDR
+DB ITID_RING_ARMOR #@item
+  DS Ring armor            # name
+  DB ITK_ARMOR             # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 35                    # @value
+  DB ITAC_FPA              # allowed classes @itac
+  DB 10                    # attack/defense score @attdef
+  DB 0                     # description
+
+# Chain armor
+DB ITEM_DEF_HDR
+DB ITID_CHAIN_ARMOR #@item
+  DS Chain armor           # name
+  DB ITK_ARMOR             # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 65                    # @value
+  DB ITAC_FP               # allowed classes @itac
+  DB 15                    # attack/defense score @attdef
+  DB 0                     # description
+
+# Splinted armor
+DB ITEM_DEF_HDR
+DB ITID_SPLINTED_ARMOR #@item
+  DS Splinted armor        # name
+  DB ITK_ARMOR             # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 85                    # @value
+  DB ITAC_FP               # allowed classes @itac
+  DB 20                    # attack/defense score @attdef
+  DB 0                     # description
+
+# Plate armor
+DB ITEM_DEF_HDR
+DB ITID_PLATE_ARMOR #@item
+  DS Plate armor           # name
+  DB ITK_ARMOR             # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 150                   # @value
+  DB ITAC_FP               # allowed classes @itac
+  DB 25                    # attack/defense score @attdef
+  DB 0                     # description
+
+# King's armor
+DB ITEM_DEF_HDR
+DB ITID_KINGS_ARMOR #@item
+  DS King Vahn's Armor     # name
+  DB ITK_ARMOR             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_FIGHTER          # allowed classes @itac
+  DB 35                    # attack/defense score @attdef
+  DT This fine suit of armor
+  .. belonged to King Vahn.
+
+# King's sword
+DB ITEM_DEF_HDR
+DB ITID_KINGS_SWORD #@item
+  DS King Vahn's Sword     # name
+  DB ITK_MWEAP             # @kind
+  DB BOR(ITF_TWO_HANDED)   # @flags
+  DB 0                     # @value
+  DB ITAC_FIGHTER          # allowed classes @itac
+  DB 30                    # attack/defense score @attdef
+  DT This fine sword belonged
+  .. to King Vahn.
+
+# King's crown
+DB ITEM_DEF_HDR
+DB ITID_KINGS_CROWN #@item
+  DS King Vahn's Crown     # name
+  DB ITK_HELM              # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_FIGHTER          # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT This fine crown of solid
+  .. gold belonged to King Vahn.
+  
+# King's ring
+DB ITEM_DEF_HDR
+DB ITID_KINGS_RING  #@item
+  DS King Vahn's Ring      # name
+  DB ITK_RING              # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_FIGHTER          # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT This fine ring belonged
+  .. to King Vahn.
+
+# Wizard robes
+DB ITEM_DEF_HDR
+DB ITID_WIZARD_ROBES #@item
+  DS Wizard robes          # name
+  DB ITK_ARMOR             # @kind
+  DB 0                     # @flags
+  DB 200                   # @value
+  DB ITAC_WIZARD           # allowed classes @itac
+  DB 10                    # attack/defense score @attdef
+  DT Offers +10 defense.
+  .. Machine wash warm. Tumble dry.
+
+# Wizard robes II (Wizard vest)
+DB ITEM_DEF_HDR
+DB ITID_WIZARD_ROBES2 #@item
+  DS Wizard vest           # name
+  DB ITK_ARMOR             # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 35                    # @value
+  DB ITAC_WIZARD           # allowed classes @itac
+  DB 20                    # attack/defense score @attdef
+  DT Offers +20 defense.
+
+# Wizard hat
+DB ITEM_DEF_HDR
+DB ITID_WIZARD_HAT         #@item
+  DS Wizard hat            # name
+  DB ITK_HELM              # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 15                    # @value
+  DB ITAC_WIZARD           # allowed classes @itac
+  DB 10                    # attack/defense score @attdef
+  DT Offers +10 defense.
+
+# Wooden shield
+DB ITEM_DEF_HDR
+DB ITID_WOODEN_SHIELD #@item
+  DS Wooden shield         # name
+  DB ITK_SHIELD            # @kind
+  DB 0                     # @flags
+  DB 30                    # @value
+  DB ITAC_FP               # allowed classes @itac
+  DB 1                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Iron shield
+DB ITEM_DEF_HDR
+DB ITID_IRON_SHIELD #@item
+  DS Iron shield           # name
+  DB ITK_SHIELD            # @kind
+  DB 0                     # @flags
+  DB 150                   # @value
+  DB ITAC_FP               # allowed classes @itac
+  DB 2                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Steel shield
+DB ITEM_DEF_HDR
+DB ITID_STEEL_SHIELD #@item
+  DS Steel shield          # name
+  DB ITK_SHIELD            # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 4                     # @value
+  DB ITAC_FP               # allowed classes @itac
+  DB 4                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Battle shield
+DB ITEM_DEF_HDR
+DB ITID_BATTLE_SHIELD #@item
+  DS Battle shield         # name
+  DB ITK_SHIELD            # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 7                     # @value
+  DB ITAC_FP               # allowed classes @itac
+  DB 6                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Leather helm
+DB ITEM_DEF_HDR
+DB ITID_LEATHER_HELM #@item
+  DS Leather helm          # name
+  DB ITK_HELM              # @kind
+  DB 0                     # @flags
+  DB 50                    # @value
+  DB ITAC_FPA              # allowed classes @itac
+  DB 1                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Iron helm
+DB ITEM_DEF_HDR
+DB ITID_IRON_HELM #@item
+  DS Iron helm             # name
+  DB ITK_HELM              # @kind
+  DB 0                     # @flags
+  DB 250                   # @value
+  DB ITAC_FPA              # allowed classes @itac
+  DB 2                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Steel helm
+DB ITEM_DEF_HDR
+DB ITID_STEEL_HELM #@item
+  DS Steel helm            # name
+  DB ITK_HELM              # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 5                     # @value
+  DB ITAC_FPA              # allowed classes @itac
+  DB 3                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Battle helm
+DB ITEM_DEF_HDR
+DB ITID_BATTLE_HELM #@item
+  DS Battle helm           # name
+  DB ITK_HELM              # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 8                     # @value
+  DB ITAC_FP               # allowed classes @itac
+  DB 4                     # attack/defense score @attdef
+  DB 0                     # description
+
+# ----------------------------------------------------------------
+# --- BOOTS ------------------------------------------------------
+
+# Leather boots
+DB ITEM_DEF_HDR
+DB ITID_LEATHER_BOOTS #@item
+  DS Leather boots         # name
+  DB ITK_BOOT              # @kind
+  DB 0                     # @flags
+  DB 40                    # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 1                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Iron boots
+DB ITEM_DEF_HDR
+DB ITID_IRON_BOOTS    #@item
+  DS Iron boots            # name
+  DB ITK_BOOT              # @kind
+  DB 0                     # @flags
+  DB 200                   # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 2                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Steel boots
+DB ITEM_DEF_HDR
+DB ITID_STEEL_BOOTS   #@item
+  DS Steel boots           # name
+  DB ITK_BOOT              # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 4                     # @value
+  DB ITAC_FPA              # allowed classes @itac
+  DB 3                     # attack/defense score @attdef
+  DB 0                     # description
+
+# Battle boots
+DB ITEM_DEF_HDR
+DB ITID_BATTLE_BOOTS   #@item
+  DS Battle boots          # name
+  DB ITK_BOOT              # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 7                     # @value
+  DB ITAC_FP               # allowed classes @itac
+  DB 4                     # attack/defense score @attdef
+  DB 0                     # description
+
+# ----------------------------------------------------------------
+# --- AMULETS ----------------------------------------------------
+
+# Amulet of Regeneration
+DB ITEM_DEF_HDR
+DB ITID_AMULET_OF_HEALTH #@item
+  DS Amulet of Health      # name
+  DB ITK_AMULET            # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 15                    # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Regenerates health
+  .. at each step.
+
+# Amulet of Wizardry
+DB ITEM_DEF_HDR
+DB ITID_AMULET_OF_WIZ    #@item
+  DS Amulet of Wizardry    # name
+  DB ITK_AMULET            # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 20                    # @value
+  DB ITAC_WIZARD           # allowed classes @itac
+  DB 15                    # attack/defense score @attdef
+  DT Grants:
+  ..  +15 defense
+  ..  +25% spell damage
+
+# Amulet of Steadiness
+DB ITEM_DEF_HDR
+DB ITID_AMULET_STEADY    #@item
+  DS Amulet of Steadiness  # name
+  DB ITK_AMULET            # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 20                    # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Prevents the wearer
+  .. from being stunned.
+
+# ----------------------------------------------------------------
+# --- RINGS ------------------------------------------------------
+
+# Ring of Speed
+DB ITEM_DEF_HDR
+DB ITID_RING_OF_SPEED    #@item
+  DS Ring of Speed         # name
+  DB ITK_RING              # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 4                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Grants extra speed so
+  .. you act first in battle.
+
+# Ring of Frost Resistance
+DB ITEM_DEF_HDR
+DB ITID_RING_DEFROST       #@item
+  DS Ring of Defrosting    # name
+  DB ITK_RING              # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 4                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Grants resistance
+  .. against freeze attacks.
+
+# Ring of Poison Resistance
+DB ITEM_DEF_HDR
+DB ITID_RING_POISON_RES    #@item
+  DS Ring of Unpoisoning   # name
+  DB ITK_RING              # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 1                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Grants resistance
+  .. against poison.
+
+# Ring of Vigilance
+DB ITEM_DEF_HDR
+DB ITID_RING_SLEEP_RES     #@item
+  DS Ring of Vigilance     # name
+  DB ITK_RING              # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 2                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Grants resistance
+  .. against magic sleep.
+
+# Ring of Defense I
+DB ITEM_DEF_HDR
+DB ITID_RING_DEFENSE1      #@item
+  DS Ring of Defense       # name
+  DB ITK_RING              # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 1                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 1                     # attack/defense score @attdef
+  DT Grants +1 defense.
+
+# Ring of Defense II
+DB ITEM_DEF_HDR
+DB ITID_RING_DEFENSE2      #@item
+  DS Ring of Defense II    # name
+  DB ITK_RING              # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 2                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 3                     # attack/defense score @attdef
+  DT Grants +3 defense.
+
+# Ring of Defense III
+DB ITEM_DEF_HDR
+DB ITID_RING_DEFENSE3      #@item
+  DS Ring of Defense III   # name
+  DB ITK_RING              # @kind
+  DB ITF_VALUE_X100        # @flags
+  DB 4                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 6                     # attack/defense score @attdef
+  DT Grants +6 defense.
+ 
+# ----------------------------------------------------------------
+# --- MISC -------------------------------------------------------
+
+# Torch.
+DB ITEM_DEF_HDR
+DB ITID_TORCH #@item
+  DS Torch                 # name
+  DB ITK_THING             # @kind
+  DB 0                     # @flags
+  DB 8                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Good source of light.
+
+# Shovel.
+DB ITEM_DEF_HDR
+DB ITID_SHOVEL #@item
+  DS Shovel                # name
+  DB ITK_THING             # @kind
+  DB 0                     # @flags
+  DB 50                    # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Use it to dig things
+  .. from the ground.
+
+# Healing potion.
+DB ITEM_DEF_HDR
+DB ITID_POTION_HEALING #@item
+  DS Healing potion        # name
+  DB ITK_POTION            # @kind
+  DB ITF_MELEE_USE         # @flags
+  DB 50                    # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Heals 10 hp.
+
+# Mana potion.
+DB ITEM_DEF_HDR
+DB ITID_POTION_MANA #@item
+  DS Mana potion           # name
+  DB ITK_POTION            # @kind
+  DB ITF_MELEE_USE         # @flags
+  DB 50                    # @value
+  DB ITAC_PW               # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Restores 10 sp.
+
+# Invisibility potion.
+DB ITEM_DEF_HDR
+DB ITID_POTION_INVIS #@item
+  DS Invisibility potion   # name
+  DB ITK_POTION            # @kind
+  DB ITF_MELEE_USE         # @flags
+  DB 100                   # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Makes you invisible, enemies
+  .. are less likely to hit you.
+  .. But more likely to hit your
+  .. friends.
+
+# Potion of Awakeness.
+DB ITEM_DEF_HDR
+DB ITID_POTION_AWAKE #@item
+  DS Potion of Awakening   # name
+  DB ITK_POTION            # @kind
+  DB ITF_MELEE_USE         # @flags
+  DB 100                   # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Mysterious bitter dark liquid.
+  .. Counters magical sleep,
+  .. causing drinker to awaken.
+
+# Potion of Poison
+DB ITEM_DEF_HDR
+DB ITID_POTION_POISON #@item
+  DS Potion of Poison      # name
+  DB ITK_POTION            # @kind
+  DB ITF_MELEE_USE         # @flags
+  DB 50                    # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Poisonous liquid.
+  .. For best results, do
+  .. not drink.
+
+# Potion of Sleeping
+DB ITEM_DEF_HDR
+DB ITID_POTION_SLEEP #@item
+  DS Potion of Sleeping    # name
+  DB ITK_POTION            # @kind
+  DB ITF_MELEE_USE         # @flags
+  DB 50                    # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT May cause drowsiness.
+  .. Do not operate machinery
+  .. or fight monsters.
+
+# Potion of Fire
+DB ITEM_DEF_HDR
+DB ITID_POTION_FIRE #@item
+  DS Potion of Fire        # name
+  DB ITK_POTION            # @kind
+  DB ITF_MELEE_USE         # @flags
+  DB 200                   # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Liquid fire, pretty much.
+  .. Great for defrosting.
+
+# Antidote potion.
+DB ITEM_DEF_HDR
+DB ITID_POTION_ANTIDOTE #@item
+  DS Antidote potion       # name
+  DB ITK_POTION            # @kind
+  DB ITF_MELEE_USE         # @flags
+  DB 100                   # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Cures poison.
+
+# Potion of ice.
+DB ITEM_DEF_HDR
+DB ITID_POTION_ICE      #@item
+  DS Potion of Ice         # name
+  DB ITK_POTION            # @kind
+  DB ITF_MELEE_USE         # @flags
+  DB 100                   # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT A very cold drink.
+
+# Apple.
+DB ITEM_DEF_HDR
+DB ITID_APPLE #@item
+  DS Apple                 # name
+  DB ITK_FOOD              # @kind
+  DB 0                     # @flags
+  DB 2                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Healthy snack.
+  .. But not a full meal.
+
+# Pear.
+DB ITEM_DEF_HDR
+DB ITID_PEAR  #@item
+  DS Southern Pear         # name
+  DB ITK_FOOD              # @kind
+  DB 0                     # @flags
+  DB 30                    # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Delicacy from the Southern
+  .. Kingdom. Can cure poisons.
+
+# Blueberry.
+DB ITEM_DEF_HDR
+DB ITID_BLUEBERRY #@item
+  DS Indigo Blueberries    # name
+  DB ITK_FOOD              # @kind
+  DB 0                     # @flags
+  DB 50                    # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Grants temporary strength.
+  .. (+25% damage).
+
+# Food ration.
+DB ITEM_DEF_HDR
+DB ITID_RATION #@item
+  DS Food rations          # name
+  DB ITK_FOOD              # @kind
+  DB 0                     # @flags
+  DB 10                    # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Standard travel rations.
+  .. Terrible taste, but arguably
+  .. better than dying of hunger.
+
+# ----------------------------------------------------------------
+# --- QUEST ITEMS ------------------------------------------------
+
+# Jewelry box.
+DB ITEM_DEF_HDR
+DB ITID_JEWELRY_BOX #@item
+  DS Jewelry box           # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Ornate jewelry box.
+  .. Belongs to Lena,
+  .. who lives in Sun Port.
+
+# Incense
+DB ITEM_DEF_HDR
+DB ITID_INCENSE #@item
+  DS Incense               # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Bundle of incense.
+  .. Belongs to the local
+  .. temple in Riverside.
+
+# Golden Bracelet
+DB ITEM_DEF_HDR
+DB ITID_GOLDEN_BRACELET #@item
+  DS Golden bracelet       # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Golden Bracelet.
+  .. Return it to the owner in
+  .. the Forest Village.
+
+# Music Box
+DB ITEM_DEF_HDR
+DB ITID_MUSIC_BOX #@item
+  DS Music Box             # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Music Box.
+  .. Return it to the owner in
+  .. Westport Town.
+
+# Sailing Permit
+DB ITEM_DEF_HDR
+DB ITID_SAIL_PERMIT #@item
+  DS Sailing Permit        # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Sailing Permit.
+  .. Allows you to board the
+  .. boat to the Desert.
+
+# Spectacles
+DB ITEM_DEF_HDR
+DB ITID_SPECTACLES  #@item
+  DS Spectacles            # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Spectacles of Truth.
+  .. Allows you to see secret
+  .. entrances.
+
+# Dictionary
+DB ITEM_DEF_HDR
+DB ITID_DICTIONARY  #@item
+  DS Dictionary            # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Ancient Dictionary.
+  .. Return this to the
+  .. scholar in Westport.
+
+# Red Crystal
+DB ITEM_DEF_HDR
+DB ITID_CRYSTAL_RED #@item
+  DS Red Crystal           # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT A shining red crystal.
+
+# Green Crystal
+DB ITEM_DEF_HDR
+DB ITID_CRYSTAL_GREEN #@item
+  DS Green Crystal           # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT A shining green crystal.
+
+# Blue Crystal
+DB ITEM_DEF_HDR
+DB ITID_CRYSTAL_BLUE #@item
+  DS Blue Crystal           # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT A shining blue crystal.
+
+# Yellow Crystal
+DB ITEM_DEF_HDR
+DB ITID_CRYSTAL_YELLOW #@item
+  DS Yellow Crystal           # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT A shining yellow crystal.
+
+# Leaping stone.
+DB ITEM_DEF_HDR
+DB ITID_LEAPING_STONE #@item
+  DS Leaping Stone         # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Use it to jump across
+  .. small bodies of water.
+
+# World map
+DB ITEM_DEF_HDR
+DB ITID_WORLD_MAP #@item
+  DS World Map             # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT A map of the world.
+  .. Talk to cartographers
+  .. to update it with new
+  .. areas.
+
+# Purple Squid Ink
+DB ITEM_DEF_HDR
+DB ITID_SQUID_INK #@item
+  DS Purple Squid Ink      # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Rare ink.
+  .. A cartographer would
+  .. surely appreciate it.
+ 
+# Emerald Key.
+DB ITEM_DEF_HDR
+DB ITID_EMERALD_KEY #@item
+  DS Emerald Key           # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Opens magical emerald
+  .. gates in the world.
+ 
+# Indigo Statuette
+DB ITEM_DEF_HDR
+DB ITID_STATUETTE #@item
+  DS Indigo Statuette      # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Belongs to Indigo Town.
+  .. It can restore the city
+  .. to life.
+
+# Rescue token
+DB ITEM_DEF_HDR
+DB ITID_RESCUE_TOK #@item
+  DS Token of Riverside    # name
+  DB ITK_QUEST             # @kind
+  DB 0                     # @flags
+  DB 0                     # @value
+  DB ITAC_ALL              # allowed classes @itac
+  DB 0                     # attack/defense score @attdef
+  DT Use this to return to
+  .. Riverside in case of
+  .. dire need.
+
+# Marks the end of the ITDB.
+DB 0
+

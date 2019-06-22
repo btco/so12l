@@ -1,0 +1,255 @@
+# World Monster tables
+DEFINE W_A 0
+DEFINE W_B 1
+DEFINE W_C 2
+DEFINE W_D 3
+DEFINE W_E 4
+DEFINE W_F 5
+
+# Wandering monster table.
+WMON_Table:
+ # Riverside island
+ DB W_C 3; DW WMON_Table_C3
+ # Blossom fields
+ DB W_C 4; DW WMON_Table_C4
+ DB W_D 4; DW WMON_Table_D4
+ # Bamboo fields
+ DB W_D 3; DW WMON_Table_D3
+ # Serpent island
+ DB W_A 4; DW WMON_Table_A4
+ DB W_B 4; DW WMON_Table_B4
+ # Sandy Islands
+ DB W_A 5; DW WMON_Table_A5
+ DB W_A 6; DW WMON_Table_A6
+ # Marsh lands
+ DB W_B 2; DW WMON_Table_B2
+ DB W_B 1; DW WMON_Table_B1
+ # Southern Kingdom
+ DB W_B 6; DW WMON_Table_B6  # SW quadrant
+ DB W_C 6; DW WMON_Table_C6  # SE quadrant
+ DB W_C 5; DW WMON_Table_C5  # NE quadrant
+ # Great Desert
+ DB W_C 2; DW WMON_Table_C2  # SW quadrant
+ DB W_C 1; DW WMON_Table_C1  # NW quadrant
+ DB W_D 1; DW WMON_Table_D1  # NE quadrant
+ # Night Island
+ DB W_E 1; DW WMON_Table_E1  # North part of island
+ # Frost islands
+ DB W_E 4; DW WMON_Table_E4  # North peninsula
+ DB W_E 5; DW WMON_Table_E5
+ DB W_D 5; DW WMON_Table_D5
+ DB W_E 6; DW WMON_Table_E6
+ DB W_F 5; DW WMON_Table_F5
+ # End of table mark:
+ DB 255 255; DW 0
+
+#--- RIVERSIDE ISLAND ----------------------------------------------
+WMON_Table_C3: #@wmon_C3:
+ DB BAT_VST_GRASS   # visual style#
+ # Possible battles:
+    ########## ########## ########## ########## ########## ##########
+ DB 3 #@count
+ DB EID_SLIME  EID_RSLIME 0          0          0          0          #@battle
+ DB EID_RAT    EID_RSLIME 0          0          0          0          #@battle
+ DB EID_BUG    EID_RAT    EID_RSLIME 0          0          0          #@battle
+
+#--- BLOSSOM FIELDS ------------------------------------------------
+WMON_Table_C4: #@wmon_C4:
+ DB BAT_VST_GRASS   # visual style#
+ # Possible battles:
+    ########## ########## ########## ########## ########## ##########
+ DB 3 #@count
+ DB EID_BUG    EID_BUG    EID_FBUG   0          0          0          #@battle
+ DB EID_BUG    EID_RAT    EID_FBUG   0          0          0          #@battle
+ DB EID_FBUG   EID_FBUG   EID_FBUG   0          0          0          #@battle
+
+WMON_Table_D4: #@wmon_D4:
+ DB BAT_VST_GRASS   # visual style#
+ # Possible battles:
+    ########## ########## ########## ########## ########## ##########
+ DB 2 #@count
+ DB EID_BUG    EID_FBUG   EID_FBUG   0          0          0          #@battle
+ DB EID_BUG    EID_BUG    EID_FBUG   EID_FBUG   0          0          #@battle
+
+# Bamboo grove
+WMON_Table_D3: #@wmon_D3:
+ DB BAT_VST_GRASS   # visual style#
+    ########## ########## ########## ########## ########## ##########
+ DB 3 #@count
+ DB EID_FWIND  0          0          0          0          0          #@battle
+ DB EID_TWIST  EID_FWIND  0          0          0          0          #@battle
+ DB EID_FWIND  EID_FWIND  0          0          0          0          #@battle
+
+#--- SERPENT ISLAND ------------------------------------------------
+WMON_Table_B4: #@wmon_B4:
+ DB BAT_VST_GRASS   # visual style#
+ # Possible battles
+    ########## ########## ########## ########## ########## ##########
+ DB 3 #@count
+ DB EID_SNAKE  0          0          0          0          0          #@battle
+ DB EID_SNAKE  EID_SNAKE  0          0          0          0          #@battle
+ DB EID_SNAKE  EID_BUG    0          0          0          0          #@battle
+
+WMON_Table_A4: #@wmon_A4:
+ DB BAT_VST_GRASS   # visual style#
+ # Possible battles (each battle must have 6 EIDs, fill with 0s
+ # if not all are used):
+    ########## ########## ########## ########## ########## ##########
+ DB 4 #@count
+ DB EID_SNAKE  EID_SNAKE  0          0          0          0          #@battle
+ DB EID_SNAKE  EID_SNAKE  EID_SNAKE  0          0          0          #@battle
+ DB EID_SNAKE  EID_BUG    EID_BUG    0          0          0          #@battle
+ DB EID_BUG    EID_FBUG   EID_SNAKE  0          0          0          #@battle
+
+#--- MARSH ISLANDS -------------------------------------------------
+WMON_Table_B2: #@wmon_B2:
+ DB BAT_VST_MARSHES # visual style#
+ # Possible battles (each battle must have 6 EIDs, fill with 0s
+ # if not all are used):
+    ########## ########## ########## ########## ########## ##########
+ DB 3 #@count
+ DB EID_MGOLEM EID_MGOLEM 0          0          0          0          #@battle
+ DB EID_SNAKE  EID_RSNAKE EID_RSNAKE EID_RSNAKE EID_RSNAKE EID_RSNAKE #@battle
+ DB EID_MGOLEM EID_RSNAKE 0          0          0          0          #@battle
+
+WMON_Table_B1: #@wmon_B1:
+ DB BAT_VST_MARSHES # visual style#
+ # Possible battles
+    ########## ########## ########## ########## ########## ##########
+ DB 3 #@count
+ DB EID_MGOLEM EID_MGOLEM 0          0          0          0          #@battle
+ DB EID_MGOLEM EID_MGOLEM EID_MGOLEM 0          0          0          #@battle
+ DB EID_MGOLEM EID_MGOLEM EID_MGOLEM EID_MGOLEM 0          0          #@battle
+
+#--- SANDY ISLANDS -------------------------------------------------
+WMON_Table_A5: #@wmon_A5:
+ DB BAT_VST_DESERT  # visual style#
+ # Possible battles
+    ########## ########## ########## ########## ########## ##########
+ DB 3 #@count
+ DB EID_WORM   EID_WORM   0          0          0          0          #@battle
+ DB EID_WORM   EID_BUG    0          0          0          0          #@battle
+ DB EID_WORM   0          0          0          0          0          #@battle
+
+WMON_Table_A6: #@wmon_A6:
+ DB BAT_VST_DESERT  # visual style#
+ # Possible battles
+    ########## ########## ########## ########## ########## ##########
+ DB 4 #@count
+ DB EID_WORM   EID_WORM   0          0          0          0          #@battle
+ DB EID_WORM   EID_SPIDER 0          0          0          0          #@battle
+ DB EID_SPIDER 0          0          0          0          0          #@battle
+ DB EID_SPIDER EID_WORM   0          0          0          0          #@battle
+
+#--- SOUTHERN KINGDOM, SW QUADRANT ---------------------------------
+WMON_Table_B6: #@wmon_B6:
+ DB BAT_VST_AUT     # visual style#
+ # Possible battles
+    ########## ########## ########## ########## ########## ##########
+ DB 3 #@count
+ DB EID_RSNAKE EID_RSNAKE 0          0          0          0          #@battle
+ DB EID_RSNAKE EID_BSPIDR 0          0          0          0          #@battle
+ DB EID_RSNAKE EID_RSNAKE EID_BSPIDR 0          0          0          #@battle
+
+#--- SOUTHERN KINGDOM, SE QUADRANT ---------------------------------
+WMON_Table_C6: #@wmon_C6:
+ DB BAT_VST_AUT     # visual style#
+ # Possible battles
+    ########## ########## ########## ########## ########## ##########
+ DB 4 #@count
+ DB EID_RSNAKE EID_RSNAKE 0          0          0          0          #@battle
+ DB EID_FDEMON EID_FDEMON EID_FDEMON EID_FDEMON 0          0          #@battle
+ DB EID_SNAKE  EID_RSNAKE EID_BSPIDR EID_FDEMON 0          0          #@battle
+ DB EID_FDEMON EID_FDEMON EID_DCLER  0          0          0          #@battle
+
+#--- SOUTHERN KINGDOM, NE QUADRANT ---------------------------------
+WMON_Table_C5: #@wmon_C5:
+ DB BAT_VST_AUT     # visual style#
+ # Possible battles
+ DB 4 #@count
+ DB EID_RSNAKE EID_SNAKE  0          0          0          0          #@battle
+ DB EID_FDEMON EID_FDEMON EID_BSPIDR 0          0          0          #@battle
+ DB EID_SNAKE  EID_RSNAKE EID_FDEMON 0          0          0          #@battle
+ DB EID_RSNAKE EID_DCLER  EID_DCLER  0          0          0          #@battle
+
+#--- GREAT DESERT, SW QUADRANT -------------------------------------
+WMON_Table_C2: #@wmon_C2:
+ DB BAT_VST_DESERT  # visual style#
+ # Possible battles
+    ########## ########## ########## ########## ########## ##########
+ DB 2 #@count
+ DB EID_SCORPI EID_RSNAKE 0          0          0          0          #@battle
+ DB EID_SCORPI EID_SNAKE  EID_RSNAKE 0          0          0          #@battle
+
+#--- GREAT DESERT, NW QUADRANT -------------------------------------
+WMON_Table_C1: #@wmon_C1:
+ DB BAT_VST_DESERT  # visual style#
+ # Possible battles
+    ########## ########## ########## ########## ########## ##########
+ DB 2 #@count
+ DB EID_DESBUG EID_RSNAKE 0          0          0          0          #@battle
+ DB EID_DESBUG EID_SCORPI EID_TWIST  0          0          0          #@battle
+
+#--- GREAT DESERT, NE QUADRANT -------------------------------------
+WMON_Table_D1: #@wmon_D1:
+ DB BAT_VST_DESERT  # visual style#
+ # Possible battles (each battle must have 6 EIDs, fill with 0s
+ # if not all are used):
+    ########## ########## ########## ########## ########## ##########
+ DB 2 #@count
+ DB EID_DESBUG EID_DESBUG EID_TWIST  0          0          0          #@battle
+ DB EID_DESBUG EID_RSNAKE EID_TWIST  0          0          0          #@battle
+
+#--- NIGHT ISLAND --------------------------------------------------
+WMON_Table_E1: #@wmon_E1:
+ DB BAT_VST_MARSHES # visual style#
+ # Possible battles (each battle must have 6 EIDs, fill with 0s
+ # if not all are used):
+    ########## ########## ########## ########## ########## ##########
+ DB 3 #@count
+ DB EID_NDEMON 0          0          0          0          0          #@battle
+ DB EID_NDEMON EID_MGOLEM 0          0          0          0          #@battle
+ DB EID_NDEMON EID_NDEMON 0          0          0          0          #@battle
+
+#--- FROST ISLAND --------------------------------------------------
+WMON_Table_E4: #@wmon_E4:
+ DB BAT_VST_SNOW    # visual style#
+ # Possible battles:
+    ########## ########## ########## ########## ########## ##########
+ DB 2 #@count
+ DB EID_ISNAKE EID_ISNAKE 0          0          0          0          #@battle
+ DB EID_ISNAKE EID_ISNAKE 0          0          0          0          #@battle
+
+WMON_Table_D5: #@wmon_D5:
+ DB BAT_VST_SNOW    # visual style#
+ # Possible battles:
+    ########## ########## ########## ########## ########## ##########
+ DB 2 #@count
+ DB EID_ISNAKE EID_ISNAKE EID_ISNAKE 0          0          0          #@battle
+ DB EID_ISNAKE EID_ISNAKE 0          0          0          0          #@battle
+
+WMON_Table_E5: #@wmon_E5:
+ DB BAT_VST_SNOW    # visual style#
+ # Possible battles:
+    ########## ########## ########## ########## ########## ##########
+ DB 2 #@count
+ DB EID_ISNAKE EID_ISNAKE EID_ISNAKE 0          0          0          #@battle
+ DB EID_ISNAKE EID_ISNAKE 0          0          0          0          #@battle
+
+WMON_Table_E6: #@wmon_E6:
+ DB BAT_VST_SNOW    # visual style#
+ # Possible battles:
+    ########## ########## ########## ########## ########## ##########
+ DB 3 #@count
+ DB EID_ISNAKE EID_ISNAKE EID_ISNAKE 0          0          0          #@battle
+ DB EID_IGOLEM 0          0          0          0          0          #@battle
+ DB EID_IGOLEM 0          0          0          0          0          #@battle
+
+WMON_Table_F5: #@wmon_F5:
+ DB BAT_VST_SNOW    # visual style#
+ # Possible battles:
+    ########## ########## ########## ########## ########## ##########
+ DB 2 #@count
+ DB EID_IGOLEM EID_ISNAKE 0          0          0          0          #@battle
+ DB EID_ISNAKE EID_IGOLEM 0          0          0          0          #@battle
+

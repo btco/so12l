@@ -1,0 +1,139 @@
+# NOKE: North Keep
+# (King Vahn's palace)
+
+PROC NOKE_EnterFromWrld
+ # Ask the player if they want to enter.
+ SND .msg LVLN_NOKE ENTPT_NOKE; CALL UTIL_GoNoGo
+ RET
+.msg:
+ DB 2
+ DS Enter the ruins of
+ DS North Keep?
+END
+
+EXPORT PROC NOKE_Boot
+ TEST GM_CLAIMED_THRONE; JZ .end
+ # Convert marshes into grass here.
+ CALL WRLD_HealLevel
+.end:
+END
+
+# Interaction proc
+EXPORT PROC NOKE_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr NOKE_Interactibles; CALL UTIL_CheckInteract
+END
+
+# Walk proc (if needed):
+EXPORT PROC NOKE_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ #SND 2 rawcr UTIL_Battle EID_SLIME EID_SLIME
+ #CALL TRIG_Check
+ RET
+END
+
+# Leave.
+PROC NOKE_Leave
+ SND ALeaveTown LVLN_WRLD ENTPT_WRLD_FROM_NOKE
+ CALL UTIL_GoNoGo
+ RET
+END
+
+PROC NOKE_WearingKingStuff
+ VAR weap ring helm
+ SND 1 ITK_MWEAP; SYS SYSC_CHAR_EQ; REC weap
+ SND 1 ITK_RING; SYS SYSC_CHAR_EQ; REC ring
+ SND 1 ITK_HELM; SYS SYSC_CHAR_EQ; REC helm
+ CMP weap ITID_KINGS_SWORD; JNE .nope
+ CMP ring ITID_KINGS_RING; JNE .nope
+ CMP helm ITID_KINGS_CROWN; JNE .nope
+ RET 1
+.nope:
+ RET 0
+END
+
+PROC NOKE_Advisor
+ VAR has choice itid
+ # Is King?
+ CALL NOKE_WearingKingStuff; REC has
+ CMP has 0; JNE .is_king
+ # Already got crown?
+ SND ITID_KINGS_CROWN; SYS SYSC_GET_ITEM_COUNT; REC has
+ CMP has 0; JNE .has_crown
+ # Crown equipped (SYSC_GET_ITEM_COUNT doesn't cover this case)
+ SND 1 ITK_HELM; SYS SYSC_CHAR_EQ; REC itid
+ CMP itid ITID_KINGS_CROWN; JE .has_crown
+ # Already have emerald key?
+ SND ITID_EMERALD_KEY; SYS SYSC_GET_ITEM_COUNT; REC has
+ CMP has 0; JNE .already_has
+ SND 212 SGhost .a_lore; SYS SYSC_SPEAK
+ SND 0 ChoiceNoYes; SYS SYSC_CHOICE; REC choice
+ CMP choice 1; JE .end
+ SND 212 SGhost .a_lore2; SYS SYSC_SPEAK
+ SND ITID_EMERALD_KEY; SYS SYSC_GIVE
+ # (fall through)
+.already_has:
+ SND 212 SGhost .a_summary; SYS SYSC_SPEAK
+ RET
+.is_king:
+ DIA_GHOST
+ {
+  DT Your Majesty has returned!
+  .. Please, go to the throne
+  .. room and reclaim your
+  .. throne!
+ }
+ RET
+.has_crown:
+ DIA_GHOST
+ {
+  DT I see you found the King's
+  .. Crown. When you are wearing
+  .. the king's CROWN, SWORD and
+  .. RING, you can claim the
+  .. King's Throne.
+ }
+ RET
+.a_hello:
+ DB 7
+ DS Who are you? You resemble
+ DS King Vahn, yet you are not
+ DS him.
+ DS
+ DS If you were him, you would
+ DS have his CROWN, SWORD and
+ DS RING.
+.a_lore:
+ DB 8
+ DS The King was buried in
+ DS the cemetery in Night
+ DS Island, east of the
+ DS Great Desert.
+ DS
+ DS Will you journey to his
+ DS grave to pay your
+ DS respects?
+.a_lore2:
+ DB 3
+ DS Excellent. To enter the
+ DS Night Island, you will
+ DS need this Emerald Key.
+.a_summary:
+ DB 4
+ DS Journey to Night Island,
+ DS east of the Great Desert.
+ DS You will find the cemetery
+ DS there.
+.end:
+END 
+
+# NOKE INTERACTIBLES LIST
+# (position, title, proc)
+NOKE_Interactibles:
+ DW LOHI(186,33) NOKE_Leave
+ DW LOHI(186,27) NOKT_Enter
+ DW LOHI(191,30) NOKE_Advisor
+ DW 0
+

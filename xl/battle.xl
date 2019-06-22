@@ -1,0 +1,139 @@
+# BATTLE MODIFICATION PROCS
+
+# Called when a battle starts.
+# WARNING: This function MAY NOT BLOCK ON SYSCALLS,
+# so don't call SYSC_ALERT, etc.
+# Calling Lua code expects a SYNCHRONOUS execution.
+EXPORT PROC BatStarted
+ RET
+END
+
+EXPORT PROC BatModRewards
+ PARAM gp xp
+ SND gp xp; CALL REW_AdjustLootGold; REC gp
+ RET gp xp
+END
+
+# Called when a battle ends.
+# WARNING: This function MAY NOT BLOCK ON SYSCALLS,
+# so don't call SYSC_ALERT, etc.
+# Calling Lua code expects a SYNCHRONOUS execution.
+EXPORT PROC BatEnded
+ PARAM surrendered
+ # Clear the battle-related effects.
+ ANDC TGM_PEF_PROTECT
+ # Clear invisibility.
+ SND CEF_INVIS; CALL CEF_ClearBitAll
+ # If there is a battle-end callback, call it
+ CMP TGV_BATTLE_END_CB 0
+ JG .call_cb
+ RET
+.call_cb:
+ VAR cb
+ SET cb TGV_BATTLE_END_CB
+ SET TGV_BATTLE_END_CB 0
+ SND surrendered; CALL cb
+ RET
+END
+
+# Modifies player attack (called during battle).
+# Calling Lua code expects these return values:
+#   att, def, flags
+#   (the modified attack parameters)
+#
+# WARNING: This function MAY NOT BLOCK ON SYSCALLS,
+# so don't call SYSC_ALERT, etc.
+# Calling Lua code expects a SYNCHRONOUS result.
+EXPORT PROC BatModPlayerAttack
+ PARAM chi eid att def flags ak
+ VAR amu_itid x cef
+
+ # Get character effects.
+ SND chi; CALL CEF_Get; REC cef
+ # What amulet is the character wearing?
+ SND chi ITK_AMULET; SYS SYSC_CHAR_EQ; REC amu_itid
+ # Is it the Amulet of Wizardry?
+ CMP amu_itid ITID_AMULET_OF_WIZ; JE .amu_of_wiz
+.amu_of_wiz_done:
+ # Is the character under the CEF_STRONG effect?
+ TEST cef CEF_STRONG; JNZ .strong
+.strong_done:
+ # Melee attack cancels out invisibility.
+ CMP ak BAT_AK_MELEE; JNE .invis_done
+ SND chi CEF_INVIS; CALL CEF_ClearBit
+.invis_done:
+
+ # End.
+ RET att def flags
+
+.amu_of_wiz:
+ # Is this a spell?
+ TEST flags BAT_AF_SPELL; JZ .amu_of_wiz_done
+ # It is a spell. So increase attack score by 25%.
+ SET x att; DIV x 4; ADD att x
+ JMP .amu_of_wiz_done
+
+.strong:
+ # No effect on spells. 
+ TEST flags BAT_AF_SPELL; JNZ .strong_done
+ # Increase damage 25%.
+ SET x att; DIV x 4; ADD att x
+ JMP .strong_done
+END
+
+# Modifies enemy attack (called during battle).
+# Calling Lua code expects these return values:
+#   att, def, flags
+#   (the modified attack parameters)
+#
+# WARNING: This function MAY NOT BLOCK ON SYSCALLS,
+# so don't call SYSC_ALERT, etc.
+# Calling Lua code expects a SYNCHRONOUS result.
+EXPORT PROC BatModFoeAttack
+ PARAM eid chi att def flags
+ VAR i cef roll
+
+ # If the Protect spell is active, increase the effective
+ # defense score by 5.
+ TEST TGM_PEF_PROTECT; JZ .no_protect
+ ADD def 5
+.no_protect:
+ # If invisible, increase defense by another 5.
+ SND chi; CALL CEF_Get; REC cef
+ TEST cef CEF_INVIS; JZ .no_invis
+ ADD def 5
+.no_invis:
+
+ # If character has the Amulet of Steadiness, remove the stunned
+ # effect from the attack.
+ VAR amu
+ SND chi ITK_AMULET; SYS SYSC_CHAR_EQ; REC amu
+ CMP amu ITID_AMULET_STEADY; JNZ .not_steady
+ ANDC flags BAT_AF_STUN
+.not_steady:
+
+ # Remove BAT_AF_CEF_* with 50% chance
+ RND roll 0 255
+ CMP roll 127; JG .skip_cef
+ ANDC flags BAT_AF_CEF_POISON
+ ANDC flags BAT_AF_CEF_ASLEEP
+ ANDC flags BAT_AF_CEF_FROZEN
+.skip_cef:
+
+ RET att def flags
+END
+
+EXPORT PROC BatModFoeNetDmg
+ PARAM chi dmg
+ VAR p q max
+ SET q 16
+ SND chi CINFO_MAX_HP; SYS SYSC_CINFO; REC max
+ SND chi CINFO_HP; SYS SYSC_CINFO; REC p
+ MUL p 8; DIV p max
+ TEST p 252; JNZ .nz
+ SET q p; ADD q 12
+.nz:  
+ MUL dmg q; DIV dmg 16
+ RET dmg
+END
+

@@ -1,0 +1,91 @@
+# WRLD region: NIGHT ISLAND (NI)
+# Island to the east of the Great Desert.
+
+# Interactibles list
+WRLD_NI_Interactibles:
+ DW LOHI(146,56) UGTO_EnterFromWrld
+ DW LOHI(127,30) SHOP_ScrollShop
+ DW LOHI(133,53) WRLD_NI_Altar
+ DW LOHI(125,59) WRLD_NI_Cartographer
+ DW LOHI(169,22) LLIB_EnterFromWrld
+ DW LOHI(148,36) WRLD_NI_LibHintHut
+ DW LOHI(156,58) WRLD_NI_Fletcher
+ # -------- End of table marker --------
+ DW 0
+
+PROC WRLD_NI_Walk
+ PARAM rawcr pdir
+END
+
+PROC WRLD_NI_UseItem
+ PARAM itid idx chi
+ RET 0
+END
+
+PROC WRLD_NI_IsInDarkArea
+ VAR rawcr c r
+ # Night islands are on map pages E0-3, F0-3
+ SND PINFO_XZDIR; SYS SYSC_PINFO; REC rawcr
+ SND rawcr; CALL UTIL_WordToBytes; REC c r
+ DIV c 30; DIV r 17
+ CMP c W_E; JL .no
+ CMP c W_F; JG .no
+ CMP r 3; JG .no
+ RET 1
+.no:
+ RET 0
+END
+
+PROC WRLD_NI_Altar
+ SND ZID_STRENGTHEN * 3 ASpellRequiresLevel3
+ {
+  DT I teach the Strengthen
+  .. spell. It will increase
+  .. your damage when you
+  .. attack opponents.
+ }
+ CALL UTIL_TempleLearnSpell
+END
+
+PROC WRLD_NI_Cartographer
+ VAR upd
+ CALL UTIL_CartographerDialogue; REC upd
+ CMP upd 1; JNE .ret
+ OR GV_WMAPREV_COL_E WMAPREV_MASK_ROW_0
+ OR GV_WMAPREV_COL_E WMAPREV_MASK_ROW_1
+ OR GV_WMAPREV_COL_E WMAPREV_MASK_ROW_2
+ OR GV_WMAPREV_COL_E WMAPREV_MASK_ROW_3
+ OR GV_WMAPREV_COL_F WMAPREV_MASK_ROW_0
+ OR GV_WMAPREV_COL_F WMAPREV_MASK_ROW_1
+ OR GV_WMAPREV_COL_F WMAPREV_MASK_ROW_2
+ OR GV_WMAPREV_COL_F WMAPREV_MASK_ROW_3
+.ret:
+ RET
+END
+
+PROC WRLD_NI_LibHintHut
+ DIA_VILLAGER_3
+ {
+  DT Legend speaks of a Lost
+  .. Library, somewhere in
+  .. the north-eastern end
+  .. of this island.
+ }
+ DIA_VILLAGER_3
+ {
+  DT To see the entrance,
+  .. you must possess the
+  .. Spectacles.
+ }
+END
+
+PROC WRLD_NI_Fletcher
+ SND *; CALL SHOP_Fletcher
+ {
+  DB 3
+  DB ITID_ECROSSBOW #@wares_UGTO
+  DB ITID_CROSSBOW #@wares_UGTO
+  DB ITID_LONG_BOW #@wares_UGTO
+ }
+END
+

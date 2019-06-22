@@ -1,0 +1,535 @@
+# TEXTURE LOOK-UP TABLE
+
+# This table indicates the rendering information for each texture
+# in the game. For each texture ID (one of the T_* constants in
+# tex.lua), it indicates whether or not it is animated, what's the
+# frame count, flags, and what physical TIDs it corresponds to on
+# each of the possible texture banks.
+#
+# It also indicates if the texture lives in a foreground texture
+# bank ("sprites bank" in TIC-80) or in the background bank
+# (the "tiles bank" in TIC-80).
+#
+# NOTE: The frames of animated texture must appear contiguously,
+# so in a 2-texture animation, if the first texture maps to
+# TID 2482, the second frame will be found at 2484.
+EXPORT TextureLUT:
+
+DB TLUT_HDR; DB T_WATER
+DB TXF_ANIM2                  # flags
+# B:  1        2
+DW 2288; DW 2290
+
+DB TLUT_HDR; DB T_FOUNTAIN
+DB TXF_ANIM2                  # flags
+# B:  1        2
+DW 2356; DW 2352
+
+DB TLUT_HDR; DB T_SWAMP
+DB TXF_ANIM2                  # flags
+# B:  1        2
+DW 0000; DW 2390
+
+DB TLUT_HDR; DB T_ALTAR
+DB TXF_ANIM2                  # flags
+# B:  1        2
+DW 2300; DW 2326
+
+DB TLUT_HDR; DB T_STONE_FLOOR
+DB 0                          # flags
+# B:  1        2
+DW 2256; DW 2256
+
+DB TLUT_HDR; DB T_STONE_WALL
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2258
+
+DB TLUT_HDR; DB T_STONE_DOOR
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2260
+
+DB TLUT_HDR; DB T_WOOD_PLANKS
+DB 0                          # flags
+# B:  1        2
+DW 2324; DW 2262
+
+DB TLUT_HDR; DB T_WOODEN_DOOR
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2266
+
+DB TLUT_HDR; DB T_STONE_GATE
+DB 0                          # flags
+# B:  1        2
+DW 2260; DW 2268
+
+DB TLUT_HDR; DB T_WOOD_GATE
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2264
+
+DB TLUT_HDR; DB T_GRASS
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2288
+
+DB TLUT_HDR; DB T_TREE
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2294
+
+DB TLUT_HDR; DB T_HUT
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2296
+
+DB TLUT_HDR; DB T_CAVE_ENTRANCE
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2298
+
+DB TLUT_HDR; DB T_TREE_FULL
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2322
+
+DB TLUT_HDR; DB T_DIRT
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2334
+
+DB TLUT_HDR; DB T_BURIED
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 1336
+
+DB TLUT_HDR; DB T_BURIED_K
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 1337
+
+DB TLUT_HDR; DB T_MOUNTAIN
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2356
+
+DB TLUT_HDR; DB T_SAND
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2358
+
+DB TLUT_HDR; DB T_PALM_TREE
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2360
+
+DB TLUT_HDR; DB T_TALL_GRASS
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2362
+
+DB TLUT_HDR; DB T_WOODS
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2364
+
+DB TLUT_HDR; DB T_FOREST
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2366
+
+DB TLUT_HDR; DB T_STONE_ARCH
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2384
+
+DB TLUT_HDR; DB T_BROWN_BOULDER
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2386
+
+DB TLUT_HDR; DB T_DRY_TREES
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2388
+
+DB TLUT_HDR; DB T_EMERALD_GATE
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2394
+
+DB TLUT_HDR; DB T_EMERALD_GATE_K
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2458
+
+DB TLUT_HDR; DB T_WELL
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2396
+
+DB TLUT_HDR; DB T_CHEST
+DB 0                          # flags
+# B:  1        2
+DW 1322; DW 1424
+
+DB TLUT_HDR; DB T_CHEST_K
+DB 0                          # flags
+# B:  1        2
+DW 1323; DW 1425
+
+DB TLUT_HDR; DB T_COARSE_STONE
+DB 0                          # flags
+# B:  1        2
+DW 2258; DW 0000
+
+DB TLUT_HDR; DB T_CAVE_FLOOR
+DB 0                          # flags
+# B:  1        2
+DW 2262; DW 0000
+
+DB TLUT_HDR; DB T_CAVE_WALL
+DB 0                          # flags
+# B:  1        2
+DW 2264; DW 0000
+
+DB TLUT_HDR; DB T_STAIRS_UP
+DB 0                          # flags
+# B:  1        2
+DW 2266; DW 2330
+
+DB TLUT_HDR; DB T_STAIRS_DOWN
+DB 0                          # flags
+# B:  1        2
+DW 2268; DW 2332
+
+DB TLUT_HDR; DB T_IRON_BARS
+DB 0                          # flags
+# B:  1        2
+DW 2292; DW 0000
+
+DB TLUT_HDR; DB T_IRON_BARS_K
+DB 0                          # flags
+# B:  1        2
+DW 2294; DW 0000
+
+DB TLUT_HDR; DB T_LEVER
+DB 0                          # flags
+# B:  1        2
+DW 2296; DW 0000
+
+DB TLUT_HDR; DB T_LEVER_K
+DB 0                          # flags
+# B:  1        2
+DW 2298; DW 0000
+
+DB TLUT_HDR; DB T_ALTAR_K
+DB 0                          # flags
+# B:  1        2
+DW 2270; DW 0000
+
+DB TLUT_HDR; DB T_PILLAR
+DB 0                          # flags
+# B:  1        2
+DW 2320; DW 2324
+
+DB TLUT_HDR; DB T_SIGN
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 1320
+
+DB TLUT_HDR; DB T_WINDOW
+DB 0                          # flags
+# B:  1        2
+DW 2326; DW 0000
+
+DB TLUT_HDR; DB T_COARSE_DOOR
+DB 0                          # flags
+# B:  1        2
+DW 2328; DW 0000
+
+DB TLUT_HDR; DB T_COARSE_DOOR_K
+DB 0                          # flags
+# B:  1        2
+DW 2330; DW 0000
+
+DB TLUT_HDR; DB T_COARSE_DOOR_L
+DB 0                          # flags
+# B:  1        2
+DW 2332; DW 0000
+
+DB TLUT_HDR; DB T_BOOKSHELF
+DB 0                          # flags
+# B:  1        2
+DW 2334; DW 0000
+
+DB TLUT_HDR; DB T_BOOKSTAND
+DB TXF_ANIM2                  # flags
+# B:  1        2
+DW 2352; DW 0000
+
+DB TLUT_HDR; DB T_BOOKSTAND_K
+DB 0
+# B:  1        2
+DW 2422; DW 0000
+
+DB TLUT_HDR; DB T_COARSE_DOOR_L
+DB 0                          # flags
+# B:  1        2
+DW 2332; DW 0000
+
+DB TLUT_HDR; DB T_PYRE
+DB TXF_ANIM2                  # flags
+# B:  1        2
+DW 0000; DW 2300
+
+DB TLUT_HDR; DB T_AUT_GRASS
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2398
+
+DB TLUT_HDR; DB T_AUT_WOODS
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2416
+
+DB TLUT_HDR; DB T_AUT_FOREST
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2418
+
+DB TLUT_HDR; DB T_BAMBOO
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2420
+
+DB TLUT_HDR; DB T_FANCY_GATE
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2422
+
+DB TLUT_HDR; DB T_PALACE_WALL
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2426
+
+DB TLUT_HDR; DB T_BOAT
+DB TXF_ANIM2                  # flags
+# B:  1        2
+DW 0000; DW 2428
+
+DB TLUT_HDR; DB T_MON_WALL
+DB 0                          # flags
+# B:  1        2
+DW 2360; DW 0000
+
+DB TLUT_HDR; DB T_MON_BANNER
+DB 0                          # flags
+# B:  1        2
+DW 2362; DW 0000
+
+DB TLUT_HDR; DB T_MON_TORCH
+DB TXF_ANIM2                  # flags
+# B:  1        2
+DW 2364; DW 0000
+
+DB TLUT_HDR; DB T_MON_WINDOW
+DB 0                          # flags
+# B:  1        2
+DW 2384; DW 0000
+
+DB TLUT_HDR; DB T_MON_DOOR
+DB 0                          # flags
+# B:  1        2
+DW 2386; DW 0000
+
+DB TLUT_HDR; DB T_MON_FLOOR
+DB 0                          # flags
+# B:  1        2
+DW 2388; DW 0000
+
+DB TLUT_HDR; DB T_OBELISK
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2448
+
+DB TLUT_HDR; DB T_SAND_WALL
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2450
+
+DB TLUT_HDR; DB T_SAND_DOOR
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2452
+
+DB TLUT_HDR; DB T_SAND_GATE
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2454
+
+DB TLUT_HDR; DB T_TOMB_WALL
+DB 0                          # flags
+# B:  1        2
+DW 2390; DW 0000
+
+DB TLUT_HDR; DB T_TOMB_PANEL
+DB 0                          # flags
+# B:  1        2
+DW 2392; DW 0000
+
+DB TLUT_HDR; DB T_TOMB_FLOOR
+DB 0                          # flags
+# B:  1        2
+DW 2394; DW 0000
+
+DB TLUT_HDR; DB T_TOMB_STAIRS_UP
+DB 0                          # flags
+# B:  1        2
+DW 2396; DW 0000
+
+DB TLUT_HDR; DB T_TOMB_STAIRS_DOWN
+DB 0                          # flags
+# B:  1        2
+DW 2398; DW 0000
+
+DB TLUT_HDR; DB T_FLOWERS
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2456
+
+DB TLUT_HDR; DB T_TOMB_WINDOW
+DB 0                          # flags
+# B:  1        2
+DW 2416; DW 0000
+
+DB TLUT_HDR; DB T_SARCOPHAGUS
+DB 0                          # flags
+# B:  1        2
+DW 2418; DW 0000
+
+DB TLUT_HDR; DB T_PORTAL
+DB TXF_ANIM2                  # flags
+# B:  1        2
+DW 0000; DW 2460
+
+DB TLUT_HDR; DB T_SNOW_GRASS
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2480
+
+DB TLUT_HDR; DB T_SNOW_WOODS
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2482
+
+DB TLUT_HDR; DB T_SNOW_ROAD
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2484
+
+DB TLUT_HDR; DB T_SNOW_STONE
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2486
+
+DB TLUT_HDR; DB T_SNOW_HUT
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2488
+
+DB TLUT_HDR; DB T_SNOW_LAKE
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2490
+
+DB TLUT_HDR; DB T_SNOW_FOREST
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2492
+
+DB TLUT_HDR; DB T_LAVENDER
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2494
+
+DB TLUT_HDR; DB T_GRAVE
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2002
+
+DB TLUT_HDR; DB T_SWAMP_GRASS
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2004
+
+DB TLUT_HDR; DB T_MOSSY_STONE
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2006
+
+DB TLUT_HDR; DB T_GRAVE_K
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2008
+
+DB TLUT_HDR; DB T_ICE_WALL
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2010
+
+DB TLUT_HDR; DB T_ICE_DOOR
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2012
+
+DB TLUT_HDR; DB T_ICE_GATE
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2014
+
+DB TLUT_HDR; DB T_STATUE
+DB TXF_ANIM2                  # flags
+# B:  1        2
+DW 0000; DW 2032
+
+DB TLUT_HDR; DB T_STATUE_K
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2036
+
+DB TLUT_HDR; DB T_THRONE
+DB 0                          # flags
+# B:  1        2
+DW 2420; DW 2074
+
+DB TLUT_HDR; DB T_LAVA
+DB TXF_ANIM2                  # flags
+# B:  1        2
+DW 0000; DW 2038
+
+DB TLUT_HDR; DB T_FIRE_GROUND
+DB TXF_ANIM2                  # flags
+# B:  1        2
+DW 0000; DW 2042
+
+DB TLUT_HDR; DB T_FIRE_COLUMN
+DB TXF_ANIM2                  # flags
+# B:  1        2
+DW 0000; DW 2064
+
+DB TLUT_HDR; DB T_FIRE_WOODS
+DB 0                          # flags
+# B:  1        2
+DW 0000; DW 2068
+
+DB TLUT_HDR; DB T_FIRE_WALL
+DB TXF_ANIM2                  # flags
+# B:  1        2
+DW 0000; DW 2070
+
+# Marks end of DB:
+DB TLUT_HDR; DW 0
+

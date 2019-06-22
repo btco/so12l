@@ -1,0 +1,74 @@
+# Initial party.
+
+EXPORT InitialParty:   # @party
+
+DB 187    # Signature for error-checking
+# X, Z, direction (ignored)
+DB 0 0 0
+# Number of party members
+DB 2    # @nchars
+# pclk (DWORD )
+DW 0 0
+
+# @char1
+DB 186
+DS Alex                     # @name
+DB CLS_FIGHTER              # @class
+DB 240                      # face
+DB 5                        # @att
+DB 4                        # @def
+DB 10                       # @speed
+DW 19                       # @hp
+DW 19                       # @maxHp
+DW 0                        # @sp
+DW 0                        # @maxSp
+# Equipped items per kind:
+  DB ITID_CLOTHES 0                        # @eq_ITK_ARMOR
+  DB 0 0                                   # @eq_ITK_HELM
+  DB ITID_DAGGER 0                         # @eq_ITK_MWEAP
+  DB 0 0                                   # @eq_ITK_RWEAP
+  DB 0 0                                   # @eq_ITK_SHIELD
+  DB 0 0                                   # @eq_ITK_BOOT
+  DB 0 0                                   # @eq_ITK_BELT
+  DB 0 0                                   # @eq_ITK_AMULET
+  DB 0 0                                   # @eq_ITK_RING
+DB 0                        # Count of spells
+
+# @char2
+DB 186
+DS Leon                     # @name
+DB CLS_PALADIN              # @class
+DB 242                      # face
+DB 5                        # @att
+DB 4                        # @def
+DB 10                       # @speed
+DW 18                       # @hp
+DW 18                       # @maxHp
+DW 5                        # @sp
+DW 5                        # @maxSp
+# Equipped items per kind:
+  DB ITID_CLOTHES 0                        # @eq_ITK_ARMOR
+  DB 0 0                                   # @eq_ITK_HELM
+  DB ITID_DAGGER 0                         # @eq_ITK_MWEAP
+  DB 0 0                                   # @eq_ITK_RWEAP
+  DB 0 0                                   # @eq_ITK_SHIELD
+  DB 0 0                                   # @eq_ITK_BOOT
+  DB 0 0                                   # @eq_ITK_BELT
+  DB 0 0                                   # @eq_ITK_AMULET
+  DB 0 0                                   # @eq_ITK_RING
+DB 0                        # Count of spells
+
+# Count of inventory items
+DB 2
+DB ITID_POTION_HEALING 0
+DB ITID_RATION 0
+
+# Gold (dword)
+DW 120 0    # @gold
+
+# XP (DWORD)
+DW 0 0      # @xp
+
+# Level
+DB 1
+

@@ -1,0 +1,137 @@
+# WORLD MAP
+
+DEFINE WMAP_WIDTH 180
+DEFINE WMAP_HEIGHT 136
+
+# Table of colors for world map display.
+EXPORT TileWMapColors:
+ DB  1 C_LGRAY
+ DB  2 C_LGRAY
+ DB  3 C_LGRAY
+ DB  4 C_ORANGE
+ DB  5 C_ORANGE
+ DB  6 C_ORANGE
+ DB  7 C_GREEN
+ DB  8 C_ORANGE
+ DB 13 C_BROWN
+ DB 14 C_PINK
+ DB 16 C_LGRAY
+ DB 17 C_LGRAY
+ DB 18 C_LGRAY
+ DB 19 C_LGRAY
+ DB 20 C_ORANGE
+ DB 21 C_ORANGE
+ DB 22 C_ORANGE
+ DB 29 C_GREEN
+ DB 30 C_LGRAY
+ DB 31 C_BROWN
+ DB 32 C_LGRAY
+ DB 33 C_LGRAY
+ DB 34 C_LGRAY
+ DB 35 C_LGRAY
+ DB 36 C_ORANGE
+ DB 37 C_ORANGE
+ DB 38 C_ORANGE
+ DB 39 C_LGREEN
+ DB 44 C_PINK
+ DB 45 C_LGREEN
+ DB 46 C_PINK
+ DB 47 C_BROWN
+ DB 48 C_LGRAY
+ DB 49 C_ORANGE
+ DB 50 C_LGREEN
+ DB 55 C_BROWN
+ DB 58 C_LGRAY
+ DB 59 C_LGRAY
+ DB 60 C_LGREEN
+ DB 61 C_GREEN
+ DB 62 C_PURPLE
+ DB 64 C_LGRAY
+ DB 80 C_BROWN
+ DB 81 C_BROWN
+ DB 82 C_LGRAY
+ DB 83 C_LGRAY
+ DB 87 C_GREEN
+ DB 86 C_YELLOW
+ DB 23 C_BLUE
+ DB 93 C_WHITE
+ DB 94 C_WHITE
+ DB 95 C_BGRAY
+ DB 96 C_LGRAY
+ DB 97 C_LGRAY
+ DB 99 C_BBLUE
+ DB 100 C_BGRAY
+ # End of table
+ DB 0 0
+
+
+# Draws frame on top of the world map.
+# This is responsible for hiding map regions that are unexplored.
+EXPORT PROC WMAP_DrawFrame
+ VAR x y
+ # For debugging purposes, let's always call this so we can start
+ # the game with the map without visiting the cartographer:
+ CALL WMAP_RevealInitialAreas
+ # For each map column, draw rectangles on top of the map to obscure
+ # the unexplored regions.
+ SND 255 0; CALL WMAP_DrawColScrims # Col 0 is always fully revealed
+ SND GV_WMAPREV_COL_A 0; CALL WMAP_DrawColScrims
+ SND GV_WMAPREV_COL_B 30; CALL WMAP_DrawColScrims
+ SND GV_WMAPREV_COL_C 60; CALL WMAP_DrawColScrims
+ SND GV_WMAPREV_COL_D 90; CALL WMAP_DrawColScrims
+ SND GV_WMAPREV_COL_E 120; CALL WMAP_DrawColScrims
+ SND GV_WMAPREV_COL_F 150; CALL WMAP_DrawColScrims
+ # Draw blinking dot where player is.
+ ADD TGV_CLK 1
+ TEST TGV_CLK 16; JZ .no_reticle
+ SET x GV_WMAP_X
+ SET y GV_WMAP_Y
+ SUB x 3
+ SUB y 3
+ SND x y 7 7 C_WHITE RECTF_BORDER; SYS SYSC_RECT
+.no_reticle:
+END
+
+
+PROC WMAP_DrawColScrims
+ PARAM row_flags x0
+ VAR mask y
+ SET mask 1
+ SET y 0
+.loop:
+ TEST row_flags mask
+ JNZ .skip
+ # Scrim this area.
+ SND x0 y 30 17 C_GRAY; SYS SYSC_RECT
+.skip:
+ ADD y 17
+ MUL mask 2
+ CMP mask 256
+ JL .loop
+END
+
+PROC WMAP_RevealInitialAreas
+ OR GV_WMAPREV_COL_A WMAPREV_MASK_ROW_4
+ OR GV_WMAPREV_COL_A WMAPREV_MASK_ROW_5
+ OR GV_WMAPREV_COL_A WMAPREV_MASK_ROW_6
+ OR GV_WMAPREV_COL_A WMAPREV_MASK_ROW_7
+ OR GV_WMAPREV_COL_B WMAPREV_MASK_ROW_3
+ OR GV_WMAPREV_COL_B WMAPREV_MASK_ROW_4
+ OR GV_WMAPREV_COL_C WMAPREV_MASK_ROW_3
+ OR GV_WMAPREV_COL_C WMAPREV_MASK_ROW_4
+END
+
+# Updates the position of the player on the world map.
+PROC WMAP_UpdatePos
+ PARAM rawcr
+ VAR x y
+ SND rawcr; CALL UTIL_WordToBytes; REC x y
+ # Out of bounds of world map?
+ CMP x WMAP_WIDTH; JGE .ret
+ CMP y WMAP_HEIGHT; JGE .ret
+ # Within bounds, so set.
+ SET GV_WMAP_X x
+ SET GV_WMAP_Y y
+.ret:
+END
+

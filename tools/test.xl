@@ -1,0 +1,17 @@
+# Test file.
+
+#define ANSWER 42
+#define OTHER_ANSWER 43
+
+EXPORT PROC RiverviewInteract
+ VAR a b c
+ DB 1
+ DB 2
+ SET a AnotherProc
+END
+
+EXPORT PROC AnotherProc
+ DB ANSWER
+ DB OTHER_ANSWER
+END
+

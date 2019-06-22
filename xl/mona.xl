@@ -1,0 +1,204 @@
+# Template
+
+# Replace MONA by the name of the level.
+
+PROC MONA_EnterFromWrld
+ # Ask the player if they want to enter.
+ SND .msg LVLN_MONA ENTPT_MONA; CALL UTIL_GoNoGo
+ RET 0
+
+.msg:
+ DB 1
+ DS Enter the Monastery?
+END
+
+# Interaction proc
+EXPORT PROC MONA_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr MONA_Interactibles; CALL UTIL_CheckInteract
+ # Looting the chest with the amulet?
+ CMP rawcr LOHI(198,63); JE .amu_chest
+ # Looting a chest?
+ CMP sid 40; SND rawcr LOL_C; CE LOOT_ChestRandom #@q_SK_LIGHT loot_count=3
+ RET
+.amu_chest:
+ SND rawcr ITID_AMULET_OF_WIZ; CALL LOOT_ChestItem #@q_SK_LIGHT giveItem=ITID_AMULET_OF_WIZ chi=4
+END
+
+# Walk proc (if needed):
+EXPORT PROC MONA_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ SND 1 rawcr MONA_Welcome
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_TGUARD EID_TGUARD EID_DCLER #@q_SK_LIGHT
+ CALL TRIG_Check
+ SND 3 rawcr UTIL_Battle EID_TGUARD EID_SPIDER EID_DCLER EID_DCLER #@q_SK_LIGHT
+ CALL TRIG_Check
+ SND 4 rawcr UTIL_Battle EID_TGUARD EID_TGUARD EID_TGUARD EID_DCLER EID_DCLER #@q_SK_LIGHT
+ CALL TRIG_Check
+ RET
+END
+
+PROC MONA_Welcome
+ VAR choice
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND 211 SCleric .a_hey; SYS SYSC_SPEAK
+.main:
+ SND 0 .a_choices; SYS SYSC_CHOICE; REC choice
+ CMP choice 3; JE .who_is
+ CMP choice 4; JE .we_will_leave
+ # If we got here, player is provoking the fight.
+ SND 211 SCleric .a_provoke; SYS SYSC_SPEAK
+ SND EID_TGUARD EID_TGUARD EID_DCLER
+ SYS SYSC_BATTLE
+ RET 1  # For use with TRIG_Check
+.who_is:
+ SND 211 SCleric .a_who_is; SYS SYSC_SPEAK
+ SND 211 SCleric .a_who_is2; SYS SYSC_SPEAK
+ JMP .main
+.we_will_leave:
+ SND LVLN_WRLD ENTPT_WRLD_FROM_MONA
+ SYS SYSC_CHANGE_LVL
+ RET 0 # For use with TRIG_Check
+.a_narr:
+ DB 2
+ DS A cleric in gray and red
+ DS robes appears.
+.a_hey:
+ DB 3
+ DS We serve the Sorcerer King.
+ DS You are not welcome here.
+ DS Leave immediately.
+.a_choices:
+ DB 4
+ DS We came to lift the Curse of Night
+ DS We came to destroy you.
+ DS Sorcerer King? Who is that?
+ DS Fine. We will leave.
+.a_provoke:
+ DB 2
+ DS That will not be so easy.
+ DS Guards!
+.a_who_is:
+ DB 5
+ DS Who is the... what, are you
+ DS serious? The Sorcerer King!
+ DS The Master of Evil! The
+ DS Harbinger of Nightmares,
+ DS the Monarch of Shadows?
+.a_who_is2:
+ DB 7
+ DS He is also known as Markus
+ DS the Vice Governor, but this
+ DS title isn't as scary as the
+ DS other ones.
+ DS
+ DS He prefers Monarch of
+ DS Shadows, Nightmares, etc.
+END
+
+# Leave.
+PROC MONA_Leave
+ SND .a_leave LVLN_WRLD ENTPT_WRLD_FROM_MONA
+ CALL UTIL_GoNoGo
+ RET
+
+.a_leave:
+ DB 1
+ DS Leave the Monastery?
+END
+
+# Push lever
+PROC MONA_Lever
+ PARAM rawcr xz sid kf
+ # If kill flag is on, don't do anything.
+ CMP kf 0; JNE .ret
+ # Otherwise, kill the tile.
+ SND rawcr; SYS SYSC_KILL_TILE
+ # Open the gate.
+ SND LOHI(204,62); SYS SYSC_KILL_TILE
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+.ret:
+ RET
+
+.a_narr:
+ DB 4
+ DS You push the lever.
+ DS
+ DS You hear a gate opening
+ DS in the distance.
+END
+
+# Read book
+PROC MONA_Book
+ VAR choice
+ # Quest already complete?
+ TEST GM_C_SK_LIGHT; JNZ .already
+ # Narrate.
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND .a_break ChoiceNoYes; SYS SYSC_CHOICE; REC choice
+ CMP choice 2; JNE .ret
+ SND 0 0 .a_narr2; SYS SYSC_SPEAK
+ SET TGV_BATTLE_END_CB MONA_PostImp
+ # Mark the quest as completed.
+ OR GM_C_SK_LIGHT
+ # An imp appears!
+ SND EID_IMP; SYS SYSC_BATTLE #@q_SK_LIGHT
+.ret:
+ RET
+.already:
+ SND .a_already; SYS SYSC_ALERT
+ RET
+.a_narr:
+ DB 3
+ DS This spellbook is filled
+ DS with arcane runes.
+ DS It fuels the Curse of Night.
+.a_narr2:
+ DB 4
+ DS You try to break the spell.
+ DS
+ DS As you do so, a demon leaps
+ DS from the pages of the book!
+.a_break:
+ DB 1
+ DS Break the spell?
+.a_already:
+ DB 1
+ DS The spell is already broken.
+END
+
+PROC MONA_PostImp
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND 0 0 .a_narr2; SYS SYSC_SPEAK
+ SET TGV_WRLD_GIVE_ITEM ITID_CRYSTAL_GREEN
+ SND LVLN_WRLD ENTPT_WRLD_FROM_MONA
+ SYS SYSC_CHANGE_LVL
+ RET
+.a_narr:
+ DB 5
+ DS You defeat the demon and
+ DS finally break the spell.
+ DS
+ DS Daylight is restored to
+ DS the region!
+.a_narr2:
+ DB 6
+ DS As the demon's body
+ DS vanishes in cloud of smoke,
+ DS you find that something
+ DS shiny was left behind...
+ DS
+ DS The Green Crystal!
+END
+
+# MONA INTERACTIBLES LIST
+# (position, title, proc)
+MONA_Interactibles:
+ DW LOHI(202,51) MONA_Leave
+ DW LOHI(199,64) MONA_Lever
+ DW LOHI(207,65) MONA_Book
+ DW 0
+

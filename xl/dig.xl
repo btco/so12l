@@ -1,0 +1,100 @@
+# DIG
+
+# Dig (with shovel). The player can uncover a treasure by digging
+# on or next to a diggable tile.
+# The diggable tile must be TF_KILLABLE (that's how we know it was
+# already dug).
+#
+# digtable:
+#   a table of tiles and procs to call
+#   E.g.:
+#      DW LOHI(123,123); DW arg, DW ProcToCall
+#      DW 0  # ends table
+DEFINE DIG_TABLE_STRIDE 6
+PROC DIG_Dig
+ PARAM digtable
+ VAR ret1 ret2
+ VAR rawcr rawcr2
+ # Current position?
+ SND PINFO_XZDIR; SYS SYSC_PINFO; REC rawcr
+ # Position in front of player?
+ CALL UTIL_GetTileInFrontOfPlayer; REC rawcr2
+ # Try with both.
+ SND rawcr digtable; CALL DIG_TryDigAt; REC ret1
+ SND rawcr2 digtable; CALL DIG_TryDigAt; REC ret2
+ # If both failed, say that the player found nothing.
+ OR ret1 ret2; CMP ret1 0; JE .nothing
+ RET
+.nothing:
+ SND ANothing; SYS SYSC_ALERT
+END
+
+PROC DIG_TryDigAt
+ PARAM rawcr digtable
+ VAR ptr this_rawcr kf arg proc
+ # Look it up in the table.
+ SET ptr digtable
+.loop:
+ REAW this_rawcr ptr
+ # End of table?
+ CMP this_rawcr 0; JE .ret0
+ # Did we find the right entry?
+ CMP this_rawcr rawcr; JE .found
+ # Advance to next table entry.
+ ADD ptr DIG_TABLE_STRIDE
+ JMP .loop
+.ret0:
+ # Position is not on table.
+ RET 0
+.found:
+ # Is this tile already killed?
+ SND rawcr TINFO_IS_KILLED; SYS SYSC_TINFO; REC kf
+ CMP kf 0; JNZ .ret0
+ # Mark tile is killed.
+ SND rawcr; SYS SYSC_KILL_TILE
+ # Get the arg and proc address to call.
+ ADD ptr 2; REAW arg ptr
+ ADD ptr 2; REAW proc ptr
+ # Call it.
+ SND arg; CALL proc
+ RET 1
+END
+
+PROC DIG_FindItem
+ PARAM itid
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND itid; SYS SYSC_GIVE
+ RET
+.a_narr:
+ DB 3
+ DS After digging for a bit,
+ DS you find something buried
+ DS here.
+END
+
+PROC DIG_FindGold
+ PARAM amount
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND amount; SYS SYSC_GIVE_GOLD
+ RET
+.a_narr:
+ DB 3
+ DS After digging for a bit,
+ DS you find a chest with
+ DS gold coins.
+END
+
+PROC DIG_FindSpellbook
+ PARAM zid
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND zid; SYS SYSC_LEARN_SPELL
+ RET
+.a_narr:
+ DB 5
+ DS After digging for a bit,
+ DS you find an ancient
+ DS spellbook.
+ DS
+ DS You open it and read it.
+END
+

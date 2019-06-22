@@ -1,0 +1,100 @@
+# Cursed effect of items.
+
+# Also used for scrolls. Same logic.
+PROC CURSED_Effect
+ PARAM itid idx chi
+ VAR rnd
+ # If this is in melee, call a different function.
+ CMPZ chi; JNZ .is_melee
+
+ RND rnd 1 2
+ CMP rnd 2; JE .explode
+ JMP .poison
+
+.explode:
+ SND *; SYS SYSC_ALERT
+ {
+  DT It explodes as you
+  .. try to use it!
+ }
+ SND 0 20; CALL UTIL_Hurt
+ SND itid idx; SYS SYSC_REMOVE_ITEM
+ RET
+
+.poison:
+ SND *; SYS SYSC_ALERT
+ {
+  DT A cloud of poison
+  .. forms around you!
+ }
+ SND 0 CEF_POISON; SYS SYSC_INFLICT
+ RET
+
+.is_melee:
+ SND itid idx chi; CALL CURSED_EffectMelee
+END
+
+
+PROC CURSED_EffectMelee
+ PARAM itid idx chi
+ VAR rnd
+
+ RND rnd 1 20
+ CMP rnd 1; JLE .vortex # extremely unlikely
+ CMP rnd 4; JLE .drain
+ CMP rnd 7; JLE .sleep
+ CMP rnd 10; JLE .poison
+ CMP rnd 13; JLE .frozen
+ # Most likely:
+ JMP .explode
+
+.explode:
+ SND AItExplodes; SYS SYSC_ALERT
+ SND chi 20; CALL UTIL_Hurt
+ SND itid idx; SYS SYSC_REMOVE_ITEM
+ RET
+
+.sleep:
+ SND *; SYS SYSC_ALERT
+ {
+  DT You feel sleepy.
+ }
+ SND chi CEF_ASLEEP; SYS SYSC_INFLICT
+ RET
+
+.poison:
+ SND *; SYS SYSC_ALERT
+ {
+  DT You feel sick.
+ }
+ SND chi CEF_POISON; SYS SYSC_INFLICT
+ RET
+
+.frozen:
+ SND *; SYS SYSC_ALERT
+ {
+  DT You feel cold.
+ }
+ SND chi CEF_FROZEN; SYS SYSC_INFLICT
+ RET
+
+.drain:
+ SND *; SYS SYSC_ALERT
+ {
+  DT You feel your magic
+  .. energy drain away.
+ }
+ SND chi CINFO_SP 0; SYS SYSC_SET_CINFO
+ RET
+
+.vortex:
+ SND *; SYS SYSC_ALERT
+ {
+  DT A vortex opens and pulls
+  .. you into the void.
+ }
+ SND chi CINFO_HP 0; SYS SYSC_SET_CINFO
+ SND itid idx; SYS SYSC_REMOVE_ITEM
+ RET
+END
+

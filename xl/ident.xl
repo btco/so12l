@@ -1,0 +1,94 @@
+# Identify logic
+
+# This logic is used both by identify shops and the identify
+# spell. If is_shop is 1, this is a shop; if not, it's a spell.
+PROC IDENT_Launch
+ PARAM is_shop
+ VAR choice chi itk itid st price paid idx
+ # Price to identify item is party level * 5 (if this is a shop)
+ SND PINFO_LEVEL; SYS SYSC_PINFO; REC price; MUL price 5
+ # Hi.
+ CMPZ is_shop; JZ .no_greet
+ DIA_EXPERT
+ {
+  DT What item do you want to
+  .. identify?
+ }
+.no_greet:
+ # Identify from inventory or equipped?
+ SND AIdWhat * CHD_F_CANCELABLE; SYS SYSC_CHOICE; REC choice
+ {
+  DT Item in inventory
+  .. Equipped item
+ }
+ CMPZ choice; JE .end
+ CMP choice 1; JE .inventory
+ # Who's wearing it?
+ SND 0 * CHD_F_CANCELABLE; SYS SYSC_ASK_WHO; REC chi
+ {
+  DT Equipped on whom?
+ }
+ CMPZ chi; JE .end
+ # Which equipped item should we identify?
+ SND chi *; SYS SYSC_CHOOSE_EQUIPPED; REC itk
+ {
+  DS Which equipped item?
+ }
+ CMPZ itk; JE .end
+ # Get the ITID and item state byte:
+ SND chi itk; SYS SYSC_CHAR_EQ; REC itid st
+.do_identify:  # <-- .inventory case merges here!
+ CMPZ itid; JE .end
+ # Already identified?
+ TEST st ITSF_UNIDENT; JZ .already_ident
+ # Demand payment, if this is a shop.
+ CMPZ is_shop; JZ .no_pay
+ SND * price; SYS SYSC_PAY; REC paid
+ {
+  DT Identify this item?
+ }
+ CMPZ paid; JE .end
+.no_pay:
+ # Erase the ITSF_UNIDENT bit to make it identified.
+ ANDC st ITSF_UNIDENT
+ CMPZ is_shop; JZ .no_lets_see
+ # Give the expert's response.
+ DIA_EXPERT
+ {
+  DT Let's see...
+ }
+.no_lets_see:
+ SND itid st; SYS SYSC_SHOW_ITEM_INFO
+ # Write item back. If idx>0 then we got the item from inventory,
+ # so write back to inventory. Otherwise we got it from a character's
+ # equipped item, so write back using SET_CHAR_EQ.
+ CMP idx 0; JNZ .write_back_to_inv
+ # Write back to equipment.
+ SND chi itk itid st; SYS SYSC_SET_CHAR_EQ
+ RET 1
+.write_back_to_inv:
+ SND idx itid st; SYS SYSC_SET_INV
+ RET 1
+
+.inventory:
+ # Choose from inventory.
+ SYS SYSC_CHOOSE_INV; REC idx
+ CMPZ idx; JE .end
+ # Get item from inventory.
+ SND idx; SYS SYSC_GET_INV; REC itid st
+ JMP .do_identify
+
+.already_ident:
+ SND *; SYS SYSC_ALERT
+ {
+  DT This item is already
+  .. identified. You can see
+  .. its info in the inventory
+  .. screen.
+ }
+ RET
+.s_what:
+ DS Identify what?
+.end:
+ RET 0
+END

@@ -1,0 +1,119 @@
+# WRLD region: Sandy Islands (SI)
+# This is the archipelago just to the west of Serpent Woods.
+
+# Interactibles list
+WRLD_SI_Interactibles:
+ # Cartographer's hut.
+ DW LOHI(16,89) WRLD_SI_WriterHut
+ # Town of Sun Port.
+ DW LOHI(29,93) SUTO_EnterFromWrld
+ # Sign that says Old Tower
+ DW LOHI(22,109) WRLD_SI_SignOTO
+ # Entrance to Old Tower
+ DW LOHI(21,113) OTO1_EnterFromWrld
+ # Well
+ DW LOHI(11,99) WRLD_SI_Well
+ # Expert hut
+ DW LOHI(11,107) SHOP_Expert
+ # -------- End of table marker --------
+ DW 0
+
+PROC WRLD_SI_WriterHut
+ VAR choice
+ TEST GM_LOOTED_WRITER_HUT; JNZ .already
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND 0 .a_loot_choices; SYS SYSC_CHOICE; REC choice
+ CMP choice 2; JNE .ret
+ # Loot it
+ OR GM_LOOTED_WRITER_HUT
+ SND 0 0 .a_narr_loot; SYS SYSC_SPEAK
+ SND ITID_SQUID_INK; SYS SYSC_GIVE
+ RET
+.already:
+ SND .a_nothing; SYS SYSC_ALERT
+.ret:
+ RET
+.a_narr:
+ DT This hut appears abandoned.
+ .. There are piles of rotting
+ .. books and paper.
+.a_loot_choices:
+ DT Leave it as it is.
+ .. Loot it for valuables.
+.a_nothing:
+ DT Nothing of value here.
+.a_narr_loot:
+ DT You search it.
+ ..
+ .. You find a strange vial
+ .. of purple ink.
+END
+
+PROC WRLD_SI_Walk
+ PARAM rawcr pdir
+END
+
+PROC WRLD_SI_SignOTO
+ SND .a_sign; SYS SYSC_ALERT
+ RET
+.a_sign:
+ DB 1
+ DS Old Tower
+END
+
+PROC WRLD_SI_Well
+ PARAM rawcr
+ VAR choice kf
+ # Already used?
+ SND rawcr TINFO_IS_KILLED; SYS SYSC_TINFO; REC kf
+ CMP kf 0; JNE .already_used
+ # Kill tile so the well can't be used again.
+ SND rawcr; SYS SYSC_KILL_TILE
+ # A voice speaks...
+ SND 221 SVoice .a_text; SYS SYSC_SPEAK
+ SND 0 .a_choices; SYS SYSC_CHOICE; REC choice
+ CMP choice 1; JE .nothing
+ CMP choice 2; JE .ask1
+ CMP choice 3; JE .ask10
+ CMP choice 4; JE .ask100
+ # Too greedy.
+ SND 0 0 .a_narr_greedy; SYS SYSC_SPEAK
+ SND EID_WORM EID_WORM EID_WORM EID_WORM EID_WORM EID_WORM 4
+ SYS SYSC_BATTLE
+.ret:
+ RET
+
+.nothing:
+ SND 100; SYS SYSC_GIVE_GOLD
+ RET
+.ask1:
+ SND 10; SYS SYSC_GIVE_GOLD
+ RET
+.ask10:
+.ask100:
+ SND 1; SYS SYSC_GIVE_GOLD
+ RET
+
+.already_used:
+ SND ANothingHappened; SYS SYSC_ALERT
+ RET
+
+.a_text:
+ DT Welcome to the Well
+ .. of Greed.
+ ..
+ .. What do you desire?
+
+.a_choices:
+ DT Nothing
+ .. 1gp
+ .. 10gp
+ .. 100gp
+ .. 1,000gp
+ .. 1,000,000gp
+
+.a_narr_greedy:
+ DT Sand worms jump out
+ .. from the well.
+END
+

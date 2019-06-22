@@ -1,0 +1,66 @@
+DEBUG CODES
+
+Up+Right+A to start patch.
+Then enter hex code, then Z to execute.
+
+
+Change level                91 <LL> 3f
+Change level+entpt          92 <LL> <EE> 3f 
+
+No melee                    82 AB 01
+No melee OFF                81 AB 01
+
+Fast mode                   82 AB 02
+Fast mode OFF               81 AB 02
+
+Show FPS                    82 AB 04
+Show FPS OFF                81 AB 04
+
+No music                    82 AB 08
+No music OFF                81 AB 08
+
+Give item                   91 <IT> 3E
+
+Give gold                   91 FE <AMT_LO> <AMT_HI> 44
+
+Give XP                     91 FE <XP_LO> <XP_HI> 4B
+
+Level Up                    50
+
+Learn spell                 91 <ZID> 52
+
+Heal                        93 <CHI> <HP> <SP> 5A
+  Heal 32hp all             93 00 20 00 5A
+  Heal all                  93 00 fc fc 5A
+
+Show world map              67
+
+win game, evil ending       91 00 71
+Win game, good ending       91 01 71
+
+Inflict condition           92 <chi> <cm> 72
+  Inflict CEF_POISON all    92 00 01 72 
+
+Show cutscene               91 <csn> 73
+
+Patch GPS                   82 <gps_v> <mask>
+Unpatch GPS                 81 <gps_v> <mask>
+  GPS1 is E0
+  GPS2 is E1
+  GPS3 is E2
+  GPS4 is E3
+  GPS5 is E4
+  GPS6 is E5
+  GPS7 is E6
+
+  Example: rescue GOV      82 E0 04
+ 
+Save                       4c
+
+Debug command              91 <cmd> 74
+  1: quit battle
+  2: learn all spells
+  3: build dungeon walls
+  4: identify all
+
+

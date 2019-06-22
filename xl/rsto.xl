@@ -1,0 +1,374 @@
+# TOWN OF RIVERSIDE
+
+EXPORT PROC RSTO_Interact
+ PARAM rawcr xz sid kf
+ # Shops?
+ SND rawcr RSTO_Interactibles; CALL UTIL_CheckInteract
+ RET
+END
+
+EXPORT PROC RSTO_Boot
+ # If the Obelisk quest is not complete, don't show the portal to SAHA.
+ TEST GM_C_OBELISK; CZ RSTO_RemovePortal
+ # If the governor rescue is complete, remove the sign.
+ TEST GM_C_RESCUE_GOV
+ JZ .ret
+ # Remove sign. Change sign tile to SID 18 (plain floor).
+ SND LOHI(219,44) 18; SYS SYSC_CHANGE_SID
+.ret:
+END
+
+PROC RSTO_RemovePortal
+ # Replace portal with a grass tile.
+ SND LOHI(224,39) 7; SYS SYSC_CHANGE_SID
+END
+
+# Town sign that announces that the governor is missing.
+PROC RSTO_Sign
+ SND .a_sign_msg
+ SYS SYSC_ALERT
+ RET
+
+.a_sign_msg:
+ DT REWARD
+ .. For whoever rescues the
+ .. governor.
+ .. Last seen going towards the
+ .. cave northwest of the city.
+END
+
+
+# BLACKSMITH -----------------------------------------------------
+PROC RSTO_Blacksmith
+ SND *; CALL SHOP_Blacksmith
+ {
+  DB 4
+  DB ITID_SHORT_SWORD #@wares_RSTO
+  DB ITID_LONG_SWORD #@wares_RSTO
+  DB ITID_QUARTERSTAFF #@wares_RSTO
+  DB ITID_DAGGER #@wares_RSTO
+ }
+END
+
+# ARMOR SHOP -----------------------------------------------------
+PROC RSTO_ArmorShop
+ SND *; CALL SHOP_ArmorShop
+ {
+  DB 3
+  DB ITID_LEATHER_ARMOR #@wares_RSTO
+  DB ITID_BRIGANDINE #@wares_RSTO
+  DB ITID_WOODEN_SHIELD #@wares_RSTO
+ }
+END
+
+# BOOT SHOP ------------------------------------------------------
+PROC RSTO_BootShop
+ SND *; CALL SHOP_BootShop
+ {
+  DB 2
+  DB ITID_LEATHER_BOOTS #@wares_RSTO
+  DB ITID_IRON_BOOTS #@wares_RSTO
+ }
+END
+
+
+# SOUTH GATE -----------------------------------------------------
+PROC RSTO_SouthGate
+ SND ALeaveTown LVLN_WRLD ENTPT_WRLD_FROM_RSTO_S; CALL UTIL_GoNoGo
+ RET
+END
+
+
+# NORTH GATE -----------------------------------------------------
+PROC RSTO_NorthGate
+ # Did player already rescue the governor and escaped from jail?
+ TEST GM_R_RESCUE_GOV
+ JZ .nope
+ SND ALeaveTown LVLN_WRLD ENTPT_WRLD_FROM_RSTO_N; CALL UTIL_GoNoGo
+ RET
+.nope:
+ SND 252 SGuard .a_deny
+ SYS SYSC_SPEAK
+ RET
+.a_deny:
+ DB 3
+ DS The North Gate is closed
+ DS until the governor returns.
+ DS Try the South Gate.
+END
+
+# TOWN HALL -----------------------------------------------------
+PROC RSTO_TownHall
+ # Already claimed "reward"?
+ TEST GM_R_RESCUE_GOV; JNZ .already
+ # Found governor?
+ TEST GM_C_RESCUE_GOV; JNZ .reward
+ # Governor not rescued yet.
+ # Assign quest, if not yet assigned.
+ OR GM_A_RESCUE_GOV
+ # Give the speech about the governor being missing.
+ DIA_MARKUS
+ {
+  DT I am Markus, vice-governor.
+  .. We are worried about the
+  .. governor. He went to the 
+  .. cave north-west of town.
+  ..
+  .. Can you go find him?
+ }
+ RET
+.reward:
+ # Governor rescued, but "reward" not yet received.
+ CALL RSTO_AccuseDialogue
+ RET
+.already:
+ DIA_GUARD
+ {
+  DT You look familiar...
+  .. Aren't you the group that,
+  .. ten years ago... uh...
+  .. Nevermind. Have a good day!
+ }
+END
+
+# Training hall.
+PROC RSTO_TrainingHall
+ SND 4; CALL Train #@train_RSTO
+END
+
+PROC RSTO_EnterCelr
+ TEST GM_R_RESCUE_GOV
+ JZ .cant
+ SND .msg LVLN_CELR ENTPT_CELR; CALL UTIL_GoNoGo
+ RET
+.cant:
+ SND *; SYS SYSC_ALERT
+ {
+  DT Cellar under construction.
+  .. Check back in 10 years.
+ }
+ RET
+.msg:
+ DB 2
+ DS Stairs lead down into a dark
+ DS cellar. Descend?
+END
+
+PROC RSTO_Inn
+ SND 255 .a_welcome 10
+ CALL UTIL_Inn
+ RET
+.a_welcome:
+ #  |--------------------------|
+ DT Welcome to Riverside Inn.
+ .. Stay?
+END
+
+EXPORT PROC RSTO_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ SND 1 rawcr DIA_CS_2_ARG
+ {
+  DT We should buy supplies.
+  .. Food, torches, weapons,
+  .. armor...
+ }
+ CALL TRIG_Check
+ # Trigger to give player the Rescue Token.
+ SND 2 rawcr RSTO_MaybeGiveRescueToken; CALL TRIG_Check
+END
+
+PROC RSTO_Portal
+ SND .a_msg LVLN_SAHA ENTPT_SAHA_FROM_OBE1 LOHI(104,39); CALL UTIL_Portal
+ RET
+.a_msg:
+ DT Portal to Sand Haven.
+ .. Enter?
+END
+
+PROC RSTO_AccuseDialogue
+ VAR choice
+ # Remove crystals
+ SND ITID_CRYSTAL_RED; SYS SYSC_REMOVE_ITEM
+ SND ITID_CRYSTAL_GREEN; SYS SYSC_REMOVE_ITEM
+ SND ITID_CRYSTAL_BLUE; SYS SYSC_REMOVE_ITEM
+ SND ITID_CRYSTAL_YELLOW; SYS SYSC_REMOVE_ITEM
+ # Set "reward" as claimed.
+ OR GM_R_RESCUE_GOV
+
+ DIA_MARKUS
+ {
+  DT What? The governor is dead?
+  .. He gave you those crystals?
+  .. Give them to me.
+ }
+ DIA_CHOICE
+ {
+  DT Yes. Here they are.
+  .. No. The crystals are OURS now.
+  .. Wait. Why give them to you?
+ }
+ CMP choice 1; JE .yes_give
+ # fall through (refused to give)
+ DIA_MARKUS
+ {
+  DT We are on the same side.
+  .. I always had the governor's
+  .. trust. I insist. Give me
+  .. the crystals.
+ }
+ DIA_CHOICE
+ {
+  DT Very well. Here they are.
+  .. We refuse. You can't have them.
+ }
+ CMP choice 1; JE .yes_give
+ # fall through (refused twice).
+ DIA_MARKUS
+ {
+  DT I begin to suspect your
+  .. good intentions, friends.
+  .. Or are you my enemies?
+ }
+ DIA_NARR
+ {
+  DT The guards seize the crystals
+  .. from you and hand them to
+  .. Markus.
+ }
+ # fall through
+.yes_give:
+ DIA_NARR
+ {
+  DT Markus takes the crystals.
+  .. His eyes sparkle with greed.
+ }
+ DIA_MARKUS_EVIL
+ {
+  DT The legendary crystals...
+  .. So beautiful...
+ }
+ DIA_MARKUS_EVIL
+ {
+  DT I do not believe you.
+  .. The governor wouldn't
+  .. just give these to you.
+ }
+ DIA_NARR
+ {
+  DT The guards surround you.
+ }
+ DIA_MARKUS_EVIL
+ {
+  DT There is only one logical
+  .. explanation. You KILLED the
+  .. governor to steal the
+  .. crystals.
+  ..
+  .. Guards, arrest them!
+ }
+ DIA_NARR
+ {
+  DT You are dragged to jail.
+  .. Markus keeps the crystals.
+ }
+
+ # Go to jail.
+ SND LVLN_JAIL ENTPT_JAIL
+ SYS SYSC_CHANGE_LVL
+END
+
+PROC RSTO_MaybeGiveRescueToken
+ VAR has
+ # Governor rescue must have been completed.
+ TEST GM_R_RESCUE_GOV; JZ .fail
+ # Check that player doesn't already have the rescue token.
+ SND ITID_RESCUE_TOK; SYS SYSC_GET_ITEM_COUNT; REC has
+ CMPZ has; JNE .fail
+ # Player rescued the governor and does not yet have the token,
+ # so give.
+ DIA_VILLAGER_6
+ {
+  DT I remember you! You tried
+  .. to save the governor ten
+  .. years ago.
+ }
+ DIA_VILLAGER_6
+ {
+  DT Here is an item that may
+  .. be useful in your quest.
+  ..
+  .. If ever you find yourself
+  .. in grave danger, use it
+  .. to be transported safely
+  .. to Riverside.
+ }
+ SND ITID_RESCUE_TOK; SYS SYSC_GIVE
+ RET 1
+.fail:
+ RET 0
+END
+
+PROC RSTO_Jail
+ SND *; SYS SYSC_ALERT
+ {
+  DT The door is locked.
+ }
+END
+
+PROC RSTO_House1
+ DIA_VILLAGER_3
+ {
+  DT Sleeping at an inn will
+  .. make you feel much better.
+  ..
+  .. There is an inn in the
+  .. northwest part town.
+ }
+END
+
+PROC RSTO_House2
+ DIA_VILLAGER_4
+ {
+  DT Items you find may be
+  .. cursed. Cursed items can't
+  .. be easily removed.
+ }
+END
+
+PROC RSTO_House3
+ DIA_VILLAGER_6
+ {
+  DT The temple just east of 
+  .. town teaches many useful
+  .. spells. Be sure to visit!
+ }
+END
+
+PROC RSTO_PotionShop
+ SND SHOP_Wares_Potions1; CALL SHOP_PotionShop
+END
+
+# RSTO INTERACTIBLES LIST
+# (position, title, proc)
+RSTO_Interactibles:
+ DW LOHI(214,42) RSTO_Blacksmith
+ DW LOHI(217,40) RSTO_ArmorShop
+ DW LOHI(214,37) RSTO_BootShop
+ DW LOHI(219,49) RSTO_SouthGate
+ DW LOHI(233,34) RSTO_NorthGate
+ DW LOHI(228,36) RSTO_TownHall
+ DW LOHI(217,36) RSTO_TrainingHall
+ DW LOHI(217,44) SHOP_GeneralStore
+ DW LOHI(239,48) RSTO_EnterCelr
+ DW LOHI(221,36) RSTO_Inn
+ DW LOHI(219,44) RSTO_Sign
+ DW LOHI(224,39) RSTO_Portal
+ DW LOHI(236,42) SHOP_Expert
+ DW LOHI(237,36) RSTO_Jail
+ DW LOHI(236,42) RSTO_House1
+ DW LOHI(233,44) RSTO_House2
+ DW LOHI(233,48) RSTO_House3
+ DW LOHI(230,48) RSTO_PotionShop
+ DW 0
+

@@ -1,0 +1,85 @@
+# DEBUG Party
+# NOTE ABOUT DEBUG PARTIES: Only record the equipment, XP and gold.
+# Do not change any of the levels or attributes, as those are
+# leveled-up automatically when loading the party.
+
+# DESCRIPTION OF THIS DEBUG PARTY:
+# Party inventory/spell status right before going into RSC, but
+# after doing some shopping in the city.
+
+EXPORT Party_PreRSC:
+
+DB 187    # Signature for error-checking
+# X, Z, direction (ignored)
+DB 0 0 0
+# Number of party members
+DB 2
+# pclk (DWORD)
+DW 0 0
+
+# Character 1
+DB 186
+DS Alex                    # Name
+DB CLS_FIGHTER              # Class
+DB 240                      # Face
+DB 5                        # Attack score
+DB 4                        # Def score
+DB 10                       # Speed score
+DW 19                       # HP
+DW 19                       # Max HP
+DW 0                        # SP
+DW 0                        # Max SP
+# Equipped items per kind:
+  DB ITID_CLOTHES 0                        # ITK_ARMOR
+  DB 0 0                                   # ITK_HELM
+  DB ITID_SHORT_SWORD 0                    # ITK_MWEAP
+  DB 0 0                                   # ITK_RWEAP
+  DB 0 0                                   # ITK_SHIELD
+  DB 0 0                                   # ITK_BOOT
+  DB 0 0                                   # ITK_BELT
+  DB 0 0                                   # ITK_AMULET
+  DB 0 0                                   # ITK_RING
+DB 0                        # Count of spells
+
+# Character 2
+DB 186
+DS Leon                    # Name
+DB CLS_PALADIN              # Class
+DB 242                      # Face
+DB 5                        # Attack score
+DB 4                        # Def score
+DB 10                       # Speed score
+DW 18                       # HP
+DW 18                       # Max HP
+DW 5                        # SP
+DW 5                        # Max SP
+# Equipped items per kind:
+  DB ITID_CLOTHES 0                        # ITK_ARMOR
+  DB 0 0                                   # ITK_HELM
+  DB ITID_SHORT_SWORD 0                    # ITK_MWEAP
+  DB 0 0                                   # ITK_RWEAP
+  DB 0 0                                   # ITK_SHIELD
+  DB 0 0                                   # ITK_BOOT
+  DB 0 0                                   # ITK_BELT
+  DB 0 0                                   # ITK_AMULET
+  DB 0 0                                   # ITK_RING
+DB 0                        # Count of spells
+
+# Count of inventory items
+DB 6
+DB ITID_HEALING_POTION 0
+DB ITID_RATION 0
+DB ITID_TORCH 0
+DB ITID_TORCH 0
+DB ITID_RATION 0
+DB ITID_RATION 0
+
+# Gold (dword)
+DW 0 0
+
+# XP (DWORD)
+DW 0 0
+
+# Level
+DB 1
+

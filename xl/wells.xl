@@ -1,0 +1,159 @@
+# TODO: more effects
+
+# Interacts with a well (asks the user if they want to throw a coin).
+# If the player accepts, deducts the coin and calls the callback.
+#  rawcr: the raw col/row of the well (to kill the tile).
+PROC WELLS_DoWell
+ PARAM rawcr
+ VAR paid kf eff_no ptr eff eff_arg
+ # Ask player if they want to throw a coin.
+ SND .msg 1; SYS SYSC_PAY
+ REC paid
+ CMP paid 0
+ JE .ret
+ # Player threw a coin. Was the tile already killed?
+ SND rawcr TINFO_IS_KILLED
+ SYS SYSC_TINFO
+ REC kf
+ # If tile was already killed, nothing happens.
+ CMP kf 0
+ JNE .nothing
+ # Kill the tile.
+ SND rawcr
+ SYS SYSC_KILL_TILE
+ # Get effect number.
+ SET eff_no GV_WELL_COUNT; MOD eff_no WELLS_NUM_EFFECTS
+ # Advance to next effect number.
+ ADD GV_WELL_COUNT 1; MOD GV_WELL_COUNT 255
+ # Figure out what effect to pick from the effects table.
+ SET ptr eff_no; MUL ptr 3  # 3 bytes per effect entry
+ ADD ptr WELLS_Effects
+ REAB eff ptr; ADD ptr 1; REAW eff_arg ptr
+ # Apply the effect.
+ SND eff eff_arg; CALL WELLS_ApplyEffect
+ RET
+.nothing:
+ SND ANothingHappened; SYS SYSC_ALERT
+ RET
+.ret:
+ RET
+.msg:
+ DB 1
+ DS Throw a coin into the well?
+END
+
+# List of well effects, in order.
+DEFINE WELLS_NUM_EFFECTS 12
+WELLS_Effects:
+ DB EFFECT_HP; DW 0
+ DB EFFECT_SP; DW 0
+ DB EFFECT_ATT; DW 0
+ DB EFFECT_SPEED; DW 0
+ DB EFFECT_GOLD; DW 250
+ DB EFFECT_XP; DW 500
+ DB EFFECT_HP; DW 0
+ DB EFFECT_SP; DW 0
+ DB EFFECT_ATT; DW 0
+ DB EFFECT_SPEED; DW 0
+ DB EFFECT_GOLD; DW 500
+ DB EFFECT_XP; DW 1000
+
+# Possible effects from a well:
+DEFINE EFFECT_GOLD 1     # Give gold.
+DEFINE EFFECT_HP 2       # Increase max HP.
+DEFINE EFFECT_SP 3       # Increase max SP.
+DEFINE EFFECT_ATT 4      # Increase attack score.
+DEFINE EFFECT_SPEED 5    # Increase defense score.
+DEFINE EFFECT_XP 6       # Grant XP.
+
+# Applies a given effect on the player.
+PROC WELLS_ApplyEffect
+ PARAM effect effect_arg
+
+ CMP effect EFFECT_GOLD; JE .gold
+ CMP effect EFFECT_HP; JE .hp
+ CMP effect EFFECT_SP; JE .sp
+ CMP effect EFFECT_ATT; JE .att
+ CMP effect EFFECT_SPEED; JE .speed
+ CMP effect EFFECT_XP; JE .xp
+ RET
+
+.gold:
+ SND .msg_gold
+ SYS SYSC_ALERT
+ SND effect_arg
+ SYS SYSC_GIVE_GOLD
+ RET
+
+.hp:
+ SND .msg_hp; SYS SYSC_ALERT
+ SND CINFO_MAX_HP 3; CALL UTIL_IncStatForAll
+ SND CINFO_HP 3; CALL UTIL_IncStatForAll
+ SND 0 .blink_hp C_LBLUE SFX_POWERUP; SYS SYSC_BLINK
+ RET
+
+.sp:
+ SND .msg_sp; SYS SYSC_ALERT
+ SND CINFO_MAX_SP 3; CALL UTIL_IncStatForAll
+ SND CINFO_SP 3; CALL UTIL_IncStatForAll
+ SND 0 .blink_sp C_LBLUE SFX_POWERUP; SYS SYSC_BLINK
+ RET
+
+.att:
+ SND .msg_att; SYS SYSC_ALERT
+ SND CINFO_ATT 1; CALL UTIL_IncStatForAll
+ SND 0 .blink_att C_LBLUE SFX_POWERUP; SYS SYSC_BLINK
+ RET
+
+.speed:
+ SND .msg_speed; SYS SYSC_ALERT
+ SND CINFO_SPEED 2; CALL UTIL_IncStatForAll
+ SND 0 .blink_speed C_LBLUE SFX_POWERUP; SYS SYSC_BLINK
+ RET
+
+.xp:
+ SND .msg_xp
+ SYS SYSC_ALERT
+ SND effect_arg
+ SYS SYSC_GIVE_XP
+ RET
+
+.msg_hp:
+ DB 2
+ DS You feel more resistant.
+ DS (+3 Max HP)
+
+.msg_sp:
+ DB 3
+ DS You feel your spellcasting
+ DS ability improving.
+ DS (+3 Max SP)
+
+.msg_gold:
+ DB 2
+ DS You feel that your pockets
+ DS are a bit heavier.
+
+.msg_xp:
+ DB 1
+ DS You feel wiser.
+
+.msg_att:
+ DB 2
+ DS You feel more skilled in
+ DS combat (+1 attack score).
+
+.msg_speed:
+ DB 2
+ DS You feel faster.
+ DS (+2 speed)
+
+.blink_hp:
+ DS +3 Max HP
+.blink_sp:
+ DS +3 Max SP
+.blink_att:
+ DS +1 Att
+.blink_speed:
+ DS +2 Speed
+END

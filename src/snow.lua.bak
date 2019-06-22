@@ -1,0 +1,70 @@
+diff --git a/rpg/src/rend.lua b/rpg/src/rend.lua
+index 1cd76b7..30c0674 100644
+--- a/rpg/src/rend.lua
++++ b/rpg/src/rend.lua
+@@ -107,8 +107,15 @@ R_INIT={
+  nextId=100,
+  -- Lighting setting.
+  li=LIGHT_FULL,
++ -- Rain mode (RAIN_ constant)
++ ra=RAIN_NONE,
++ -- Rain particles, each with x,y
++ rap=nil,
+ }
+ 
++#define RAIN_NONE 0
++#define RAIN_SAND 1
++
+ -- Texture LUT. For each texture ID, this gives an object with:
+ --  nfr: number of animation frames
+ --  int: animation frame interval, in ms
+@@ -175,9 +182,20 @@ function R_Rend()
+   end
+  end
+  PalMapSet()
++
++
++ R.ra=RAIN_SAND -- XXX
++
++
++ _=R.ra and RendRain()
+  clip()
+ end
+ 
++-- rm: rain mode (RAIN_ constants)
++function R_SetRain(ra)
++ R.ra,R.rap=ra,nil
++end
++
+ function R_SetSkyColor(skyc)
+  R.skyc=skyc
+ end
+@@ -652,3 +670,28 @@ function ResolveTid(r)
+  return ptid
+ end
+ 
++function RendRain()
++ local x0,x1,y0,y1,dx,dy=0,VP_W,0,0,0,10
++ if R.ra==RAIN_SAND then
++  -- Sand blows horizontally
++  x0,x1,y0,y1,dx,dy=VP_W,VP_W,0,VP_H,-2,1
++ end
++ -- Create particles if needed.
++ if not R.rap then
++  -- Create pre-warmed particles.
++  R.rap={}
++  for i=1,100 do insert(R.rap,{x=random(0,VP_W),y=random(0,VP_H)}) end
++ end
++ -- Animate particles. The ones that fall off-screen are regenerated.
++ for i=1,#R.rap do
++  local p=R.rap[i]
++  p.x,p.y=p.x+RandomBetween(0,dx),p.y+RandomBetween(0,dy)
++  p.age=(p.age or 0)+1
++  pix(p.x,p.y,R.ra==RAIN_SAND and 12 or 2)
++  -- Off screen? Regenerate.
++  if p.x<0 or p.y<0 or p.x>VP_W or p.y>VP_H then
++   p.x,p.y,p.age=RandomBetween(x0,x1),RandomBetween(y0,y1),0
++  end
++ end
++end
++

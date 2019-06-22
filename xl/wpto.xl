@@ -1,0 +1,144 @@
+# Westport Town (WPTO)
+
+PROC WPTO_EnterFromWrld
+ # Ask the player if they want to enter.
+ SND .msg LVLN_WPTO ENTPT_WPTO; CALL UTIL_GoNoGo
+ RET 0
+
+.msg:
+ DB 2
+ DS Enter the town
+ DS of Westport?
+END
+
+# Interaction proc
+EXPORT PROC WPTO_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr WPTO_Interactibles; CALL UTIL_CheckInteract
+ RET
+END
+
+# Walk proc (if needed):
+EXPORT PROC WPTO_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ #SND 1 rawcr UTIL_CharSpeak 2 .a_supplies
+ #CALL TRIG_Check
+ #SND 2 rawcr UTIL_Battle EID_SLIME EID_SLIME
+ #CALL TRIG_Check
+ RET
+END
+
+# Leave.
+PROC WPTO_Leave
+ SND ALeaveTown LVLN_WRLD ENTPT_WRLD_FROM_WPTO
+ CALL UTIL_GoNoGo
+ RET
+END
+
+PROC WPTO_MusicBoxOwner
+ VAR count
+ # Already rewarded?
+ TEST GM_R_MUSIC_BOX; JNZ .already
+ # Did player just bring the music box?
+ SND ITID_MUSIC_BOX; SYS SYSC_GET_ITEM_COUNT; REC count
+ CMP count 0; JG .brought_it
+ # Explain quest.
+ SND 251 SVillager .a_quest; SYS SYSC_SPEAK
+ SND 251 SVillager .a_quest2; SYS SYSC_SPEAK
+ RET
+.already:
+ SND 251 SVillager AThanksAgain; SYS SYSC_SPEAK
+ RET
+.brought_it:
+ OR GM_R_MUSIC_BOX
+ SND 251 SVillager .a_thanks; SYS SYSC_SPEAK
+ SND 5000; CALL REW_GiveQuestReward #@q_MUSIC_BOX
+ SND ITID_MUSIC_BOX; SYS SYSC_REMOVE_ITEM
+ RET
+.a_quest:
+ DT Years ago my grandfather,
+ .. fleeing from enemies, buried
+ .. a family heirloom to stop it
+ .. from being taken from him.
+.a_quest2:
+ DT It was buried just north of
+ .. the well on the island at
+ .. the center of the lake in
+ .. the Frostlands.
+ ..
+ .. If you recover it, bring it
+ .. back to me!
+.a_thanks:
+ DT Oh! You brought me my music
+ .. box! Thank you very much!
+END
+
+PROC WPTO_Training
+ SND 11; CALL Train  #@train_WPTO
+END
+
+PROC WPTO_ArmorShop
+ SND *; CALL SHOP_ArmorShop
+ {
+  DB 7
+  DB ITID_CHAIN_ARMOR     #@wares_WPTO
+  DB ITID_RING_ARMOR      #@wares_WPTO
+  DB ITID_BATTLE_SHIELD   #@wares_WPTO
+  DB ITID_STEEL_SHIELD    #@wares_WPTO
+  DB ITID_IRON_SHIELD     #@wares_WPTO
+  DB ITID_STEEL_BOOTS     #@wares_WPTO
+  DB ITID_IRON_BOOTS      #@wares_WPTO
+ }
+END
+
+# Scholar's house
+PROC WPTO_Scholar
+ VAR has
+ TEST GM_R_DICTIONARY; JNZ .already_rewarded
+ # Brought back the dictionary?
+ SND ITID_DICTIONARY; SYS SYSC_GET_ITEM_COUNT; REC has
+ CMPZ has; JNZ .reward
+ # State quest.
+ DIA_SCHOLAR
+ {
+  DT Legend speaks of a Lost
+  .. Library somewhere in the
+  .. far East. In it there is an
+  .. Ancient Dictionary. If you
+  .. find it, bring it back
+  .. to me!
+ }
+ RET
+.reward:
+ DIA_SCHOLAR
+ {
+  DT Oh! You brought me the
+  .. Ancient Dictionary! I will
+  .. forever be thankful to
+  .. you!
+ }
+ SND ITID_DICTIONARY; SYS SYSC_REMOVE_ITEM
+ SND 10000; CALL REW_GiveQuestReward #@q_DICTIONARY
+ OR GM_R_DICTIONARY
+ RET
+ OR GM_R_DICTIONARY
+.already_rewarded:
+ DIA_SCHOLAR
+ {
+  DT Thank you again!
+ }
+END
+
+# WPTO INTERACTIBLES LIST
+# (position, title, proc)
+WPTO_Interactibles:
+ DW LOHI(209,91) WPTO_Leave
+ DW LOHI(205,87) SHOP_GeneralStore
+ DW LOHI(205,94) WPTO_MusicBoxOwner
+ DW LOHI(207,87) WPTO_Training
+ DW LOHI(201,87) WPTO_ArmorShop
+ DW LOHI(208,93) WPTO_Scholar
+ DW 0
+

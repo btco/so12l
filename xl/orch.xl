@@ -1,0 +1,131 @@
+# Orchard level.
+
+# Orchard entrance door
+PROC ORCH_EnterFromWrld
+ # Did the player talk to Steve to get the mission?
+ TEST GM_A_ORCHARD; JZ .not_assigned
+
+ # Did the player already rid the orchard of bugs?
+ TEST GM_C_ORCHARD; JNZ .already
+
+ # Ask the player if they want to enter the orchard.
+ SND .msg LVLN_ORCH ENTPT_ORCH; CALL UTIL_GoNoGo
+ RET 0
+
+.not_assigned:
+ SND .not_assigned_msg
+ SYS SYSC_ALERT
+ RET 0
+
+.already:
+ # Tell the player they don't need to enter the orchard any more.
+ SND .already_msg
+ SYS SYSC_ALERT
+ RET 0
+
+.msg:
+ DB 1
+ DS Enter the orchard?
+
+.already_msg:
+ DT Nothing left to do here.
+
+.not_assigned_msg:
+ DT Private property.
+ .. See Steve, the Orchard Keeper.
+END
+
+EXPORT PROC ORCH_Interact
+ PARAM rawcr xz sid kf
+
+ # Looting chest?
+ CMP sid 40; JE .loot_chest
+
+ # Exit?
+ CMP sid 57; JE .leave
+
+ RET
+
+ .leave:; CALL ORCH_Leave; RET
+ .loot_chest:;
+  SND rawcr LOL_A; CALL LOOT_ChestRandom; RET #@q_ORCHARD loot_count=3
+END
+
+# Leave orchard.
+PROC ORCH_Leave
+ VAR choice count
+
+ # Did player complete level?
+ TEST GM_C_ORCHARD
+ JZ .not_clear
+
+ # Player just finished the orchard mission. Congratulations are
+ # in order.
+ # First, mark the mission as accomplished.
+ OR GM_C_ORCHARD
+ # Say congrats.
+ DIA_CS_2
+ {
+  DT Steve will be glad to hear
+  .. we got rid of bugs. Let's
+  .. go talk to him.
+ }
+ # Leave.
+ SND LVLN_WRLD ENTPT_WRLD_FROM_ORCH
+ SYS SYSC_CHANGE_LVL
+ RET
+
+.not_clear:
+ # Not all monsters have been killed. Ask if player wants to
+ # leave anyway.
+ SND .not_clear_msg LVLN_WRLD ENTPT_WRLD_FROM_ORCH; CALL UTIL_GoNoGo
+ RET
+
+.ret:
+ RET
+
+.not_clear_msg:
+ DB 2
+ DS You haven't killed all the bugs.
+ DS Leave anyway?
+END
+
+PROC ORCH_Walk
+ PARAM rawcr pdir
+
+ # At any moment, if the last battle tile has been cleared,
+ # then the mission is accomplished.
+ CALL ORCH_CheckComplete
+
+ # Check for triggers:
+ SND 1 rawcr UTIL_Battle EID_BUG #@q_ORCHARD
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_BUG EID_BUG EID_SLIME #@q_ORCHARD
+ CALL TRIG_Check
+ SND 3 rawcr UTIL_Battle EID_BUG EID_BUG EID_RSLIME #@q_ORCHARD
+ CALL TRIG_Check
+END
+
+PROC ORCH_CheckComplete
+ VAR kf
+ # Did we already mark it as complete? If so, nothing else to do.
+ TEST GM_C_ORCHARD
+ JNZ .ret
+ # Has the last battle been cleared?
+ SND LOHI(217,64) TINFO_IS_KILLED; SYS SYSC_TINFO; REC kf
+ CMP kf 0
+ JZ .ret
+ # Mark it as complete.
+ OR GM_C_ORCHARD
+ SND 2 .a_complete; CALL UTIL_CharSpeak
+ RET
+
+.a_complete:
+ DB 3
+ DS Those were the last
+ DS bugs. Let's get back
+ DS to Steve's hut.
+.ret:
+END
+
+

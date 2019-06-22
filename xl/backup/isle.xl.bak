@@ -1,0 +1,750 @@
+# ISLE LEVEL (level ISLE)
+
+# LPS bits (byte and mask):
+# Got the wizard's gift for rescuing the governor?
+DEFINE ISLE_LPS_RESCUE_GIFT     VID_LPS1 1
+# Got the peninsula hut's reward for rescuing the governor?
+DEFINE ISLE_LPS_HUT_REWARD      VID_LPS1 2
+
+EXPORT PROC ISLE_Interact
+ PARAM rawcr xz sid kf
+
+ VAR choice r
+
+ # West Peninsula huts
+ CMP rawcr LOHI(23,112); JE .hut1
+ CMP rawcr LOHI(28,111); JE .hut2
+ CMP rawcr LOHI(26,92); JE .hut3
+ CMP rawcr LOHI(12,80); JE .hut4
+ CMP rawcr LOHI(27,68); JE .hut5
+ CMP rawcr LOHI(21,103); JE .hut6
+
+ # Riverside gates
+ CMP rawcr LOHI(28,76); JE .rsi_gate_s
+ CMP rawcr LOHI(32,72); JE .rsi_gate_n
+
+ # Riverside cave entrance
+ CMP rawcr LOHI(24,66); JE .rsi_cave
+
+ # Orchard entrance
+ CMP rawcr LOHI(60,72); JE .enter_orchard
+
+ # Steve's hut.
+ CMP rawcr LOHI(49,71); JE .steves_hut
+
+ # Signs
+ SND rawcr LOHI(61,71) .msg_orchard; CALL UTIL_CheckSign
+ SND rawcr LOHI(80,43) .msg_suto_sign; CALL UTIL_CheckSign
+ SND rawcr LOHI(48,54) .msg_north_island_sign; CALL UTIL_CheckSign
+
+ # Trees
+ CMP sid 39; JE .tree
+ CMP sid 50; JE .tree
+
+ # Hut near broken bridge
+ CMP rawcr LOHI(49,65); JE .hut_broken_bridge
+
+ # Huts in The Plains
+ CMP rawcr LOHI(51,85); JE .hut_plains_1
+
+ # Well in The Plains
+ CMP rawcr LOHI(47,94); JE .well_plains
+
+ # Entrance to Mountain Pass (PASS)
+ CMP rawcr LOHI(58,94); JE .to_pass_s
+ CMP rawcr LOHI(63,80); JE .to_pass_n
+
+ # Entrance to south tunnel (TUNN)
+ CMP rawcr LOHI(49,108); JE .to_tunn_w
+ CMP rawcr LOHI(52,112); JE .to_tunn_e
+
+ # Tranquility coast hut.
+ CMP rawcr LOHI(71,79); JE .coast_hut
+ # Myra's hut.
+ CMP rawcr LOHI(102,113); JE .myras_hut
+
+ # Entrance to Sun Port (SUTO)
+ CMP rawcr LOHI(79,40); JE .enter_suto
+
+ # Hut in Green Bay with hint to treasure.
+ CMP rawcr LOHI(58,57); JE .green_bay_hut
+
+ # Entrance to Old Tower (OTO1).
+ CMP rawcr LOHI(98,125); JE .enter_oto1
+
+ # Entrance to Greenleaf Village (GRTO).
+ CMP rawcr LOHI(94,116); JE .enter_grto
+
+ # South Temple entrance.
+ CMP rawcr LOHI(41,90); JE .enter_stmp
+
+ RET 0
+
+ .tree:; SND sid kf; CALL UTIL_Tree; RET 1
+ .hut1:; CALL ISLE_Hut1; RET 0
+ .hut2:; CALL ISLE_Hut2; RET 0
+ .hut3:; CALL ISLE_Hut3; RET 0
+ .hut4:; CALL ISLE_Hut4; RET 0
+ .hut5:; CALL ISLE_Hut5; RET 0
+ .hut6:; CALL ISLE_Hut6; RET 0
+ .rsi_gate_s:; CALL ISLE_RsiGateS; RET 0
+ .rsi_gate_n:; CALL ISLE_RsiGateN; RET 0
+ .rsi_cave:; CALL ISLE_RsiCave; RET 0
+ .enter_orchard:; CALL ISLE_EnterOrchard; RET 0
+ .steves_hut:; CALL StevesHut; RET 0
+ .to_pass_s:; CALL ISLE_ToPassS; RET 0
+ .to_pass_n:; CALL ISLE_ToPassN; RET 0
+ .hut_broken_bridge:; CALL ISLE_HutBrokenBridge; RET 0
+ .hut_plains_1:; CALL ISLE_HutPlains1; RET 0
+ .to_tunn_w:; CALL ISLE_ToTunnW; RET 0
+ .to_tunn_e:; CALL ISLE_ToTunnE; RET 0
+ .coast_hut:; CALL ISLE_CoastHut; RET 0
+ .myras_hut:; CALL ISLE_MyrasHut; RET 0
+ .enter_suto:; CALL ISLE_EnterSuto; RET 0
+ .green_bay_hut:; CALL ISLE_GreenBayHut; RET 0
+ .enter_oto1:; CALL ISLE_EnterOto1; RET 0
+ .well_plains:; SND rawcr EFFECT_HP 0; CALL UTIL_Well; RET 0
+ .enter_grto:; CALL ISLE_EnterGrto; RET 0
+ .enter_stmp:; CALL ISLE_EnterStmp; RET 0
+
+ .msg_orchard:; DB 1; DS Steve's Orchard
+ .msg_suto_sign:
+  DB 2
+  DS Sailings to Sand Portal:
+  DS Inquire in town.
+ .msg_north_island_sign:
+  DB 2
+  DS <- Great Library
+  DS -> Town of Sun Port
+END
+
+# Hut #1
+PROC ISLE_Hut1
+ SND 250 SVillager .hut1_msg
+ SYS SYSC_SPEAK
+ RET 0
+.hut1_msg:
+ DB 3
+ DS Travel north along the
+ DS river to find the town of
+ DS Riverside.
+END
+
+# Hut #2
+PROC ISLE_Hut2
+ # Has the player already rescued the governor?
+ TEST GM_C_RESCUE_GOV; JNZ .hut2_already
+ # Did not rescue. So show the "we are worried" message.
+ SND 251 SVillager .hut2_msg
+ SYS SYSC_SPEAK
+ RET 0
+.hut2_already:
+ # Has already rescued governor, so just say thanks.
+ SND 251 SVillager .hut2_already_msg
+ SYS SYSC_SPEAK
+ RET 0
+.hut2_msg:
+ DB 6
+ DS Everyone is worried because
+ DS the governor has gone
+ DS missing. 
+ DS
+ DS He went into a cave to the
+ DS northwest.
+.hut2_already_msg:
+ DB 2
+ DS Thank you for rescuing the
+ DS governor!
+END
+
+# Hut #3
+PROC ISLE_Hut3
+ SND 253 SVillager .hut3_msg
+ SYS SYSC_SPEAK
+ RET 0
+.hut3_msg:
+ DB 3
+ DS Those are the gates of
+ DS Riverside just north of
+ DS here.
+END
+
+# Hut #4
+PROC ISLE_Hut4
+ # Did the player already claim the reward?
+ TEST ISLE_LPS_HUT_REWARD; JNZ .hut4_already
+ # Did the player rescue the governor?
+ TEST GM_C_RESCUE_GOV; JNZ .hut4_reward
+ # Didn't rescue. State the request.
+ SND 253 SVillager .hut4_request_msg
+ SYS SYSC_SPEAK
+ RET 0
+.hut4_already:
+ # Already claimed the reward.
+ SND 253 SVillager .hut4_already_msg
+ SYS SYSC_SPEAK
+ RET 0
+.hut4_reward:
+ # Say thanks.
+ SND 253 SVillager .hut4_reward_msg
+ SYS SYSC_SPEAK
+ # Give the player the reward
+ SND 50
+ SYS SYSC_GIVE_GOLD
+ # Mark that the reward was already given.
+ OR ISLE_LPS_HUT_REWARD
+ RET 0
+.hut4_request_msg:
+ DB 3
+ DS If you rescue the governor,
+ DS come back here and I will
+ DS give you a reward.
+.hut4_already_msg:
+ DB 2
+ DS Thank you for rescuing the
+ DS governor of Riverside!
+.hut4_reward_msg:
+ DB 3
+ DS Thank you for rescuing the
+ DS governor! Here is a reward
+ DS (50 gp)!
+END
+
+# Hut #5
+PROC ISLE_Hut5
+ # Did the player already rescue the governor?
+ TEST GM_C_RESCUE_GOV; JNZ .hut5_deny
+ # Did we already give the potion?
+ TEST ISLE_LPS_RESCUE_GIFT; JZ .hut5_give
+.hut5_deny:
+ # Already gave potion.
+ SND 251 .hut5_name .hut5_msg_no
+ SYS SYSC_SPEAK
+ RET 0
+.hut5_give:
+ # Give player the potion.
+ SND 251 .hut5_name .hut5_msg
+ SYS SYSC_SPEAK
+ SND ITID_HEALING_POTION
+ SYS SYSC_GIVE
+ # Mark that we already gave out the potion.
+ OR ISLE_LPS_RESCUE_GIFT
+ RET 0
+.hut5_name:
+ DS Wizard
+.hut5_msg:
+ DB 3
+ DS You are going to rescue the
+ DS governor? Here is a potion
+ DS to help you.
+.hut5_msg_no:
+ DB 1
+ DS Good luck!
+END
+
+# Hut #6
+PROC ISLE_Hut6
+ SND 250 SVillager .hut6_msg
+ SYS SYSC_SPEAK
+ RET 0
+.hut6_msg:
+ DB 4
+ DS An apple a day keeps the
+ DS healing cleric away.
+ DS Sometimes you can find
+ DS fruit in the trees.
+END
+
+# Tree interaction.
+PROC ISLE_Tree
+ PARAM sid kf
+ # If the tree is not a fruit tree, or if it was already looted,
+ # the player finds nothing more.
+ CMP sid 50; JNE .tree_empty
+ CMP kf 0; JNE .tree_empty
+ # Give loot.
+ SND LootScheduleTree
+ SYS SYSC_LOOT
+ RET 1
+.tree_empty:
+ # Nothing in this tree.
+ SND .tree_empty_msg 
+ SYS SYSC_ALERT
+ RET 1
+.tree_empty_msg:
+ DB 1
+ DS Nothing in this tree.
+END
+
+# RSTO city gates.
+#STownOfRiverside:; DS Town of Riverside
+#AEnterTownOfRiverside:; DB 1; DS Enter the town of Riverside?
+
+PROC ISLE_RsiGateS
+ SND STownOfRiverside AEnterTownOfRiverside LVLN_RSTO ENTPT_RSTO_SOUTH_GATE
+ CALL UTIL_GoNoGo
+ RET 0
+END
+
+PROC ISLE_RsiGateN
+ SND STownOfRiverside AEnterTownOfRiverside LVLN_RSTO ENTPT_RSTO_NORTH_GATE
+ CALL UTIL_GoNoGo
+ RET 0
+END
+
+# Cave entrance.
+PROC ISLE_RsiCave
+ # If the governor was already rescued, there's nothing to do
+ # here any more.
+ TEST GM_C_RESCUE_GOV; JNZ .already_rescued
+
+ # If the player has no torches, warn them (we only do this for
+ # this one cave, since the player might be a beginner).
+ SND ITID_TORCH
+ SYS SYSC_GET_ITEM_COUNT
+ VAR torches
+ REC torches
+ CMP torches 0; JG .skip_torches
+
+ # Warn player about sources of light.
+ SND .no_torches_msg
+ SYS SYSC_ALERT
+ RET 0
+
+.skip_torches:
+
+ # Ask the player if they want to enter the cave.
+ SND .rsi_cave_title .rsi_cave_txt ChoiceNoYes
+ SYS SYSC_CHOICE
+ VAR choice
+ REC choice
+ CMP choice 2; JNE .ret
+
+ # Enter the cave.
+ SND SFX_STAIRS_DOWN
+ SYS SYSC_SFX
+ SND LVLN_RSC1 ENTPT_RSC1_ENTRANCE
+ SYS SYSC_CHANGE_LVL
+.ret:
+ RET 0
+
+.already_rescued:
+ SND .already_rescued_msg
+ SYS SYSC_ALERT
+ RET 0
+
+.rsi_cave_title:
+ DS Cave
+.rsi_cave_txt:
+ DB 3
+ DS Old stairs lead down
+ DS into the darkness below.
+ DS Descend?
+.already_rescued_msg:
+ DB 2
+ DS You already rescued the governor.
+ DS There is no reason to enter.
+.no_torches_msg:
+ DB 5
+ DS [HINT]
+ DS You should not enter dark caves
+ DS without a source of light. Buy
+ DS some torches in the Riverside
+ DS General Store first!
+END
+
+# Orchard entrance door
+PROC ISLE_EnterOrchard
+ # Did the player talk to Steve to get the mission?
+ TEST GM_A_ORCHARD; JZ .not_assigned
+
+ # Did the player already rid the orchard of bugs?
+ TEST GM_C_ORCHARD; JNZ .already
+
+ # Ask the player if they want to enter the orchard.
+ SND SOrchard .msg LVLN_ORCH ENTPT_ORCH
+ CALL UTIL_GoNoGo
+ RET 0
+
+.not_assigned:
+ SND .not_assigned_msg
+ SYS SYSC_ALERT
+ RET 0
+
+.already:
+ # Tell the player they don't need to enter the orchard any more.
+ SND .already_msg
+ SYS SYSC_ALERT
+ RET 0
+
+.msg:
+ DB 1
+ DS Enter the orchard?
+
+.already_msg:
+ DB 3
+ DS You already killed all the bugs.
+ DS There is nothing left to do in
+ DS the orchard.
+
+.not_assigned_msg:
+ DB 4
+ DS Private property. If you wish to
+ DS enter, speak to Steve the Orchard
+ DS Keeper, at the crossroads west
+ DS of here.
+END
+
+PROC ISLE_ToPassS
+ SND SMountainPass AEnterMountainPass LVLN_PASS ENTPT_PASS_SOUTH
+ CALL UTIL_GoNoGo
+ RET 0
+END
+
+PROC ISLE_ToPassN
+ SND SMountainPass AEnterMountainPass LVLN_PASS ENTPT_PASS_NORTH
+ CALL UTIL_GoNoGo
+ RET 0
+END
+
+# Hut near the broken bridge.
+PROC ISLE_HutBrokenBridge
+ SND 254 SVillager .msg 
+ SYS SYSC_SPEAK
+ RET 0
+
+.msg:
+ DB 4
+ DS The bridge is broken, but I
+ DS heard someone say that the 
+ DS old man on Tranquility Beach
+ DS has a spell that can help.
+END
+
+PROC ISLE_HutPlains1
+ SND 253 SVillager .msg 
+ SYS SYSC_SPEAK
+ RET 0
+
+.msg:
+ DB 5
+ DS I heard that there's a path
+ DS from here to Tranquility
+ DS Beach. Start at the well,
+ DS then go east into the
+ DS mountain pass.
+END
+
+PROC ISLE_ToTunnW
+ SND STunnel ATunnel LVLN_TUNN ENTPT_TUNN_W
+ CALL UTIL_GoNoGo
+ RET 0
+END
+
+PROC ISLE_ToTunnE
+ SND STunnel ATunnel LVLN_TUNN ENTPT_TUNN_E
+ CALL UTIL_GoNoGo
+ RET 0
+END
+
+# Hut on the Tranquility Coast.
+PROC ISLE_CoastHut
+ TEST GM_R_MYRA; JNZ .quest_r
+ TEST GM_C_MYRA; JNZ .quest_c
+
+ # Quest not assigned yet, so present it.
+ SND 251 .old_wiz .quest_msg
+ SYS SYSC_SPEAK
+ SND 251 .old_wiz .quest_msg2
+ SYS SYSC_SPEAK
+ OR GM_A_MYRA
+ RET 0
+
+.quest_c:
+ # Quest complete, not yet rewarded.
+ SND 253 .myra .quest_c_msg 
+ SYS SYSC_SPEAK
+ # Reward: spellbook of Leap.
+ SND ZID_LEAP
+ CALL UTIL_ReadSpellbook
+ VAR done
+ REC done
+ # If book was read, mark reward as given.
+ CMP done 1; JE .done
+ RET 0
+.done:
+ OR GM_R_MYRA
+ RET 1
+
+.quest_r:
+ # Quest already rewarded.
+ SND AHutEmpty
+ SYS SYSC_ALERT
+ RET 0
+
+.old_wiz:
+ DS Old Wizard
+
+.myra:
+ DS Myra
+
+.quest_msg:
+ DB 6
+ DS I know a spell that will
+ DS allow you to cross the
+ DS broken bridge.
+ DS
+ DS If you help me, I will
+ DS teach you the spell.
+
+.quest_msg2:
+ DB 6
+ DS You must seek my niece Myra
+ DS and tell her to visit me
+ DS urgently. I am very sick.
+ DS
+ DS She lives on the south coast
+ DS in a hut by a lake.
+
+.quest_c_msg:
+ DB 7
+ DS Sadly my uncle has passed
+ DS away, but you have
+ DS faithfully completed the
+ DS task he asked of you.
+ DS
+ DS He has left you this
+ DS spellbook as a reward.
+END
+
+PROC ISLE_MyrasHut
+ TEST GM_R_MYRA; JNZ .quest_r
+ TEST GM_C_MYRA; JNZ .quest_c
+ TEST GM_A_MYRA; JNZ .quest_a
+
+ # Player hasn't picked up the quest from the old man by the coast
+ # yet, so just
+ SND 253 .myra .msg_no_quest
+ SYS SYSC_SPEAK
+ RET 0
+
+.quest_a:
+ # Quest already assigned by the old man. So it's complete now.
+ SND 253 .myra .msg_complete
+ SYS SYSC_SPEAK
+ SND 2500
+ SYS SYSC_GIVE_XP
+ # Quest is now complete.
+ OR GM_C_MYRA
+ RET 0
+
+.quest_c:
+.quest_r:
+ SND AHutEmpty
+ SYS SYSC_ALERT
+ RET 0
+
+.myra:
+ DS Myra
+
+.msg_no_quest:
+ DB 7
+ DS Hi. My name is Myra. My
+ DS uncle lives on Tranquility
+ DS Beach, north of here.
+ DS
+ DS I've been meaning to go
+ DS visit, but haven't had the
+ DS time lately.
+
+.msg_complete:
+ DB 7
+ DS My uncle sent you? He is
+ DS sick? I should go there
+ DS immediately. Thank you for
+ DS delivering the message.
+ DS
+ DS Please meet me at his hut
+ DS on Tranquility Beach.
+END
+
+# Enter town of Sun Port (SUTO).
+PROC ISLE_EnterSuto
+ SND STownOfSunPort AEnterTownOfSunPort LVLN_SUTO ENTPT_SUTO
+ CALL UTIL_GoNoGo
+ RET 0
+END
+
+# Green Bay hut
+PROC ISLE_GreenBayHut
+ SND 250 SVillager .msg
+ SYS SYSC_SPEAK
+ RET 0
+
+.msg:
+ DB 8
+ DS There is a rumor that a
+ DS thief stole a jewelry box
+ DS box and buried it in these
+ DS woods, then never came back
+ DS for it.
+ DS
+ DS Maybe it is still buried
+ DS somewhere?
+END
+
+# ISLE's item use callback.
+EXPORT PROC ISLE_UseItem
+ PARAM itid rawcr
+ VAR matched
+
+ DEFINE JEWELRY_BOX_POS LOHI(52,43)
+
+ CMP itid ITID_SHOVEL; JE .dig
+ RET 0
+
+.dig:
+ # Did the player try to dig the jewelry box?
+ SND rawcr JEWELRY_BOX_POS
+ CALL UTIL_AreAdjacent
+ REC matched
+ CMP matched 0; JNE .jewelry_box
+
+ # Nothing to dig up here.
+ SND .nothing; SYS SYSC_ALERT
+ RET 0
+
+.jewelry_box:
+ # Player is trying to dig up the jewelry box.
+ SND JEWELRY_BOX_POS 0 ITID_JEWELRY_BOX; CALL UTIL_Dig
+ RET 0
+
+.nothing:
+ DB 1
+ DS Nothing to dig up here.
+END
+
+PROC ISLE_EnterOto1
+ SND SOldTower .msg LVLN_OTO1 ENTPT_OTO1_FROM_ISLE
+ CALL UTIL_GoNoGo
+ RET 0
+
+.msg:
+ DB 1
+ DS Enter the Old Tower?
+END
+
+PROC ISLE_EnterGrto
+ # Has the player defeated the Old Tower? If so, enter the "alive"
+ # version of this city, otherwise enter the ruins.
+ TEST GM_C_OTO_GHOST; JNZ .alive
+ # Ruins:
+ SND SGrto .msg_dead LVLN_GRTO_DEAD ENTPT_GRTO_DEAD
+ CALL UTIL_GoNoGo
+ RET 0
+.alive:
+ # Alive version:
+ SND SGrto .msg_alive LVLN_GRTO_ALIVE ENTPT_GRTO_ALIVE
+ CALL UTIL_GoNoGo
+ RET 0
+
+.msg_dead:
+ DB 3
+ DS This used to be Greenleaf Village.
+ DS Now the city is deserted.
+ DS Enter the abandoned city?
+ 
+.msg_alive:
+ DB 1
+ DS Enter Greenleaf Village?
+END
+
+# Enter Southern Templ
+PROC ISLE_EnterStmp
+ VAR count
+ # Figure out what state the temple is in.
+ # Does the player have the incense in the inventory?
+ SND ITID_INCENSE
+ SYS SYSC_GET_ITEM_COUNT
+ REC count
+ CMP count 0; JG .state_c
+ # Was the quest already rewarded?
+ TEST GM_R_RSTO_INCENSE; JNZ .state_r
+ # Was the quest already assigned?
+ TEST GM_A_RSTO_INCENSE; JNZ .state_a
+ # Quest not yet assigned. Assign it.
+ SND 226 SCleric .msg_na
+ SYS SYSC_SPEAK
+ OR GM_A_RSTO_INCENSE
+ # (fall through to continue message)
+.state_a:
+ # Quest is assigned. Repeat message.
+ SND 226 SCleric .msg_a
+ SYS SYSC_SPEAK
+ RET 0
+.state_c:
+ # Quest was just completed.
+ # Remove the incense from the inventory.
+ SND ITID_INCENSE; SYS SYSC_REMOVE_ITEM
+ # Say thanks.
+ SND 226 SCleric .msg_c
+ SYS SYSC_SPEAK
+ # Give some gold.
+ SND 100
+ SYS SYSC_GIVE_GOLD
+ # Mark the reward as given.
+ OR GM_R_RSTO_INCENSE
+ RET 0
+.state_r:
+ # Quest finished and rewarded, so player can enter the temple.
+ SND SSouthTemple .msg_enter LVLN_STMP ENTPT_STMP
+ CALL UTIL_GoNoGo
+ RET 0
+.msg_enter:
+ DB 1
+ DS Enter the temple?
+.msg_na:
+ DB 9
+ #  |--------------------------|
+ DS Greetings, travelers. The
+ DS temple is closed because we
+ DS ran out of incense.
+ DS
+ DS There is some in the town
+ DS cellar, but it is infested
+ DS by giant ants.
+ DS
+ DS Can you help us?
+.msg_a:
+ DB 5
+ #  |--------------------------|
+ DS If you bring us some incense
+ DS from the town cellar, we
+ DS will reopen. The cellar is
+ DS at the south-eastern corner
+ DS of the city.
+.msg_c:
+ DB 5
+ DS You brought us incense!
+ DS Thank you very much! As a
+ DS reward, here is some gold.
+ DS You are also welcome to
+ DS step inside the temple.
+END
+
+# Walk proc.
+EXPORT PROC ISLE_Walk
+ PARAM rawcr pdir
+ SND rawcr pdir
+ CALL WMON_MaybeSpawn
+ RET 0
+END
+
+# Boot proc
+EXPORT PROC ISLE_Boot
+ # Set the wandering monster countdown to something high,
+ # just to prevent us from immediately spawning a monster when
+ # entering a level.
+ RND TGV_WMON_CD 15 30
+END
+

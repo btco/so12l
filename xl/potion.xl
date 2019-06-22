@@ -1,0 +1,184 @@
+# Potions
+
+PROC POTION_Use
+ PARAM itid idx chi
+ VAR i st rnd
+ # Get the potions's state byte.
+ SND idx; SYS SYSC_GET_INV; REC itid st
+ # Cursed effect?
+ RND rnd 0 100
+ CMP rnd 30; JL .no_curse
+ TEST st ITSF_CURSED; JNZ .cursed
+.no_curse:
+ # If chi is not 0, we are using it in combat.
+ CMP chi 0; JNZ .combat
+ # Otherwise, we are not using it in combat. Ask who will drink.
+ # Note: inactive but alive characters can use potions too
+ # (presumably someone else feeds them the potion?)
+ SND 0 AWhoWillDrink CHD_F_CANCELABLE WHOD_INACTIVE_ALIVE; SYS SYSC_ASK_WHO
+ REC chi
+ # If it's still 0, it means the user canceled.
+ CMP chi 0; JE .ret
+ # If not 0, the user has chosen who will drink the potion.
+ JMP .drink
+
+.combat:
+ # When using a potion in combat, the user can choose to drink it
+ # or throw it at an enemy.
+ SND 0 *; SYS SYSC_CHOICE; REC i
+ {
+  DT Drink potion
+  .. Throw potion
+ }
+ # Spend the item.
+ SND itid idx; SYS SYSC_REMOVE_ITEM
+ CMP i 2; JE .throw
+ # (fall through)
+.drink:
+ # Spend the item.
+ SND itid idx; SYS SYSC_REMOVE_ITEM
+ # Character chi is drinking the potion. What potion type is it?
+ CMP itid ITID_POTION_HEALING; SND chi; CE POTION_Heal
+ CMP itid ITID_POTION_MANA; SND chi; CE POTION_Mana
+ CMP itid ITID_POTION_INVIS; SND chi; CE POTION_Invis
+ CMP itid ITID_POTION_AWAKE; SND chi; CE POTION_Awake
+ CMP itid ITID_POTION_POISON; SND chi; CE POTION_Poison
+ CMP itid ITID_POTION_SLEEP; SND chi; CE POTION_Sleep
+ CMP itid ITID_POTION_FIRE; SND chi; CE POTION_Fire
+ CMP itid ITID_POTION_ANTIDOTE; SND chi; CE POTION_Antidote
+ CMP itid ITID_POTION_ICE; SND chi; CE POTION_Ice
+ RET
+
+.throw:
+ # Throw the potion (in combat).
+ SND chi itid; CALL POTION_Throw
+ RET
+
+.cursed:
+ SND itid idx chi; CALL CURSED_Effect 
+ RET
+
+.ret:
+END
+
+PROC POTION_Heal
+ PARAM chi
+ SND chi 201 0; SYS SYSC_HEAL
+ SND chi CEF_POISON; CALL CEF_ClearBit
+ SND *; SYS SYSC_ALERT
+ {
+  DT You feel healed!
+ }
+END
+
+PROC POTION_Mana
+ PARAM chi
+ SND chi 0 20; SYS SYSC_HEAL
+ SND *; SYS SYSC_ALERT
+ {
+  DT You feel a surge of magical
+  .. energy (+20 sp).
+ }
+END
+
+PROC POTION_Invis
+ PARAM chi
+ SND chi CEF_INVIS; CALL CEF_SetBit
+ SND *; SYS SYSC_ALERT
+ {
+  DT You no longer see yourself.
+  .. (invisibility).
+ }
+END
+
+PROC POTION_Awake
+ PARAM chi
+ SND chi CEF_ASLEEP; CALL CEF_ClearBit
+ SND chi CEF_ALERT; CALL CEF_SetBit
+ SND *; SYS SYSC_ALERT
+ {
+  DT You feel wide awake.
+ }
+END
+
+PROC POTION_Poison
+ PARAM chi
+ SND chi CEF_POISON; SYS SYSC_INFLICT
+ SND *; SYS SYSC_ALERT
+ {
+  DT That tasted funny.
+  .. You feel sick.
+ }
+END
+
+PROC POTION_Sleep
+ PARAM chi
+ SND chi CEF_ASLEEP; SYS SYSC_INFLICT
+ SND *; SYS SYSC_ALERT
+ {
+  DT You feel so... tired.
+ }
+END
+
+PROC POTION_Ice
+ PARAM chi
+ SND chi CEF_FROZEN; SYS SYSC_INFLICT
+ SND *; SYS SYSC_ALERT
+ {
+  DT You feel... cold...
+ }
+END
+
+PROC POTION_Fire
+ PARAM chi
+ VAR cef
+ SND chi; CALL CEF_Get; REC cef
+ TEST cef CEF_FROZEN; JNZ .defrost
+ SND *; SYS SYSC_ALERT
+ {
+  DT When you uncork the potion,
+  .. you are engulfed in flames!
+  .. (-30 hp)
+ }
+ SND chi 30; CALL UTIL_Hurt
+ RET
+.defrost:
+ SND chi CEF_FROZEN; CALL CEF_ClearBit
+ SND *; SYS SYSC_ALERT
+ {
+  DT The potion's flames thaw you
+  .. back into life. You can move
+  .. again.
+ }
+ RET
+END
+
+PROC POTION_Antidote
+ PARAM chi
+ SND chi CEF_POISON; CALL CEF_ClearBit
+ SND *; SYS SYSC_ALERT
+ {
+  DT You feel healthy.
+ }
+END
+
+PROC POTION_Throw
+ PARAM chi itid
+ VAR psp att special
+ # Default attack score for a thrown potion is 10.
+ SET att 10
+ # Special cases:
+ SET special 20; CMP itid ITID_POTION_POISON; JE .set_special
+ SET special 30; CMP itid ITID_POTION_FIRE; JE .set_special
+ # (fall through)
+.continue:
+ SND BAT_AK_RANGED att .narr 207 BOR(BAT_AF_THROW,BAT_AF_FORCE_HIT)
+ SYS SYSC_BATTLE_ATTACK
+ RET
+.set_special:
+ SET att special
+ JMP .continue
+.narr:
+ DS throws a potion
+END
+

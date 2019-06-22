@@ -1,0 +1,31 @@
+
+# Interaction proc for common stuff like fountains, apple trees, etc.
+PROC COMMON_Interact
+ PARAM rawcr sid kf
+ VAR ret
+
+ # Tree?
+ CMP sid 39; SND rawcr sid kf; CE UTIL_Tree
+ CMP sid 50; SND rawcr sid kf; CE UTIL_Tree
+ # Fountain?
+ CMP sid 54; CE UTIL_Save
+ # Well?
+ CMP sid 31; SND rawcr; CE WELLS_DoWell
+ # Temple Pyre?
+ CMP sid 78; CE TEMPLE_Interact
+ # Emerald gate?
+ CMP sid 15; CE COMMON_EmeraldGate
+END
+
+PROC COMMON_EmeraldGate
+ SND .msg; SYS SYSC_ALERT
+ RET
+.msg:
+ DB 5
+ DS This gate is magically
+ DS sealed.
+ DS
+ DS Only the Emerald Key
+ DS can open this gate.
+END
+

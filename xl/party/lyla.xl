@@ -1,0 +1,27 @@
+# Initial party.
+
+LylaChar: # @char_lyla
+
+DB 186
+DS Lyla                     # @name
+DB CLS_ARCHER               # @class
+DB 241                      # Face
+DB 5                        # @att
+DB 6                        # @def
+DB 25                       # @speed
+DW 14                       # @hp
+DW 14                       # @maxHp
+DW 0                        # @sp
+DW 0                        # @maxSp
+# Equipped items per kind:
+  DB ITID_LEATHER_ARMOR 0                  # @eq_ITK_ARMOR
+  DB 0 0                                   # @eq_ITK_HELM
+  DB 0 0                                   # @eq_ITK_MWEAP
+  DB ITID_SHORT_BOW 0                      # @eq_ITK_RWEAP
+  DB 0 0                                   # @eq_ITK_SHIELD
+  DB 0 0                                   # @eq_ITK_BOOT
+  DB 0 0                                   # @eq_ITK_BELT
+  DB 0 0                                   # @eq_ITK_AMULET
+  DB 0 0                                   # @eq_ITK_RING
+DB 0                        # Count of spells
+

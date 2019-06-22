@@ -1,0 +1,38 @@
+# XP TABLE
+
+# XP for each level.
+# Expressed in thousands of XP.
+# @xptable
+EXPORT XpTable:
+DW        0      # "Level 0" (not used) @xptable_entry
+DW        0      # Level 1 @xptable_entry
+DW        2      # Level 2 @xptable_entry
+DW        5      # Level 3 @xptable_entry
+DW        9      # Level 4 @xptable_entry
+DW       14      # Level 5 @xptable_entry
+DW       20      # Level 6 @xptable_entry
+DW       27      # Level 7 @xptable_entry
+DW       35      # Level 8 @xptable_entry
+DW       44      # Level 9 @xptable_entry
+DW       64      # Level 10 @xptable_entry
+DW       86      # Level 11 @xptable_entry
+DW      110      # Level 12 @xptable_entry
+DW      136      # Level 13 @xptable_entry
+DW      164      # Level 14 @xptable_entry
+DW      194      # Level 15 @xptable_entry
+DW      226      # Level 16 @xptable_entry
+DW      260      # Level 17 @xptable_entry
+DW      296      # Level 18 @xptable_entry
+DW      334      # Level 19 @xptable_entry
+DW      394      # Level 20 @xptable_entry
+DW      457      # Level 21 @xptable_entry
+DW      523      # Level 22 @xptable_entry
+DW      592      # Level 23 @xptable_entry
+DW      664      # Level 24 @xptable_entry
+DW      739      # Level 25 @xptable_entry
+DW      817      # Level 26 @xptable_entry
+DW      898      # Level 27 @xptable_entry
+DW      982      # Level 28 @xptable_entry
+DW     1069      # Level 29 @xptable_entry
+DW     1189      # Level 30 @xptable_entry
+

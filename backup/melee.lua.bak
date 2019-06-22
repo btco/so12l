@@ -1,0 +1,434 @@
+-- MELEE system
+
+-- Maximum # of foes at a time.
+#define MAX_FOES 3
+
+-- center x of each sprite in melee, for each possible # of foes.
+#id FOE_CX
+local FOE_CX={{92},{72,112},{52,92,132}}
+
+-- center x for each character (when rendering damage, etc)
+#id CHAR_CX
+local CHAR_CX={23,69,115,161}
+
+-- character actions menu
+-- (strings loaded on init)
+#id ACT_MENU
+
+-- Symbolic constants for each of the indices in the menu:
+#define ACT_MENU_ATTACK 1
+#define ACT_MENU_SPELL 2
+#define ACT_MENU_ITEM 3
+#define ACT_MENU_DEFEND 4
+
+#define MELEE_BOX_X 184
+#define MELEE_BOX_W 56
+#define MELEE_BOX_H 16
+
+-- Melee UI modes
+-- Not in melee
+#define MUI_OFF 0
+-- Not player's turn.
+#define MUI_NOT_PLR 1
+-- Player's turn, asking which action to take.
+#define MUI_PICK_ACT 2
+-- Player's turn, asking which foe to target with an action
+-- (e.g. which foe to attack or cast a spell on).
+#define MUI_PICK_FOE 5
+-- Player's turn, asking which character to target with an action.
+-- (e.g. which party member to heal, etc).
+#define MUI_PICK_CHAR 6
+
+M=nil
+M_INIT={
+ -- Current UI mode.
+ m=MUI_OFF,
+ -- If we are in melee, these are the enemies (entities).
+ -- If we are not in melee, this is nil.
+ foes=nil,
+ -- If it's the player's turn, this indicates what is the character
+ -- whose turn it is. If nil, it's not the player's turn.
+ tchar=nil,
+ -- Current menu selection on character action menu.
+ actSel=1,
+ -- Current foe selection if picking foe.
+ foeSel=1,
+ -- Turn order. Each entry in the turn order has:
+ --   chi?: character index, or nil if it's a foe's turn
+ --   foe: foe (object, not index), or nil if it's a
+ --     character's turn
+ --   spd: speed score of the character or foe (for ordering)
+ order={},
+ -- Whose turn it is now (index into order[]).
+ turn=nil,
+
+ -- If this is set, then a spell recently cast has requested
+ -- that a melee attack be performed on behalf of the currently
+ -- active character (this is how attack spells work). This is
+ -- the damage that this attack causes. This can also be used when
+ -- an item usage is equivalent to a melee attack.
+ rdmg=nil,
+}
+
+-- TYPE: AttackResult
+--  narr: narration string
+--  hits: array of hits, each:
+--   i: index of the character who was hit
+--   dmg: damage taken (DamageDef)
+
+-- Resets. Must be called at start of game.
+function M_Reset()
+ ACT_MENU=X_Strs(SYM_AActMenu)
+ M=DeepCopy(M_INIT)
+end
+
+function M_IsInMelee() return M.m~=MUI_OFF end
+
+-- Adds the given entity as a foe in the melee, if it's not already
+-- in the melee.
+function M_MaybeAddFoe(ent)
+ if ent.dead then return end
+ if DBG_NO_MELEE then E_Kill(ent) return end
+ if M.m==MUI_OFF then MeleeInit() end
+ if ListFind(M.foes,ent) then return end
+ assert(#M.foes<MAX_FOES)
+ insert(M.foes,ent)
+ InsertIntoTurnOrder({foe=ent,spd=ent.speed})
+ -- Render entity on top of walls.
+ R_SprRendTop(ent.hspr)
+end
+
+-- Updates melee.
+function M_Tick()
+ assert(M.foes)
+ -- This does entity clean-up. It does NOT let entities act.
+ -- Doing this takes care of collecting dead entities and removing
+ -- them from the tile, so that new entities can join the battle.
+ E_Update()
+ -- If we are waiting for a character to act, just handle that
+ -- and do nothing else.
+ if M.m~=MUI_NOT_PLR then TickPlayerTurn() return end
+ -- Advance turn.
+ AdvanceTurn()
+ local oe=M.order[M.turn]
+ if oe.chi then
+  -- It's a character's turn.
+  M.tchar=PA[oe.chi]
+  -- The character must now pick an action.
+  M.m=MUI_PICK_ACT
+ else
+  -- It's a foe's turn.
+  local e=oe.foe
+  FoeAction(e)
+ end
+end
+
+-- Renders the melee.
+function M_Rend()
+ -- Render the enemy box for each enemy.
+ for i=1,#M.foes do
+  local e=M.foes[i]
+  local y=(i-1)*MELEE_BOX_H
+  RectFB(MELEE_BOX_X,y,MELEE_BOX_W,MELEE_BOX_H+1,C_BLACK,C_WHITE)
+  prn(e.name,MELEE_BOX_X+3,y+2,
+   M.m==MUI_PICK_FOE and M.foeSel==i and C_YELLOW or C_WHITE)
+  DrawHBar(MELEE_BOX_X+3,y+10,MELEE_BOX_W-6,4,
+   e.hp/e.maxHp,C_RED,C_PURPLE)
+ end
+ -- Render the "select action" menu for the character whose turn
+ -- it is, if applicable.
+ if M.m==MUI_PICK_ACT then
+  local nsel=Menu("Action?",ACT_MENU,197,40,C_BBLUE,C_BLUE,M.actSel)
+  M.actSel=A_HasActions() and M.actSel or nsel
+ elseif M.m==MUI_PICK_FOE then
+  RectFB(100,0,85,#M.foes*MELEE_BOX_H+1,C_BLUE,C_BBLUE)
+  prn(X_Str(SYM_SWhichEnemy),103,3,C_BBLUE)
+  _=G.clk&16>0 and spr(248,177,5+(M.foeSel-1)*MELEE_BOX_H,0)
+  if Dbtnp(BTN_DOWN) then M.foeSel=WrapInc(M.foeSel,#M.foes) end
+  if Dbtnp(BTN_UP) then M.foeSel=WrapDec(M.foeSel,#M.foes) end
+ end
+end
+
+-- Request a melee attack on behalf of the currently active
+-- character (this is how combat spells work).
+function M_ReqAttack(dmg)
+ -- Must be in "select action" mode, as this replaces a normal
+ -- melee attack.
+ assert(M.m==MUI_PICK_ACT,"M/RA "..M.m)
+ -- Pick the target of the attack.
+ M.rdmg,M.m,M.foeSel=dmg,MUI_PICK_FOE,1
+end
+
+--END OF API----------------------------------------------------
+----------------------------------------------------------------
+
+function MeleeInit()
+ M.foes={}
+ M.order={}
+ -- Add all characters into the turn order.
+ for i=1,NUM_CHARS do
+  InsertIntoTurnOrder({chi=i,spd=PA[i].speed})
+ end
+ M.m=MUI_NOT_PLR
+ M.tchar=nil
+end
+
+function MeleeEnd()
+ M.m=MUI_OFF
+ M.foes=nil
+ M.tchar=nil
+ M.order=nil
+end
+
+-- Figures out whose is the next turn and sets M.turn appropriately
+function AdvanceTurn()
+ -- This for loop is just to guarantee we won't loop forever.
+ -- It could be a "while TRUE do" if I was more confident about
+ -- my code.
+ for i=1,#M.order do
+  -- Advance the turn.
+  M.turn=WrapInc(M.turn,#M.order)
+  -- When we wrap around back to 1, it's time to give other
+  -- entities (who are not in melee) a chance to act and maybe
+  -- do ranged attacks or join the battle.
+  if M.turn==1 then E_DoTurn() end
+
+  -- Figure out if it's ok.
+  local oe=M.order[M.turn]
+  if oe.chi then
+   -- It's a character's turn. Check if the character is alive
+   -- and in conditions to act.
+   if P_IsCharActive(oe.chi) then return end
+   -- Character is not in conditions to act, so skip.
+  else
+   -- It's a foe's turn, so it's ok.
+   -- TODO: skip foe if paralyzed/held/etc.
+   return
+  end
+ end
+end
+
+
+-- Inserts an order entry into the M.order array at the right
+-- spot according to speed.
+function InsertIntoTurnOrder(oent)
+ local done=FALSE
+ for i=1,#M.order do
+  if oent.spd>M.order[i].spd then
+   insert(M.order,i,oent)
+   done=TRUE
+   break
+  end
+ end
+ if not done then insert(M.order,oent) end
+ -- Any alterations into the turn order reset the turn
+ -- (that's the easiest implementation).
+ M.m=MUI_NOT_PLR
+ M.tchar=nil
+ -- Set it to #M.order so that it advances to the first.
+ M.turn=#M.order
+end
+
+function RemoveFoeFromTurnOrder(e)
+ for i=1,#M.order do
+  if M.order[i].foe==e then
+   remove(M.order,i)
+   if M.turn>i then M.turn=M.turn-1 end
+   return
+  end
+ end
+end
+
+function EndCharTurn()
+ M.tchar=nil
+ M.m=MUI_NOT_PLR
+end
+
+-- Runs 1 frame of the prompt to act.
+function TickPlayerTurn()
+ if #M.foes==0 then MeleeEnd() return end
+ -- If player pressed the cancel button, return to the actions menu.
+ if Dbtnp(BTN_SEC) then
+  M.m=MUI_PICK_ACT
+  return
+ end
+ -- Else, only proceed if the primary button was clicked.
+ if not Dbtnp(BTN_PRI) then return end
+ if M.m==MUI_PICK_ACT then
+  if M.actSel==ACT_MENU_ATTACK then
+   -- Attack. We now need to pick a target enemy.
+   M.m=MUI_PICK_FOE
+   M.foeSel=1
+  elseif M.actSel==ACT_MENU_DEFEND then
+   -- Defend.
+   DoPlrDefend()
+   EndCharTurn()
+  elseif M.actSel==ACT_MENU_ITEM then
+   -- Use item.
+   P_ChooseItem(X_Str(SYM_SUseItem),nil,ITF_MELEE_USE,
+     X_Str(SYM_SNoItemsToUse),FALSE,_MeleeChooseItemCb)
+  elseif M.actSel==ACT_MENU_SPELL then
+   -- Cast spell.
+   Z_LaunchCast(ListFind(PA,M.tchar),_PostCastCb)
+  end
+ elseif M.m==MUI_PICK_FOE then
+  -- Enemy picked.
+  DoPlrAttack()
+  EndCharTurn()
+ end
+end
+function _PostCastCb(did)
+ -- If the spell was cast and if it did NOT request an attack (M.rdmg),
+ -- then end the character's turn.
+ -- (if the spell did request an attack, then M.rdmg is not nil,
+ -- and we are now in MUI_PICK_FOE mode).
+ _=did and not M.rdmg and EndCharTurn()
+end
+function _MeleeChooseItemCb(it)
+ if it and IT_Use(it,ListFind(PA,M.tchar)) then
+  EndCharTurn()
+ end
+end
+
+-- Makes the given enemy take an action.
+function FoeAction(e)
+ if not e.matd then return end
+ -- Temporarily replace the entity's sprite by its attack sprite.
+ R_SprSetTid(e.hspr,e.matd.atid)
+ -- Resolve the attack.
+ local ar=ResolveAttack(e.matd.atd)
+ _=#ar.hits>0 and SFX_Play(SFX_HURT)
+ -- Animate the attack result.
+ A_Enq(ActAnimateAttackResult,{ar=ar})
+ A_Enq(ActCommitAttackResult,{ar=ar})
+ A_Enq(ActPostAttack,{e=e})
+end
+
+-- Action that animates an attack result.
+--   d.ar: the AttackResult to animate.
+function ActAnimateAttackResult(d)
+ -- Make the border of the viewport red.
+ rectb(0,0,185,112,C_RED)
+ -- Show the damage taken next to each character.
+ for _,hit in ipairs(d.ar.hits) do
+  local sx=CHAR_CX[hit.i]
+  -- TODO: render a different splat type depending on the damage
+  -- type.
+  RendDmgSplat(sx,100-min(5,d.clk),hit.dmg)
+ end
+ -- Show the narration string.
+ RectFB(0,0,185,14,C_BROWN,C_RED)
+ prn(d.ar.narr,3,5,C_WHITE)
+ return d.clk>90 or (btn(6) and DBG_FAST_MELEE)
+end
+
+-- Action that commits an attack result (against the player).
+--   d.ar: the AttackResult to commit.
+function ActCommitAttackResult(d)
+ for _,hit in ipairs(d.ar.hits) do
+  local c=PA[hit.i]
+  -- We don't compute resistances here because the AttackResult
+  -- already represents the net damage.
+  c.hp=max(0,c.hp-DmgTot(hit.dmg))
+ end
+ return TRUE
+end
+
+-- Action that runs after an entity's attack routine.
+function ActPostAttack(d)
+ -- Restore the entity's sprite to its neutral sprite.
+ R_SprSetTid(d.e.hspr,d.e.tid)
+ return TRUE
+end
+
+-- Resolves an AttackDef, yielding an AttackResult.
+-- The AttackResult has the NET damage (with resistances, etc,
+-- already factored in).
+function ResolveAttack(atd)
+ local r={narr=atd.narr,hits={}}
+ local idxs={}
+ for i=1,NUM_CHARS do
+  -- Only add characters who are awake.
+  if P_IsCharActive(i) then insert(idxs,i) end
+ end
+ -- Pick targets.
+ for i=1,(atd.ntar or 1) do
+  if #idxs<1 then break end
+  -- Pick a random target from the remaining ones.
+  local i=ListRemRnd(idxs)
+  local ch=PA[i]
+  -- Roll the attack.
+  local hit=RollAttack(atd.att,P_GetDef(ch))
+  if hit then
+   -- Deduct the character's damage resistance.
+   local ndmg=DmgCalcNet(DmgRand(atd.dmg),P_GetDmgR(ch))
+   insert(r.hits,{i=i,dmg=ndmg})
+  end
+ end
+ return r
+end
+
+function RollAttack(att,def)
+ return Clamp(50+att-def,10,100)>random(1,100)
+end
+
+function DoPlrAttack()
+ assert(M.tchar)
+ local e=M.foes[M.foeSel]
+
+ -- NOTE: If M.rdmg is set, then the current character is performing a
+ -- special attack (result of a spell/item). In that case, it
+ -- always hits, and the damage is given by M.rdmg.
+
+ -- Hit probability is 50% + attack score - defense score.
+ -- (boolean). We use M.rdmg for its truth value here:
+ local hit=M.rdmg or RollAttack(M.tchar.att,e.def)
+ -- Calculate damage from wielded weapon (or preset damage).
+ local dmg=M.rdmg or DmgRand(P_GetMeleeDmg(M.tchar))
+ M.rdmg=nil
+ -- Deduct the target's damage resistance.
+ dmg=DmgCalcNet(dmg,e.dmgr)
+ -- Schedule attack animation.
+ A_Enq(ActPlrAttackAnim,{dmg=hit and dmg or nil})
+ if hit then
+  SFX_Play(SFX_HIT)
+  A_Enq(ActPlrAttackCommit,{dmg=dmg})
+ else
+  SFX_Play(SFX_MISS)
+ end
+end
+
+function DoPlrDefend()
+ -- TODO: implement some benefit to defending.
+end
+
+-- Player attack animation action.
+-- d: action data, which consists of
+--  dmg: DamageDef with the damage inflicted, or nil if missed
+function ActPlrAttackAnim(d)
+ local x=FOE_CX[#M.foes][M.foeSel] 
+ if d.dmg then
+  RendDmgSplat(x,70-min(5,d.clk),d.dmg)
+ else
+  local oy=min(5,d.clk)
+  RectFB(x-20,70-oy,40,20,C_GRAY,C_LGRAY)
+  PrintC("MISSED",x,80-oy,C_WHITE)
+ end
+ return d.clk>45 or (btn(6) and DBG_FAST_MELEE)
+end
+
+function ActPlrAttackCommit(d)
+ local e=M.foes[M.foeSel]
+ -- NOTE: we don't deduct resistances here because this is already
+ -- the NET damage.
+ e.hp=e.hp-DmgTot(d.dmg)
+ if e.hp<1 then
+  -- Entity died. Remove from combat, and delete it.
+  ListRem(M.foes,e)
+  RemoveFoeFromTurnOrder(e)
+  E_Kill(e)
+  SFX_Play(SFX_KILL)
+ end
+ return TRUE
+end
+

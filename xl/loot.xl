@@ -1,0 +1,60 @@
+# Loot a chest with a random items/gold.
+#   rawcr: The position of the chest.
+#   lol: Loot level (one of the LOL_* constants). This implies a
+#        certain target loot value.
+# Returns 1 if looted, 0 if was empty (already looted).
+PROC LOOT_ChestRandom
+ PARAM rawcr lol
+ VAR ret
+ SND rawcr 0 0 lol; CALL LOOT_ChestImpl_; REC ret
+ RET ret
+END
+
+# Loot a chest with gold in it.
+#   rawcr: The position of the chest.
+#   gp: The amount of gold in it. Must be > 0.
+# Returns 1 if looted, 0 if was empty (already looted).
+PROC LOOT_ChestGold
+ PARAM rawcr gp
+ VAR ret
+ SND rawcr gp 0 0; CALL LOOT_ChestImpl_; REC ret
+ RET ret
+END
+
+# Loot a chest with an item in it.
+#   rawcr: The position of the chest.
+#   itid: The item in it.
+# Returns 1 if looted, 0 if was empty (already looted).
+PROC LOOT_ChestItem
+ PARAM rawcr itid
+ VAR ret
+ SND rawcr 0 itid 0; CALL LOOT_ChestImpl_; REC ret
+ RET ret
+END
+
+# (internal)
+# Returns 1 if looted, 0 if was empty (already looted).
+PROC LOOT_ChestImpl_
+ PARAM rawcr gp itid lol
+ VAR kf
+ # Was the chest already looted?
+ SND rawcr TINFO_IS_KILLED; SYS SYSC_TINFO; REC kf
+ CMP kf 0; JNE .empty
+ # Consume chest.
+ SND rawcr; SYS SYSC_KILL_TILE
+ # Loot it.
+ CMP gp 0; JG .give_gold
+ CMP itid 0; JG .give_item
+ SND lol; SYS SYSC_RANDOM_LOOT
+ RET 1
+.give_gold:
+ SND gp; SYS SYSC_GIVE_GOLD
+ RET 1
+.give_item:
+ SND itid; SYS SYSC_GIVE
+ RET 1
+.empty:
+ SND ANothing; SYS SYSC_ALERT
+ RET 0
+END
+

@@ -1,0 +1,177 @@
+# ITEM USE HANDLERS
+
+# Table of item use procedures
+ItemUseLUT:
+ DB ITID_APPLE; DW USE_Apple
+ DB ITID_PEAR; DW USE_Pear
+ DB ITID_POTION_HEALING; DW POTION_Use
+ DB ITID_POTION_MANA; DW POTION_Use
+ DB ITID_POTION_INVIS; DW POTION_Use
+ DB ITID_POTION_AWAKE; DW POTION_Use
+ DB ITID_POTION_POISON; DW POTION_Use
+ DB ITID_POTION_SLEEP; DW POTION_Use
+ DB ITID_POTION_FIRE; DW POTION_Use
+ DB ITID_POTION_ANTIDOTE; DW POTION_Use
+ DB ITID_POTION_ICE; DW POTION_Use
+ DB ITID_WAND_HEAL; DW WAND_Use
+ DB ITID_WAND_LIGHT; DW WAND_Use
+ DB ITID_WAND_PROTECT; DW WAND_Use
+ DB ITID_WAND_STUN; DW WAND_Use
+ DB ITID_WAND_AWAKEN; DW WAND_Use
+ DB ITID_WAND_CURE_POISON; DW WAND_Use
+ DB ITID_WAND_STRENGTHEN; DW WAND_Use
+ DB ITID_WAND_BURN; DW WAND_Use
+ DB ITID_WAND_FORCE_BEAD; DW WAND_Use
+ DB ITID_WAND_TEMPEST; DW WAND_Use
+ DB ITID_WAND_LIGHTNING; DW WAND_Use
+ DB ITID_WAND_PUSH; DW WAND_Use
+ DB ITID_WAND_INVIS; DW WAND_Use
+ DB ITID_WAND_IDENTIFY; DW WAND_Use
+ DB ITID_SCROLL_HEAL; DW SCROLL_Use
+ DB ITID_SCROLL_LIGHT; DW SCROLL_Use
+ DB ITID_SCROLL_PROTECT; DW SCROLL_Use
+ DB ITID_SCROLL_STUN; DW SCROLL_Use
+ DB ITID_SCROLL_AWAKEN; DW SCROLL_Use
+ DB ITID_SCROLL_CURE_POISON; DW SCROLL_Use
+ DB ITID_SCROLL_STRENGTHEN; DW SCROLL_Use
+ DB ITID_SCROLL_BURN; DW SCROLL_Use
+ DB ITID_SCROLL_FORCE_BEAD; DW SCROLL_Use
+ DB ITID_SCROLL_TEMPEST; DW SCROLL_Use
+ DB ITID_SCROLL_LIGHTNING; DW SCROLL_Use
+ DB ITID_SCROLL_PUSH; DW SCROLL_Use
+ DB ITID_SCROLL_INVIS; DW SCROLL_Use
+ DB ITID_SCROLL_IDENTIFY; DW SCROLL_Use
+ DB ITID_RATION; DW USE_Ration
+ DB ITID_TORCH; DW USE_Torch
+ DB ITID_LEAPING_STONE; DW USE_LeapingStone
+ DB ITID_WORLD_MAP; DW USE_WorldMap
+ DB ITID_BLUEBERRY; DW USE_Blueberry
+ DB ITID_RESCUE_TOK; DW USE_RescueTok
+ # End of table:
+ DB 0
+
+PROC USE_Apple
+ PARAM itid idx
+ SND itid idx 3; CALL UTIL_EatFood
+END
+
+PROC USE_Pear
+ PARAM itid idx
+ # Pears heal 4hp and clear the poisoned status.
+ SND itid idx 4 CEF_POISON; CALL UTIL_EatFood
+END
+
+PROC USE_Ration
+ PARAM itid idx
+ VAR choice
+ SND .a_ration ChoiceNoYes CHD_F_CANCELABLE; SYS SYSC_CHOICE; REC choice
+ CMP choice 2
+ JNE .bail
+ # Rest.
+ SND 0; CALL UTIL_Rest
+ # Spend the item.
+ SND itid idx; SYS SYSC_REMOVE_ITEM
+ RET 1
+.bail:
+ RET 0
+.a_ration:
+ DB 2
+ DS Rest and eat rations?
+ DS (Will restore hp/sp).
+.s_blink:
+ DS Rest
+END
+
+PROC USE_Torch
+ PARAM itid idx
+ # Add 100 units to light, clamp at 255.
+ ADD GV_PEF_LIGHT 100
+ SND GV_PEF_LIGHT 0 255; CALL UTIL_Clamp; REC GV_PEF_LIGHT
+ # Spend the item.
+ SND itid idx; SYS SYSC_REMOVE_ITEM
+END
+
+PROC USE_LeapingStone
+ VAR xz dir leap_xz land_xz flags solid count
+ # What tile is the player on, and what direction are they facing?
+ SND PINFO_XZDIR; SYS SYSC_PINFO
+ REC xz dir
+ # What tile is the player trying to leap over?
+ SND xz dir 1; CALL UTIL_ApplyDir; REC leap_xz
+ # What tile is the player going to land on?
+ SND xz dir 2; CALL UTIL_ApplyDir; REC land_xz
+ # Does the tile being lept over have the TF_LEAPABLE flag?
+ SND leap_xz TINFO_FLAGS; SYS SYSC_TINFO; REC flags
+ TEST flags TF_LEAPABLE; JZ .not_leapable
+.continue:
+ # The tile to land on must not be solid.
+ SND land_xz TINFO_IS_SOLID; SYS SYSC_TINFO; REC solid
+ CMP solid 0; JNE .not_landable
+ # All clear. Leap to destination tile.
+ SND PINFO_XZDIR land_xz dir; SYS SYSC_SET_PINFO
+ SND land_xz; CALL PROC_MaybeHandleSwamp
+ RET 0
+
+.not_leapable:
+ SND .not_leapable_msg
+ SYS SYSC_ALERT
+ RET 0
+
+.not_landable:
+ SND .not_landable_msg
+ SYS SYSC_ALERT
+ RET 0
+
+.not_leapable_msg:
+ DB 2
+ DS Leap failed. You can't leap
+ DS over this.
+
+.not_landable_msg:
+ DB 2
+ DS Leap failed. Landing area
+ DS not clear.
+END
+
+PROC USE_WorldMap
+ SYS SYSC_WORLD_MAP
+END
+
+PROC USE_Blueberry
+ PARAM itid idx
+ # Explain how it works.
+ SND .a_msg; SYS SYSC_ALERT
+ # Blueberry grants the CEF_STRONG effect.
+ SND itid idx 1 0 CEF_STRONG; CALL UTIL_EatFood
+ RET
+.a_msg:
+ DB 6
+ DS Eating an indigo blueberry
+ DS makes you stronger
+ DS (+25% battle damage).
+ DS
+ DS The effect lasts only until
+ DS you rest!
+END
+
+PROC USE_RescueTok
+ VAR choice
+ SND * ChoiceNoYes; SYS SYSC_CHOICE; REC choice
+ {
+  DT A portal to Riverside opens
+  .. in front of you.
+  .. Return to Riverside now?
+ }
+ CMP choice 2; JNE .end
+ SND * ChoiceNoYes; SYS SYSC_CHOICE; REC choice
+ {
+  DT Are you sure?
+ }
+ CMP choice 2; JNE .end
+ SND LVLN_RSTO ENTPT_RSTO_NORTH_GATE; SYS SYSC_CHANGE_LVL
+ # HACK: also set map position
+ SET GV_WMAP_X 60
+ SET GV_WMAP_Y 59
+.end:
+END
+

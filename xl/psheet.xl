@@ -1,0 +1,147 @@
+# Character sheet display.
+
+DEFINE PSHEET_X 0
+DEFINE PSHEET_Y 0
+DEFINE PSHEET_W 184
+DEFINE PSHEET_H 108
+DEFINE PSHEET_TIP_OFFSET 20
+# X coordinate for left column
+DEFINE PSHEET_LX 8
+# X coordinate for right column
+DEFINE PSHEET_RX 90
+
+EXPORT PROC PSHEET_Draw
+ PARAM chi
+ VAR x spr ptr y val max att def spd
+ SET y 8
+ # Draw box.
+ SND PSHEET_X PSHEET_Y PSHEET_W PSHEET_H C_BLUE RECTF_DECO
+ SYS SYSC_RECT
+ # Draw box tip.
+ SET x chi; SUB x 1
+ MUL x CHAR_BOX_STRIDE; ADD x PSHEET_TIP_OFFSET
+ SND 218 x 106; SYS SYSC_SPR
+ # Compute the right face sprite.
+ # ptr = PSHEET_CharFaces + chi - 1
+ SET ptr chi; SUB ptr 1; ADD ptr PSHEET_CharFaces
+ REAB spr ptr
+ # Draw char face.
+ SND spr PSHEET_LX y; SYS SYSC_SPR
+ # Figure out the right name.
+ SET ptr chi; SUB ptr 1; MUL ptr 2
+ ADD ptr CharNames
+ REAW ptr ptr # ptr is a pointer to a pointer, this dereferences
+              # it once, so it's now a pointer to a string.
+ # Print name.
+ ADD y 1
+ SND 22 y ptr C_WHITE; SYS SYSC_PRINT
+ # Get character's class
+ SND chi CINFO_CLASS; SYS SYSC_CINFO; REC val
+ # Look up class name.
+ SET ptr val; SUB ptr 1; MUL ptr 2; ADD ptr AClassNamePtrs
+ REAW ptr ptr
+ # Print class.
+ SND 60 y ptr C_BGRAY; SYS SYSC_PRINT
+ # Print level #
+ SND PINFO_LEVEL; SYS SYSC_PINFO; REC val
+ SND 125 y .s_level val; CALL PSHEET_DrawField
+ # Advance to next line
+ ADD y 15
+ # Print HP
+ SND chi CINFO_HP; SYS SYSC_CINFO; REC val
+ SND chi CINFO_MAX_HP; SYS SYSC_CINFO; REC max
+ SND PSHEET_LX y .s_hp val max 18; CALL PSHEET_DrawSlashedField
+ # Print SP
+ SND chi CINFO_SP; SYS SYSC_CINFO; REC val
+ SND chi CINFO_MAX_SP; SYS SYSC_CINFO; REC max
+ SND PSHEET_RX y .s_sp val max 18; CALL PSHEET_DrawSlashedField
+ # Advance to next line
+ ADD y 10
+ # Get effective attack/defense.
+ SND chi CINFO_EFF_ATT_DEF_SPEED; SYS SYSC_CINFO; REC att def spd
+ # Print effective attack.
+ SND PSHEET_LX y .s_att att; CALL PSHEET_DrawField
+ # Print effective speed.
+ SND PSHEET_RX y .s_spd spd; CALL PSHEET_DrawField
+ # Advance to next line
+ ADD y 10
+ # Print effective defense.
+ SND PSHEET_LX y .s_def def; CALL PSHEET_DrawField
+ # Advance to next line
+ ADD y 10
+ # Print "Cond" heading.
+ SND PSHEET_LX y .s_cond C_WHITE; SYS SYSC_PRINT
+ # Print bad conditions on the left.
+ VAR cond_top_y; SET cond_top_y y
+ SND 36 y C_RED chi CEF_POISON SCondPoison; CALL PSHEET_DrawCond; REC y
+ SND 36 y C_GRAY chi CEF_ASLEEP SCondAsleep; CALL PSHEET_DrawCond; REC y
+ SND 36 y C_BBLUE chi CEF_FROZEN SCondFrozen; CALL PSHEET_DrawCond; REC y
+ # Print good conditions on the right.
+ SET y cond_top_y
+ SND 80 y C_LGREEN chi CEF_STRONG SCondStrong; CALL PSHEET_DrawCond; REC y
+ SND 80 y C_LGREEN chi CEF_INVIS SCondInvis; CALL PSHEET_DrawCond; REC y
+ SND 80 y C_LGREEN chi CEF_ALERT SCondAlert; CALL PSHEET_DrawCond; REC y
+ # Bottom part:
+ SET y 86
+ # Print gold
+ SND PINFO_GOLD; SYS SYSC_PINFO; REC val
+ SND PSHEET_LX y .s_gold val; CALL PSHEET_DrawField
+ # Next line:
+ ADD y 10
+ # Print XP
+ SND PINFO_XP; SYS SYSC_PINFO; REC val
+ SND PINFO_XP_FOR_NEXT; SYS SYSC_PINFO; REC max
+ SND PSHEET_LX y .s_xp val max 42; CALL PSHEET_DrawSlashedField
+
+ RET
+
+.s_level:; DS Lvl
+.s_hp:; DS HP
+.s_sp:; DS SP
+.s_att:; DS Att
+.s_def:; DS Def
+.s_spd:; DS Spd
+.s_gold:; DS Gold
+.s_xp:; DS XP
+.s_cond:; DS Cond
+END
+
+# Draws the given condition at the x,y position.
+# Returns the y coordinate of the next condition (if it was
+# drawn, returns y+10, if not drawn returns just y).
+PROC PSHEET_DrawCond
+ PARAM x y color chi cef_mask text
+ VAR cef
+ SND chi; CALL CEF_Get; REC cef
+ TEST cef cef_mask
+ JNZ .has
+ RET y
+.has:
+ SND x y text color; SYS SYSC_PRINT
+ ADD y 10
+ RET y
+END
+
+PROC PSHEET_DrawField
+ PARAM x y label val
+ SND x y label C_WHITE; SYS SYSC_PRINT
+ ADD x 28
+ SND x y val C_BGRAY PRNF_NUMBER; SYS SYSC_PRINT
+END
+
+# Draws a field like "HP: A / B"
+# w is the expected width of X and Y.
+PROC PSHEET_DrawSlashedField
+ PARAM x y label val_a val_b w
+ SND x y label C_WHITE; SYS SYSC_PRINT
+ ADD x 28
+ SND x y val_a C_BGRAY PRNF_NUMBER; SYS SYSC_PRINT
+ ADD x w
+ SND x y .slash C_BGRAY; SYS SYSC_PRINT
+ ADD x 8
+ SND x y val_b C_BGRAY PRNF_NUMBER; SYS SYSC_PRINT
+ RET
+.slash:; DS /
+END
+
+PSHEET_CharFaces:; DB 240 242 241 243

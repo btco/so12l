@@ -1,0 +1,967 @@
+#!/usr/bin/perl
+## XLASM: XL language assembler.
+## xlasm -o output_file -s symbol_file input1.xl input2.xml ...
+##  
+##    -d debug_file: If provided, debug info will be printed to this file.
+##    -z stride_file: If provided, will print symbol strides to this file.
+##                    (that is, distances in bytes between successive
+##                    symbols)
+
+use POSIX;
+use Getopt::Std;
+
+# Opcodes (see XL.txt):
+$OPCODE_SYSCALL_MIN = 60;
+$OPCODE_SYSCALL_MAX = 119;
+$OPCODE_SET = 124;
+$OPCODE_RET = 125;
+$OPCODE_CMP = 126;
+$OPCODE_RND = 127;
+$OPCODE_ECHO = 128;
+$OPCODE_ANDC = 129;
+$OPCODE_OR = 130;
+$OPCODE_AND = 131;
+$OPCODE_TEST = 132;
+$OPCODE_ZAVS = 133;
+$OPCODE_ADD = 134;
+$OPCODE_SUB = 135;
+$OPCODE_MUL = 136;
+$OPCODE_DIV = 137;
+$OPCODE_MOD = 138;
+$OPCODE_REAB = 139;
+$OPCODE_REAW = 140;
+$OPCODE_SND0 = 144;
+   # opcodes 144-159 are for SND0 .. SND15
+$OPCODE_REC0 = 160;
+   # opcodes 160-175 are for REC0 .. REC15
+$OPCODE_PAR0 = 176;
+   # opcodes 176-191 are for PAR0 .. PAR15
+$OPCODE_JMP = 212;
+$OPCODE_JE = 213;
+$OPCODE_JNE = 214;
+$OPCODE_JG = 215;
+$OPCODE_JGE = 216;
+$OPCODE_JL = 217;
+$OPCODE_JLE = 218;
+$OPCODE_CALL = 219;
+$OPCODE_CE = 220;
+$OPCODE_CNE = 221;
+$OPCODE_CG = 222;
+$OPCODE_CGE = 223;
+$OPCODE_CL = 224;
+$OPCODE_CLE = 225;
+$OPCODE_CMPZ = 226;
+
+# Jump opcodes for easy lookup.
+%JUMP_OPCODES = (
+  JMP => $OPCODE_JMP,
+  JE => $OPCODE_JE,
+  JNE => $OPCODE_JNE,
+  JG => $OPCODE_JG,
+  JGE => $OPCODE_JGE,
+  JL => $OPCODE_JL,
+  JLE => $OPCODE_JLE,
+  # Aliases for readability:
+  JZ => $OPCODE_JE,
+  JNZ => $OPCODE_JNE,
+);
+# Jump opcodes for easy lookup.
+%CALL_OPCODES = (
+  CALL => $OPCODE_CALL,
+  CE => $OPCODE_CE,
+  CNE => $OPCODE_CNE,
+  CG => $OPCODE_CG,
+  CGE => $OPCODE_CGE,
+  CL => $OPCODE_CL,
+  CLE => $OPCODE_CLE,
+  # Aliases for readability:
+  CZ => $OPCODE_CE,
+  CNZ => $OPCODE_CNE,
+);
+
+# Maximum binary length (2 pages of TIC-80 map memory)
+$MAX_BINARY_SIZE = 2 * 32640;
+
+# File and line number we are processing. This is a global because we
+# need it to produce error messages when aborting assembly.
+$g_tag = 0;
+
+# Reads input, preprocesses it into instructions.
+# ARGS: a list of linedefs.
+# Returns a list of instructions, each of which is a dict with:
+#   instr: the instruction
+#   tag: the tag for debugging purposes (original file and line#)
+sub preprocess {
+  my @instr = ();
+  for $linedef (@_) {
+    my $line = $linedef->{line};
+    # Strip comments.
+    $line =~ s/#.*$//g;
+    # Expand HILO(a,b) and LOHI(a,b) macros.
+    $line = expandLOHI($line);
+    # Expand BOR macro.
+    $line = expandBOR($line);
+    # If this line has embedded semicolons, split it.
+    for $subline (split(';', $line)) {
+      # Strip leading and trailing spaces.
+      $subline =~ s/^\s+//g;
+      $subline =~ s/\s+$//g;
+      # Skip empty lines.
+      next if $subline eq "";
+      # If this is a pseudo instruction, expand it into actual
+      # instructions.
+      @actual = processPseudo($subline);
+      for $actual (@actual) {
+        push @instr, { instr => $actual, tag => $linedef->{tag} };
+      }
+    }
+  }
+  return @instr;
+}
+
+sub expandLOHI {
+  my $line = shift;
+  while ($line =~ /(LOHI|HILO)\s*\(\s*(\d+)\s*,\s*(\d+)\s*\)/) {
+    my $val = $1 eq "LOHI" ? $2 + 256 * $3 : $2 * 256 + $3;
+    my $begin = $-[0];
+    my $end = $+[0];
+    $line = substr($line, 0, $begin) . $val . substr($line, $end);
+  }
+  return $line;
+}
+
+sub expandBOR {
+  my $line = shift;
+  while ($line =~ /(BOR)\s*\(([,\d ]*)\)/) {
+    my $args = $2;
+    my $begin = $-[0];
+    my $end = $+[0];
+
+    my $val = 0;
+    for $comp (split(',',$args)) {
+      $val = $val | $comp;
+    }
+    $line = substr($line, 0, $begin) . $val . substr($line, $end);
+  }
+  return $line;
+}
+
+# If the given instruction is a pseudo instruction, expands it
+# into the actual instructions that it means. If it's a real
+# instruction, just returns it.
+sub processPseudo {
+  my @result = ();
+  my $instr = shift;
+
+  if ($instr =~ /^RET\s+(.*)$/) {
+    # "RET x y z" is syntactic sugar for "SND x y z; RET"
+    push @result, "SND $1";
+    push @result, "RET";
+  } elsif ($instr =~ /^PARAM\s+(.*)$/) {
+    # The PARAM pseudo instruction declares variables and receives
+    # arguments into them.
+    my @pars = split(/\s+/, $1);
+    my $count = scalar(@pars);
+    die "# params must be between 1 and 15" unless $count >= 1 && $count <= 15;
+    # Declare them all.
+    push @result, "VAR $_" for @pars;
+    # And receive them using a PAR0 .. PAR15 instruction.
+    push @result, "PAR" . $count;
+  } elsif ($instr =~ /^CMP\s+(\w+)\s+0$/) {
+    # CMP x 0 is the same as CMPZ x
+    push @result, "CMPZ $1";
+  } else {
+    # Not a pseudo instruction. Return it as a single-element list.
+    push @result, $instr;
+  }
+  return @result;
+}
+
+# Preprocesses DT instructions
+#    DT Lorem ipsum
+#    .. dolor sit amet
+#    .. elispiscing elit
+#
+# Becomes:
+#    DB 3
+#    DS Lorem ipsum
+#    DS dolor sit amet
+#    DS elispiscing elit
+sub preprocessDTs {
+  my @instrs = @_;
+  my @out = ();
+  for (my $i = 0; $i < scalar(@instrs); $i++) {
+    my $thisInstr = $instrs[$i];
+    my $instr = $thisInstr->{instr};
+    die "Empty instruction [$i]?" unless $instr;
+    if ($instr =~ /^DT (.*)$/) {
+      my $text = $1;
+      # Count how many .. instructions there are after it.
+      my $dotDotCount = 0;
+      for (my $j = $i + 1; $j < scalar(@instrs); $j++) {
+        if ($instrs[$j]->{instr} =~ /^[.][.]/) {
+          $dotDotCount++;
+        } else {
+          last;
+        }
+      }
+      push @out, { instr => "DB " . ($dotDotCount + 1), tag => $thisInstr->{tag} };
+      push @out, { instr => "DS $text", tag => $thisInstr->{tag} };
+    } elsif ($instr =~ /^[.][.]/) {
+      $thisInstr->{instr} =~ s/^[.][.]/DS/g;
+      push @out, $thisInstr;
+    } else {
+      push @out, $thisInstr;
+    }
+  }
+  return @out;
+}
+
+sub preprocessFloatingBlocks {
+  my $nextNum = 0;
+  my @instrs = @_;
+  my @out = ();
+  # Dict of blocks currently waiting to be expanded.
+  # Keyed by symbol name.
+  # Value is a ref to an array with the block's instructions.
+  my %blocks = ();
+  # Symbol to use for the next block we find.
+  my $nextBlockSym = "";
+  # Are we currently processing a block? If so, this is the symbol
+  # name of the block; otherwise, it's "".
+  my $curBlockSym = "";
+
+  for (my $i = 0; $i < scalar(@instrs); $i++) {
+    my $thisInstr = $instrs[$i];
+    my $instr = $thisInstr->{instr};
+
+    die "Empty instruction [$i]?" unless $instr;
+
+    # If we are already in a block, just accumulate this instruction
+    # in the current block.
+    if ($curBlockSym) {
+      if ($instr =~ /^}/) {
+        # End of block.
+        $curBlockSym = "";
+      } else {
+        # Instruction belongs to current block.
+        die "No cur block sym?" unless $curBlockSym;
+        my $blockArrayRef = $blocks{$curBlockSym};
+        push @$blockArrayRef, $thisInstr;
+      }
+      # Nothing else to do for this instruction.
+      next;
+    }
+
+    # Starting a block?
+    if ($instr =~ /^{/) {
+      # Make sure we're expecting it.
+      die "Unexpected floating block at $thisInstr->{tag}"
+        unless $nextBlockSym;
+      $curBlockSym = $nextBlockSym;
+      $nextBlockSym = "";
+      $blocks{$curBlockSym} = [];
+      next;
+    }
+
+    # If we got here, we are not in a block and not starting
+    # a block, so all that's left are possible block references
+    # in the current instruction. Let's check for that.
+
+    if ($instr =~ /^D[^W] / or $instr =~ /^\.\./ or $instr =~ /^DEFINE\b/) {
+      # Data instructions don't take floating blocks... except DW.
+      # Also, DT continuations (..) don't take floating blocks either.
+      push @out, $thisInstr;
+      next;
+    }
+    # Anything else can take a floating block, so check for it:
+    # A standalone '*' is a floating block reference.
+    unless ($instr =~ / \* ?/) {
+      # DS instructions don't take floating blocks.
+      push @out, $thisInstr;
+      next;
+    }
+    # This line has a floating block ref. Let's make up a unique
+    # symbol name for it.
+    my $sym = "Floatb_${nextNum}__";
+    $nextNum++;
+    # Replace * in the line by this new symbol.
+    $instr =~ s/ \* ?/ $sym /;
+    # This will be the symbol for the next block we find.
+    $nextBlockSym = $sym;
+    # Write the modified instruction to the output.
+    $thisInstr->{instr} = $instr;
+    push @out, $thisInstr;
+  }
+
+  # Now dump the blocks.
+  for my $sym (keys(%blocks)) {
+    my $instrsRef = $blocks{$sym};
+    push @out, { instr => "$sym:", tag => "" };
+    for $instr (@$instrsRef) {
+      push @out, $instr;
+    }
+  }
+
+  return @out;
+}
+
+# Parses all #define directives found in the given instruction
+# set, returning a dictionary of them.
+# Args: instructions (array of linedefs).
+# Ret: hash of defines.
+sub parseDefines {
+  for $linedef (@_) {
+    $instr = $linedef->{line};
+    # Accept both '#define' syntax, or DEFINE.
+    $instr =~ /^\s*[#]define\s+(\w+)\s+(.*)$/ ||
+        $instr =~ /^\s*DEFINE\s+(\w+)\s+(.*)$/ and do {
+      $sym = $1;
+      $val = $2;
+
+      # Remove in-line comment from value, if present.
+      $val =~ s/#.*$//g;
+      $val =~ s/\s+$//g;
+
+      exists $defs{$sym} and abort("Duplicate define $sym.");
+      $defs{$sym} = $val;
+      #print STDERR "Define: $sym -> $val\n";
+    };
+  }
+  return %defs;
+}
+
+# Expands the defines in the given set of instructions.
+# Args: defs instr
+#   defs: ref to a hash of defines
+#   linedefs: the instructions on which to perform the expansion.
+#     This is an array of linedefs.
+# Returns nothing. Mutates linedefs in-place.
+sub expandDefines {
+  my $defsR = shift;
+  my $linedefsR = shift;
+  my %defines = %$defsR;
+  # Expand all #defines.
+  print STDERR "Expanding defines...\n";
+
+  # Temporarily assemble all the input together into a single string
+  # because that's more efficient to handle.
+  my $all = "";
+  $all .= join("\n", map { $_->{line} } @$linedefsR);
+
+  # Expand defines until nothing changes, at which point we know
+  # we have expanded as much as possible.
+  while (1) {
+   my $old = $all;
+   for my $k (keys(%defines)) {
+     $v = $defines{$k};
+     $all =~ s/\b$k\b/$v/g;
+   }
+   last if $old eq $all;
+  }
+
+  # Remove all the DEFINE lines.
+  $all =~ s/^DEFINE .*$//mg;
+
+  # Split $all back into the linedefs.
+  my @lines = split("\n", $all);
+  scalar(@lines) == scalar(@$linedefsR) or
+    die "Expected " . scalar(@$linedefsR) . " got " . scalar(@lines);
+  for ($i = 0; $i < scalar(@$linedefsR); $i++) {
+    $linedefsR->[$i]->{line} = $lines[$i];
+  }
+}
+
+# Reads the input program and returns it as an array of linedefs.
+# A linedef is a dictionary with:
+#   line: the text of the line
+#   tag: a human-readable "name" for the line (file and line number)
+sub readInput {
+  my @input = ();
+  for $inputFile (@ARGV) {
+    print STDERR "Reading $inputFile.\n";
+    open INPUT, "$inputFile" or die "Failed to read $inputFile.\n$!\n";
+    my $lineNo = 1;
+    while (<INPUT>) {
+      chomp; s/\r//g;
+
+      # Detect some dangerous patterns:
+      die "CALL SYSC_ looks wrong @ $inputFile:$lineNo" if /CALL SYSC/;
+
+      push @input, {line => $_, tag => "$inputFile:$lineNo"};
+      $lineNo++;
+    }
+    close INPUT;
+  }
+  return @input;
+}
+
+sub main {
+  # Output binary's bytes indexed by address.
+  my @binary = (123);  # Byte 0 is the signature byte, 123.
+  # Symbol table. Associates symbol names to their numeric address.
+  # Used for PROC addresses, labels, etc. PROC-local symbols are
+  # prefixed with the proc name, so a symbol ".foo" in a PROC called
+  # DoLoremIpsum will be named DoLoremIpsum.foo
+  my %syms = ();
+  # Variable table. Associates variable names with the variable ID.
+  my %vars = ();
+  # Next variable ID to assign. Var IDs start at 1.
+  my $nextVarId = 1;
+  # Name of the current proc we are in.
+  my $curProc = undef;
+  # Dictionary of exported symbols.
+  my $exports = ();
+  # Dictionary of annotations for debug. This dict maps offsets
+  # to annotations.
+  my %annot = ();
+
+  # Read lines from file.
+  my @linedefs = readInput();
+  # Get all defines.
+  my %defines = parseDefines(@linedefs);
+  # Expand all defines.
+  expandDefines(\%defines, \@linedefs);
+  # Preprocess input and convert to instructions.
+  my @instr = preprocess(@linedefs);
+  # Process floating blocks.
+  @instr = preprocessFloatingBlocks(@instr);
+  # Process DT (text block) instructions:
+  @instr = preprocessDTs(@instr);
+  # Process each instruction.
+  my $prev_line = "";
+  my $line = "";
+  for $instr (@instr) {
+    $prev_line = $line;
+    $line = $instr->{instr};
+    $g_tag = $instr->{tag};
+    $annot{@binary} .= "($g_tag) $line\n";
+    if ($line =~ /^(EXPORT\s+)?PROC\s+(\w+)$/) {
+      # Start of a procedure.
+      my $isExport = $1;
+      my $procName = $2;
+      ensure(!$curProc,
+        "Missing END, can't start a PROC within a PROC.");
+      ensure(!exists $syms{$procName},
+        "Duplicate global symbol $procName.");
+      # A PROC name is a global symbol so it must begin with a
+      # capital letter.
+      ensure($procName =~ /^[A-Z]/,
+        "PROC name must begin with A-Z.\n");
+      # Store the current address as the address of this PROC.
+      my $addr = scalar(@binary);
+      $syms{$procName} = $addr;
+      $exports{$procName} = $addr if $isExport;
+      $curProc = $procName;
+    } elsif ($line =~ /^END$/) {
+      # End of a PROC.
+      ensure($curProc, "END outside of PROC.");
+      $curProc = undef;
+      $nextVarId = 1;
+      %vars = ();
+      # For safety, insert a RET instruction, unless the previous
+      # instruction was already a RET.
+      push @binary, $OPCODE_RET unless $prev_line eq "RET";
+    } elsif ($line =~ /^DS (.+)$/) {  # Leading spaces matter.
+      # String data.
+      my $str = $1;
+      # Empty string is represented especially. It's stupid.
+      my @bytes = unpack("C*", $str);
+      if (scalar(@bytes) == 0) {
+        push @binary, 128;  # 128 means empty string.
+      } else {
+        # Non-empty strings are represented as the raw bytes; the last byte has
+        # the high bit set to indicate end of string.
+        $bytes[scalar(@bytes)-1]+=128;
+        push @binary, @bytes;
+      }
+    } elsif ($line =~ /^DS$/) {  # Empty string.
+      # Empty string.
+      push @binary, 128;  # 128 means empty string
+    } elsif ($line =~ /^DB\s+([\d\s]+)$/) {
+      # Byte data.
+      my @vals = split(/\s+/, $1);
+      push @binary, ensureIsByte($_) for @vals;
+    } elsif ($line =~ /^DW\s+([\s.\w]+)$/) {
+      # Word data (immediates or symbols).
+      my @vals = split(/\s+/, $1);
+      emitImmediate("W", $_, \@binary, $curProc) for @vals;
+    } elsif ($line =~ /^SYS\s+(\d+)$/) {
+      # Syscall pseudo instruction.
+      # This translates to a raw opcode (must be in the syscall range).
+      my $sys = $1;
+      ensure($sys >= $OPCODE_SYSCALL_MIN && $sys <= $OPCODE_SYSCALL_MAX,
+        "Invalid syscall #: $sys");
+      push @binary, $sys;
+    } elsif ($line =~ /^VAR\s+(.*)$/) {
+      # Declare local variables, assigning them numeric IDs.
+      for $varName (split(/\s+/, $1)) {
+        ensure(!exists $vars{$varName}, "Duplicate var $varName");
+        # Variable names must begin with a lowercase letter to
+        # distinguish them from global symbols, which start with
+        # an upper-case letter.
+        ensure($varName =~ /^[a-z]\w*$/, "Invalid var name $varName.");
+        ensure($nextVarId < 127, "Too many local vars.");
+        $vars{$varName} = $nextVarId++;
+      }
+    } elsif ($line =~ /^SET\s+(\w+)\s+(\S+)$/) {
+      # Set variable to value.
+      my $var = $1;
+      my $val = $2;
+      push @binary, $OPCODE_SET;
+      push @binary, resolveVarName($var, \%vars);
+      emitVal($val, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^SND\s+(.*)$/) {
+      # SND0 .. SND15 family of instructions.
+      my @values = split(/\s+/, $1);
+      my $count = scalar(@values);
+      die "SND: bad arg count $count" unless $count >= 0 && $count <= 15;
+      push @binary, ($OPCODE_SND0 + $count);
+      emitVal($_, \@binary, \%vars, $curProc) for (@values);
+    } elsif ($line =~ /^REC\s+(.*)$/) {
+      # REC0 .. REC15 family of instructions.
+      my @vars = split(/\s+/, $1);
+      my $count = scalar(@vars);
+      die "REC: bad arg count $count" unless $count >= 0 && $count <= 15;
+      push @binary, ($OPCODE_REC0 + $count);
+      push @binary, resolveVarName($_, \%vars) for (@vars);
+    } elsif ($line =~ /^PAR(\d+)$/) {
+      # PAR0 .. PAR15 family of instructions.
+      my $count = $1;
+      # Sanity check: there must be exactly $count variables declared.
+      ensure($nextVarId == $count + 1,
+         "PARAM cannot be preceded by VAR declarations.");
+      die "PAR: bad count $count" unless $count >= 0 && $count <= 15;
+      push @binary, ($OPCODE_PAR0 + $count);
+    } elsif ($line =~ /^ADD\s+(\w+)\s+(\S+)$/) {
+      my $var = $1;
+      my $val = $2;
+      push @binary, $OPCODE_ADD;
+      push @binary, resolveVarName($var, \%vars);
+      emitVal($val, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^SUB\s+(\w+)\s+(\S+)$/) {
+      my $var = $1;
+      my $val = $2;
+      push @binary, $OPCODE_SUB;
+      push @binary, resolveVarName($var, \%vars);
+      emitVal($val, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^MUL\s+(\w+)\s+(\S+)$/) {
+      my $var = $1;
+      my $val = $2;
+      push @binary, $OPCODE_MUL;
+      push @binary, resolveVarName($var, \%vars);
+      emitVal($val, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^DIV\s+(\w+)\s+(\S+)$/) {
+      my $var = $1;
+      my $val = $2;
+      push @binary, $OPCODE_DIV;
+      push @binary, resolveVarName($var, \%vars);
+      emitVal($val, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^MOD\s+(\w+)\s+(\S+)$/) {
+      my $var = $1;
+      my $val = $2;
+      push @binary, $OPCODE_MOD;
+      push @binary, resolveVarName($var, \%vars);
+      emitVal($val, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^CMP\s+(\w+)\s+(\S+)$/) {
+      # Compare variable to value.
+      my $var = $1;
+      my $val = $2;
+      push @binary, $OPCODE_CMP;
+      push @binary, resolveVarName($var, \%vars);
+      emitVal($val, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^CMPZ\s+(\w+)$/) {
+      # Compare variable to zero.
+      my $var = $1;
+      push @binary, $OPCODE_CMPZ;
+      push @binary, resolveVarName($var, \%vars);
+    } elsif ($line =~ /^(J\w+)\s+([.\w]+)$/) {
+      # Jump instruction.
+      my $opcode = $JUMP_OPCODES{$1};
+      my $addr = $2;
+      ensure($opcode, "Invalid jump instruction $1");
+      push @binary, $opcode;
+      emitVal($addr, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^(C\w+)\s+([.\w]+)$/ and $CALL_OPCODES{$1}) {
+      # Call instruction.
+      my $opcode = $CALL_OPCODES{$1};
+      my $addr = $2;
+      ensure($opcode, "Invalid call instruction $1");
+      push @binary, $opcode;
+      emitVal($addr, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^(EXPORT\s+)?([.\w]+):$/) {
+      # Label (defines a symbol whose value is the current address).
+      my $isExport = $1;
+      my $symName = $2;
+      # Labels must begin with . (denoting a local symbol) or an
+      # uppercase letter, denoting a global symbol.
+      ensure($line =~ /^[.A-Z]/, "Invalid label name $symName");
+      # If it begins with ., it's a local symbol, so prefix it with
+      # the name of the current PROC.
+      $symName = "$curProc$symName" if $symName =~ /^\./;
+      ensure(!exists $syms{$symName}, "Duplicate symbol $symName");
+      $syms{$symName} = scalar(@binary);
+      $exports{$symName} = scalar(@binary) if $isExport;
+    } elsif ($line =~ /^RET$/) {
+      push @binary, $OPCODE_RET;
+    } elsif ($line =~ /^RND\s+(\w+)\s+(\S+)\s+(\S+)$/) {
+      # Generate random number.
+      my ($var, $val1, $val2) = ($1, $2, $3);
+      push @binary, $OPCODE_RND;
+      push @binary, resolveVarName($var, \%vars);
+      emitVal($val1, \@binary, \%vars, $curProc);
+      emitVal($val2, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^ECHO\s+(\S+)$/) {
+      my $val = $1;
+      push @binary, $OPCODE_ECHO;
+      emitVal($val, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^OR\s+(\w+)\s+(\S+)$/) {
+      # ORs variable with a value.
+      my $var = $1;
+      my $val = $2;
+      push @binary, $OPCODE_OR;
+      push @binary, resolveVarName($var, \%vars);
+      emitVal($val, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^AND\s+(\w+)\s+(\S+)$/) {
+      # ANDs variable with an immediate byte mask.
+      my $var = $1;
+      my $val = $2;
+      push @binary, $OPCODE_AND;
+      push @binary, resolveVarName($var, \%vars);
+      emitVal($val, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^ANDC\s+(\w+)\s+(\S+)$/) {
+      # ANDs variable with an immediate byte mask.
+      my $var = $1;
+      my $val = $2;
+      push @binary, $OPCODE_ANDC;
+      push @binary, resolveVarName($var, \%vars);
+      emitVal($val, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^TEST\s+(\w+)\s+(\S+)$/) {
+      # Test variable with an immediate byte mask.
+      my $var = $1;
+      my $val = $2;
+      push @binary, $OPCODE_TEST;
+      push @binary, resolveVarName($var, \%vars);
+      emitVal($val, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^ZAVS$/) {
+      # Zero all argument variables.
+      push @binary, $OPCODE_ZAVS;
+    } elsif ($line =~ /^(REAB|REAW)\s+(\w+)\s+(\S+)$/) {
+      # ORs variable with an immediate byte mask.
+      my $op = $1;
+      my $var = $2;
+      my $val = $3;
+      push @binary, (($op eq "REAB") ? $OPCODE_REAB : $OPCODE_REAW);
+      push @binary, resolveVarName($var, \%vars);
+      emitVal($val, \@binary, \%vars, $curProc);
+    } elsif ($line =~ /^DEFINE\s/) {
+      # DEFINE instructions are preprocessed, so we don't need
+      # to do anything more.
+    } else {
+      abort("Syntax error, can't parse instruction '$line'");
+    }
+  }
+
+  my $bin_size = scalar(@binary);
+  print STDERR "Binary size: $bin_size bytes.\n";
+  die "Binary too large, $bin_size > $MAX_BINARY_SIZE"
+      if $bin_size > $MAX_BINARY_SIZE;
+
+  # Now we have to go back and fill in the symbol placeholders
+  # by the value of the symbols.
+  for (my $i = 0; $i < scalar(@binary); $i++) {
+    my $b = $binary[$i];
+    if ($b =~ /^(SYM|SYMH|SYML):([.\w]+)$/) {
+      my $type = $1;
+      my $symName = $2;
+      die "Failed to resolve symbol $symName.\n" unless
+          exists $syms{$symName};
+      $b = $syms{$symName} if $type eq "SYM";
+      $b = getHighByte($syms{$symName}) if $type eq "SYMH";
+      $b = getLowByte($syms{$symName}) if $type eq "SYML";
+    }
+    $binary[$i] = $b;
+  }
+
+  outputDebug(\@binary, \%annot) if $opt_d;
+  outputSymbols(\%exports) if $opt_s;
+  outputSymbolStride(\%syms, scalar @binary) if $opt_z;
+  outputBinary(\@binary);
+}
+
+sub outputSymbols {
+  my $tableR = shift;
+  my %table = %$tableR;
+  print STDERR "Writing symbols to $opt_s.\n";
+  open SYM, ">$opt_s" or die "Failed to write symbol table to $opt_s.\n";
+  for $sym (keys(%table)) {
+    print SYM "#define SYM_$sym $table{$sym}\n";
+  }
+  close SYM;
+}
+
+sub outputDebug {
+  my $binaryR = shift;
+  my $annotR = shift;
+  my @binary = @$binaryR;
+  print STDERR "Writing debug info to $opt_d.\n";
+  open DEBUG, ">$opt_d" or die "Failed to write to debug file $opt_d.\n$!\n";
+  for (my $i = 0; $i < @binary; $i++) {
+    print DEBUG $annotR->{$i};
+    printf DEBUG "    [%04x]: %x (%d)\n", $i, $binary[$i], $binary[$i];
+  }
+  printf DEBUG "XL bin size: " . scalar(@binary) . "\n";
+  close DEBUG;
+}
+
+sub outputSymbolStride {
+  my $symbtab = shift;
+  my $binSize = shift;
+  my %strides = ();
+  my %reverse = ();
+  # Build reverse lookup, from address to symbol. We don't need the
+  # actual symbol, we just need to know if there's a symbol there.
+  for my $sym (keys(%$symbtab)) {
+    # Ignore local symbols (symbols with .)
+    $reverse{$symbtab->{$sym}} = 1 unless $sym =~ /[.]/;
+  }
+  # For each symbol, find out what symbol comes right after it.
+  # That's the stride.
+  for my $sym (keys(%$symbtab)) {
+    next if $sym =~ /[.]/;
+    my $symStart = $symbtab->{$sym};
+    my $i;
+    for ($i = $symStart + 1; $i < $binSize; $i++) {
+      last if ($reverse{$i});
+    }
+    $strides{$sym} = $i - $symbtab->{$sym};
+  }
+  my @output = ();
+  for (keys(%strides)) {
+    push @output, sprintf("%4d %s\n", $strides{$_}, $_);
+  }
+  @output = sort @output;
+
+  # For each symbol, print the stride and the symbol.
+  print STDERR "Writing stride info to $opt_z.\n";
+  open STRIDE, ">$opt_z" or die "Failed to write to debug file $opt_z.\n$!\n";
+  #for (keys(%strides)) {
+  #  printf STRIDE "%4d %s\n", $strides{$_}, $_;
+  #}
+  print STRIDE $_ for @output;
+  close STRIDE;
+}
+
+sub ensure {
+  my $cond = shift;
+  my $msg = shift;
+  abort($msg) unless $cond;
+  return $cond;
+}
+
+sub ensureIsByte {
+  my $v = shift;
+  ensure($v >= 0 && $v <= 255, "Invalid byte value $v");
+  return $v;
+}
+
+sub ensureIsWord {
+  my $v = shift;
+  ensure($v >= 0 && $v <= 65535, "Invalid word value $v");
+  return $v;
+}
+
+sub abort {
+  my $error = shift;
+  die "Error: $error at $g_tag.\n";
+}
+
+# Resolves a variable name into a numeric variable ID.
+sub resolveVarName {
+  my $varName = shift;
+  my $varsR = shift;
+  my $varId;
+  if ($varName =~ /^_?(\d+)$/) {
+    # Literal Var ID.
+    $varId = $1;
+  } elsif ($varName =~ /^[a-z]/) {
+    # Variable name. Look it up.
+    $varId = $varsR->{$varName};
+    ensure($varId, "Unknown variable $varName.");
+  } else {
+    abort("Invalid variable name $varName.");
+  }
+  return $varId;
+}
+
+sub getHighByte {
+  use integer;
+  my $word = shift;
+  return ($word/256)%256;
+}
+
+sub getLowByte {
+  use integer;
+  my $word = shift;
+  return $word%256;
+}
+
+# Value format bytes.
+$VFMT_LIT_BYTE = 255;
+$VFMT_LIT_WORD = 254;
+$VFMT_VAR_ID = 253;
+
+# Emits a value. A value can be an immediate byte, word or variable
+# reference.
+# This is emitted in XL value format (format byte, plus 1 or 2
+# bytes for value).
+sub emitVal {
+  # The value to emit.
+  my $val = shift;
+  # Reference to the binary's bytes.
+  my $binaryR = shift;
+  # Dictionary of variables.
+  my $varR = shift;
+  # Name of the current procedure.
+  my $curProc = shift;
+  
+  # Is the value a literal number?
+  if ($val =~ /^\d+$/) {
+    abort("Invalid value $val") unless $val >= 0 && $val <= 65535;
+    if ($val < 243) {
+      # Literal byte that's not a special format marker: just emit
+      # the byte itself.
+      push @$binaryR, $val;
+    } elsif ($val < 256) {
+      # Prefix it with 255 to mean "literal byte follows".
+      push @$binaryR, ($VFMT_LIT_BYTE, $val);
+    } else {
+      # Literal word. 254 means "literal word follows."
+      push @$binaryR,
+        ($VFMT_LIT_WORD, getLowByte($val), getHighByte($val));
+    }
+  } elsif ($val =~ /^[.A-Z]/) {
+    # It's a symbol. Same as an immediate word, except that we
+    # emit a placeholder that we will later replace.
+    push @$binaryR, $VFMT_LIT_WORD;
+    emitImmediate("W", $val, $binaryR, $curProc);
+  } elsif ($val =~ /^[a-z]/) {
+    # Variable reference.
+    emitVarRef($binaryR, resolveVarName($val, $varR));
+  } elsif ($val =~ /^_(\d+)$/) {
+    # Variable reference (by number).
+    emitVarRef($binaryR, $1);
+  } else {
+    abort("Can't parse value $val.");
+  }
+}
+
+sub emitVarRef {
+  my ($binaryR, $varNo) = @_;
+  if ($varNo >= 1 && $varNo <= 10) {
+    # Use abbreviated form (byte value 243 - 252).
+    push @$binaryR, ensureIsByte(242 + $varNo);
+  } else {
+    # Use long form.
+    push @$binaryR, $VFMT_VAR_ID;  # Means "variable ID follows".
+    push @$binaryR, ensureIsByte($varNo);
+  }
+}
+
+# Emits an immediate.
+sub emitImmediate {
+  # "B" for byte, "W" for word.
+  my $type = shift;
+  # The immediate to emit. Can be a number of a symbol.
+  my $imm = shift;
+  # Ref to the binary.
+  my $binaryR = shift;
+  # Name of current proc.
+  my $curProc = shift;
+
+  die if ($type ne "B" && $type ne "W");
+
+  if ($imm =~ /^\d+$/) {
+    # Literal value, so just emit it.
+    if ($type eq "B") {
+      # Literal byte.
+      ensureIsByte($imm);
+      push @$binaryR, $imm;
+    } else {
+      # Literal word.
+      push @$binaryR, getLowByte($imm);
+      push @$binaryR, getHighByte($imm);
+    }
+  } elsif ($imm =~ /^[.A-Z]/) {
+    # It's a symbol name. Emit placeholder.
+    # Prefix the symbol name with the current proc, if it starts with
+    # a dot.
+    $imm = "$curProc$imm" if $imm =~ /^\./;
+    if ($type eq "B") {
+      push @$binaryR, "SYM:$imm";
+    } else {
+      push @$binaryR, "SYML:$imm";
+      push @$binaryR, "SYMH:$imm";
+    }
+  } else {
+    abort("Invalid value or symbol '$imm'");
+  }
+}
+
+sub outputBinary {
+  my $binR = shift;
+  my @bin = @$binR;
+
+  die "Option -o must be specified.\n" unless $opt_o;
+
+  print STDERR "Writing binary to ${opt_o}_lo.txt and ${opt_o}_hi.txt.\n";
+  # Start with low segment. We will later switch to the high segment.
+  open OUTPUT, ">${opt_o}_lo.txt" or die "Failed to write to ${opt_o}_lo.txt.\n";
+  select OUTPUT;
+
+  # Pad with zeros until we get an even number of 240-byte blocks.
+  while (scalar(@bin) % 240 != 0) {
+    push @bin, 0;
+  } 
+
+  my $row = 0;
+  my $segment = "LO";
+  for (my $i = 0; $i < scalar(@bin); $i++) {
+    print("\n") if ($i % 240 == 0 && $i != 0);
+    if ($i % 240 == 0) {
+      # Time to start a new row.
+      if ($row >= 136) {
+        # Switch to the high segment.
+        die "Binary too big.\n" unless $segment eq "LO";
+        close OUTPUT;
+        open OUTPUT, ">${opt_o}_hi.txt" or die "Failed to write to ${opt_o}_hi.txt.\n";
+        select OUTPUT;
+        $segment = "HI";
+        $row = 0;
+      }
+      printf("-- %03d:", $row++) if ($i % 240 == 0);
+    }
+    $hex = sprintf("%02x", $bin[$i]);
+    # Weirdly enough, TIC 80 format requires the hex digits to be
+    # flipped around.
+    $hex =~ /^(\w)(\w)/ or die;
+    print "$2$1";
+  }
+  print "\n";
+
+  select STDOUT;
+  close OUTPUT;
+}
+
+sub help {
+  open SCRIPT, "$0";
+  while (<SCRIPT>) {
+    /^## / and print(substr($_, 3));
+  }
+  exit(1);
+}
+
+help() unless getopts("o:s:d:z:");
+help() unless scalar(@ARGV) > 0;
+main()
+

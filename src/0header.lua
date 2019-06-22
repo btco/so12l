@@ -1,0 +1,5 @@
+--## title: Shadow Over the Twelve Lands
+--## author: Bruno Oliveira
+--## desc: An RPG game
+--## script: lua
+--## saveid: SO12L

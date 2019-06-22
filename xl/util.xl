@@ -1,0 +1,829 @@
+DEFINE ERROR_VAL 65535
+
+# Shop UI.
+# face: face to show
+# title: pointer to a string that serves as the title
+# msg: pointer to string array for store welcome message
+# wares: pointer to an array of ITIDs sold in the store
+# mult: price multiplier (/100).
+# k1..k6: item kinds accepted by store if player wants to sell.
+PROC UTIL_ShopUi
+ PARAM face title msg wares mult k1 k2 k3 k4 k5 k6
+
+ # TODO: remove mult argument, it's deprecated and ignored.
+ # The multiplier is always 100 (100%).
+ SET mult 100
+
+ # Welcome!
+ SND face title msg
+ SYS SYSC_SPEAK
+
+ # Do you want to buy or sell?
+ SND AChoose ChoiceBuySell CHD_F_CANCELABLE; SYS SYSC_CHOICE
+ VAR choice
+ REC choice
+ CMP choice CHOICE_BUY; JE .buy
+ CMP choice CHOICE_SELL; JE .sell
+ RET
+
+.buy:
+ # Player wants to buy. Show the items they can buy.
+ SND wares mult
+ SYS SYSC_BUY
+ RET
+
+.sell:
+ # Player wants to sell.
+ SND k1 k2 k3 k4 k5 k6
+ SYS SYSC_SELL
+ RET
+END
+
+# Save game.
+PROC UTIL_Save
+ SND .msg ChoiceNoYes CHD_F_CANCELABLE; SYS SYSC_CHOICE
+ VAR choice
+ REC choice
+ CMP choice 2; JNE .ret
+ SYS SYSC_SAVE
+.ret:
+ RET
+.msg:
+ DB 1
+ DS Save game?
+END
+
+# Rests and restores HP/SP to all characters.
+#  is_inn: if 1, this is an inn (gives bonus HP)
+PROC UTIL_Rest
+ PARAM is_inn
+ VAR i max num_chars bonus csn
+ SND PINFO_NUM_CHARS; SYS SYSC_PINFO; REC num_chars
+ # For i = 1 .. num_chars:
+ SET i 1
+.loop:
+ CMP i num_chars; JG .end_loop
+ # Restore HP to character
+ SND i CINFO_MAX_HP; SYS SYSC_CINFO; REC max
+ # If this is an inn, give a 10% bonus on HP.
+ SET bonus max; MUL bonus is_inn; DIV bonus 10; ADD max bonus
+ SND i CINFO_HP max; SYS SYSC_SET_CINFO
+ # Restore SP to character
+ SND i CINFO_MAX_SP; SYS SYSC_CINFO; REC max
+ SND i CINFO_SP max; SYS SYSC_SET_CINFO
+ ADD i 1
+ JMP .loop
+.end_loop:
+ # Clear some conditions:
+ SND CEF_STRONG; CALL CEF_ClearBitAll
+ SND CEF_INVIS; CALL CEF_ClearBitAll
+ SND CEF_ALERT; CALL CEF_ClearBitAll
+ ANDC GM_PEF_ACIDRES
+ 
+ SET csn CSN_INN
+ CMPZ is_inn; JG .skip
+ SET csn CSN_CAMPING
+.skip:
+ SND csn; SYS SYSC_CUTSCENE
+ # Blink
+ #SND 0 SRest C_BBLUE SFX_POWERUP
+ #SYS SYSC_BLINK
+END
+
+# Ensures the given character has at least 1 hp.
+PROC UTIL_Ensure1Hp
+ PARAM chi
+ VAR hp
+ # How many hp does the character currently have?
+ SND chi CINFO_HP; SYS SYSC_CINFO; REC hp
+ # Has more than 1 hp?
+ CMP hp 1
+ JG .ret
+ # Set hp to 1
+ SND chi CINFO_HP 1; SYS SYSC_SET_CINFO
+.ret:
+END
+
+PROC UTIL_SilentHeal
+ PARAM chi hp
+ VAR max cur
+ # Restore HP to character
+ SND chi CINFO_MAX_HP; SYS SYSC_CINFO; REC max
+ SND chi CINFO_HP; SYS SYSC_CINFO; REC cur
+ # If char is already at or above max, do nothing.
+ CMP cur max
+ JG .end
+ ADD cur hp
+ SND cur 1 max; CALL UTIL_Clamp; REC cur
+ SND chi CINFO_HP cur; SYS SYSC_SET_CINFO
+.end:
+END
+
+# Handles interaction with a small altar (save game).
+PROC UTIL_Altar
+ PARAM rawcr kf
+ VAR choice
+ # Altar already used?
+ CMP kf 0
+ JNZ .ret
+ # Save game?
+ SND .msg ChoiceNoYes; SYS SYSC_CHOICE 
+ REC choice
+ CMP choice 2; JNE .ret
+ # Kill tile (altars are single-use).
+ SND rawcr
+ SYS SYSC_KILL_TILE
+ # Save game.
+ CALL UTIL_Save
+ RET
+.msg:
+ DB 1
+ DS Save game?
+.ret:
+END
+
+# Asks the player if they want to go to a different map or not.
+# If they answer yes, goes to the other map.
+PROC UTIL_GoNoGo
+ PARAM msg lvl_no entpt_no sfx
+ VAR ptr lvln csn
+ # Prompt user.
+ SND msg ChoiceNoYes; SYS SYSC_CHOICE
+
+ # Did the user say yes?
+ VAR choice
+ REC choice
+ CMP choice 2; JNE .ret
+
+ # Play sound
+ SND sfx
+ SYS SYSC_SFX
+
+ # Change level.
+ SND lvl_no entpt_no
+ SYS SYSC_CHANGE_LVL
+
+ # Show level cut scene, if any.
+ SET ptr LevelCutScenes
+.loop:
+ REAW lvln ptr
+ CMP lvln lvl_no; JE .found
+ CMPZ lvln; JE .end_cs
+ ADD ptr 3
+ JMP .loop
+.found:
+ ADD ptr 2
+ REAB csn ptr
+ SND csn; SYS SYSC_CUTSCENE
+ JMP .end_cs
+.end_cs:
+.ret:
+ RET
+END
+
+# Interaction with a tree. Tests if the player hit the tree and,
+# if so, does the appropriate thing.
+PROC UTIL_Tree
+ PARAM rawcr sid kf
+
+ # What kind of tree?
+ CMP sid 50; JE .tree_full
+ CMP sid 39; JE .tree_empty
+ # Not a tree
+ RET
+
+.tree_full:
+ # If the kill flag is on, this tree is empty.
+ CMP kf 0; JNE .tree_empty
+ # Give loot.
+ SND ITID_APPLE; SYS SYSC_GIVE
+ # Consume tree.
+ SND rawcr
+ SYS SYSC_KILL_TILE
+ RET
+.tree_empty:
+ # Nothing in this tree.
+ SND .tree_empty_msg 
+ SYS SYSC_ALERT
+ RET
+.tree_empty_msg:
+ DB 1
+ DS Nothing in this tree.
+END
+
+
+# Offer to read a spellbook.
+PROC UTIL_ReadSpellbook
+ PARAM zid 
+ SND ASpellbook ChoiceNoYes CHD_F_CANCELABLE; SYS SYSC_CHOICE
+ VAR choice
+ REC choice
+ CMP choice 2; JE .accepted
+ RET 0
+.accepted:
+ SND zid
+ SYS SYSC_LEARN_SPELL
+ RET 1
+END
+
+# Determines if a raw map position is adjacent to another one
+# (differs at most by 1 row OR 1 column) or are the same.
+PROC UTIL_AreAdjacent
+ PARAM rawcr1 rawcr2
+
+ VAR adj_n adj_e adj_s adj_w
+ SET adj_n rawcr1; ADD adj_n 256
+ SET adj_s rawcr1; SUB adj_s 256
+ SET adj_e rawcr1; ADD adj_e 1
+ SET adj_w rawcr1; SUB adj_w 1
+
+ CMP rawcr2 rawcr1; JE .yes
+ CMP rawcr2 adj_n; JE .yes
+ CMP rawcr2 adj_s; JE .yes
+ CMP rawcr2 adj_e; JE .yes
+ CMP rawcr2 adj_w; JE .yes
+
+ # Not adjacent.
+ RET 0
+.yes:
+ # Yes, they are adjacent.
+ RET 1
+END
+
+# Increase the indicated stat by the indicated amount,
+# for all characters.
+# Args:
+#   stat: one of the CINFO_* constants indicating the stat to increase
+#   amt: amount to increase it by
+PROC UTIL_IncStatForAll
+ PARAM stat amt
+ VAR i cur class num_chars
+
+ SND PINFO_NUM_CHARS; SYS SYSC_PINFO; REC num_chars
+
+ # For each character:
+ SET i 1
+.loop:
+ CMP i num_chars; JG .endloop
+ # If the stat is SP and the character is not a spellcaster,
+ # we must skip this character.
+ CMP stat CINFO_SP; JE .is_sp
+ CMP stat CINFO_MAX_SP; JE .is_sp
+ JMP .ok
+.is_sp:
+ # Stat is SP-related. So check character class.
+ SND i CINFO_CLASS
+ SYS SYSC_CINFO
+ REC class
+ CMP class CLS_PALADIN; JE .ok
+ CMP class CLS_WIZARD; JE .ok
+ # If we got here, we can't add the stat to this character.
+ ADD i 1
+ JMP .loop
+
+.ok:
+ # If we got here, it's ok to add this stat to this character.
+
+ # Get current stat value.
+ SND i stat
+ SYS SYSC_CINFO
+ REC cur
+ # Add amount.
+ ADD cur amt
+ # Set stat value.
+ SND i stat cur
+ SYS SYSC_SET_CINFO
+ # Go on to next character.
+ ADD i 1
+ JMP .loop
+.endloop:
+ RET
+END
+
+# Applies the given direction to the given raw c/r, returning
+# the resulting raw c/r.
+# rawcr: The original position.
+# dir: The direction
+# delta: The # of units to add
+PROC UTIL_ApplyDir
+ PARAM rawcr dir delta
+ VAR c r
+ # Convert rawcr into c and r for easier processing.
+ SND rawcr; CALL UTIL_WordToBytes; REC c r
+ # Modify c/r to apply the direction.
+ CMP dir DIR_N; JE .n
+ CMP dir DIR_S; JE .s
+ CMP dir DIR_E; JE .e
+ CMP dir DIR_W; JE .w
+ RET rawcr
+.n:; SUB r delta; JMP .continue
+.s:; ADD r delta; JMP .continue
+.e:; ADD c delta; JMP .continue
+.w:; SUB c delta; JMP .continue
+.continue:
+ # Clamp c and r to bounds.
+ SND c 0 239; CALL UTIL_Clamp; REC c
+ SND r 0 135; CALL UTIL_Clamp; REC r
+ # Return LOHI(c,r)
+ SND c r; CALL UTIL_BytesToWord; REC rawcr
+ RET rawcr
+END
+
+# Converts a word in "low-high" format to its constituent bytes.
+PROC UTIL_WordToBytes
+ PARAM word
+ VAR lo hi
+ # lo = word%256
+ SET lo word
+ MOD lo 256
+ # hi = word//256
+ SET hi word
+ DIV hi 256
+ RET lo hi
+END
+
+# Converts 2 bytes into a word.
+PROC UTIL_BytesToWord
+ PARAM lo hi
+ VAR word
+ SET word hi
+ MUL word 256
+ ADD word lo
+ RET word
+END
+
+PROC UTIL_Clamp
+ PARAM val min max
+ CMP val min; JL .min
+ CMP val max; JG .max
+ RET val
+ .min:; RET min
+ .max:; RET max
+END
+
+# Extends a bridge.
+#  rawcr: the rawcr where the bridge starts
+#  inc: direction of bridge. Use LOHI(1,0) to grow east,
+#     LOHI(0,1) to grow south.
+#  len: length of bridge
+PROC UTIL_ExtendBridge
+ PARAM rawcr inc len
+
+.loop:
+ CMP len 0; JE .break
+ SUB len 1
+ # Make this tile into a bridge.
+ SND rawcr 49; SYS SYSC_CHANGE_SID
+ # Move on to the next one.
+ ADD rawcr inc
+ JMP .loop
+
+.break:
+ RET
+END
+
+# Inn interaction flow.
+#   face: the sprite to use as the innkeeper's face
+#   welcome: (str[]*): welcome message.
+#   price (int): price for the 1 night stay
+PROC UTIL_Inn
+ PARAM face welcome price
+ VAR paid gp choice
+
+ # Welcome!
+ SND face .title welcome; SYS SYSC_SPEAK
+ # Charge money, or not.
+ SND face .title .a_pay_msg price
+ CALL UTIL_PayIfHasMoney
+ REC paid
+ CMP paid 0; JE .ret
+ # Rest with bonus.
+ SND 1; CALL UTIL_Rest
+ # Save the game.
+ SYS SYSC_SAVE
+.ret:
+ RET
+
+.a_pay_msg:
+ DB 3
+ DS Stay at the inn for one
+ DS night? This will recover
+ DS full HP/SP.
+
+.title:
+ DS Innkeeper
+END
+
+PROC UTIL_PayIfHasMoney
+ PARAM face title offer_msg price
+
+ VAR gp paid choice
+ # Has funds?
+ SND PINFO_GOLD; SYS SYSC_PINFO; REC gp
+ CMP gp price
+ JL .no_funds
+ # Accept?
+ SND offer_msg price; SYS SYSC_PAY
+ REC paid
+ CMP paid 0
+ JG .accepted
+ RET 0
+.accepted:
+ RET 1
+
+.no_funds:
+ SND face title .a_no_funds_msg; SYS SYSC_SPEAK
+ SND 0 .a_no_funds_choice; SYS SYSC_CHOICE; REC choice
+ CMP choice 2; JE .insist
+ RET 0
+
+.insist:
+ SND 0 0 .a_insist_narr; SYS SYSC_SPEAK
+ SND face title .a_insist_ok; SYS SYSC_SPEAK
+ RET 1
+
+.a_no_funds_msg:
+ DB 2
+ DS You don't have enough
+ DS gold to pay.
+
+.a_no_funds_choice:
+ DB 2
+ DS Give up.
+ DS Insist.
+
+.a_insist_narr:
+ DB 2
+ DS You insist, arguing that
+ DS you are on an important quest.
+
+.a_insist_ok:
+ DB 2
+ DS Very well. I believe you.
+ DS But you must pay next time.
+END
+
+
+# Checks to see if the player has tried to interact with each
+# of the tiles in the indicated list, and calls the given
+# procedure if so.
+# The list is formatted as:
+#    DW xz; DW proc_to_call
+#    DW xz; DW proc_to_call
+#    ...
+#    DW 0   <-- marks end of list
+PROC UTIL_CheckInteract
+ PARAM rawcr list
+ VAR ptr xz proc
+ SET ptr list
+.loop:
+ # Read xz. If it's 0, end of list.
+ REAW xz ptr
+ CMP xz 0
+ JE .end
+ # Get proc address for this item.
+ ADD ptr 2
+ REAW proc ptr
+ # If the player interacted with this shop, call the proc.
+ CMP xz rawcr
+ JE .found
+ # Not this one, go to the next one
+ ADD ptr 2
+ JMP .loop
+.found:
+ # Found a shop. Call the procedure.
+ SND rawcr; CALL proc
+ # (fall through)
+.end:
+ RET
+END
+
+# Returns the rawcr of the tile the player is LOOKING at.
+PROC UTIL_GetTileInFrontOfPlayer
+ VAR xz dir
+ # Get player's x, z and direction.
+ SND PINFO_XZDIR
+ SYS SYSC_PINFO
+ REC xz dir
+ # What is the tile right in front of the player?
+ SND xz dir 1
+ CALL UTIL_ApplyDir
+ REC xz
+ RET xz
+END
+
+# Draws a legend on top of the screen if the player is looking
+# at the indicated tile.
+PROC UTIL_ShowLegend
+ PARAM rawcr legend
+ VAR xz
+ # If there is no message, end.
+ CMP legend 0
+ JE .ret
+ # What tile is in front of the player?
+ CALL UTIL_GetTileInFrontOfPlayer; REC xz
+ # Is it the target tile?
+ CMP xz rawcr
+ JNE .ret
+ # Draw the background rect.
+ SND 0 98 185 14 C_BLUE
+ SYS SYSC_RECT
+ # Draw the outline rect.
+ SND 0 98 185 14 C_WHITE RECTF_BORDER
+ SYS SYSC_RECT
+ # Draw text on top.
+ SND 4 102 legend C_WHITE
+ SYS SYSC_PRINT
+.ret:
+ RET
+END
+
+# Launches battle with the given enemies.
+# This returns 1 as a convenience so it can be used with TRIG_Check
+#  eid1..6: the enemies. If you want less than 6, use 0's for all
+#      the missing ones.
+#  vst: the visual style#, 0 to use the level's default style.
+PROC UTIL_Battle
+ PARAM eid1 eid2 eid3 eid4 eid5 eid6 vst
+ SND eid1 eid2 eid3 eid4 eid5 eid6 vst
+ SYS SYSC_BATTLE
+ RET 1  # For use with TRIG_Check
+END
+
+# Makes the given character speak the given message (or, if
+# the character is incapacitated, choose another one). Returns 1
+# so that this can be used with TRIG_Check.
+PROC UTIL_CharSpeak
+ PARAM chi text
+ VAR is num_chars
+ SND PINFO_NUM_CHARS; SYS SYSC_PINFO; REC num_chars
+ # Is the requested character active? If so, that's the one we use.
+ SND chi CINFO_IS_ACTIVE; SYS SYSC_CINFO; REC is
+ CMP is 0; JNE .found
+ # If not, we whatever one is active.
+ # Start search at chi=1, increment until chi==num_chars.
+ SET chi 1
+.loop:
+ SND chi CINFO_IS_ACTIVE; SYS SYSC_CINFO; REC is
+ CMP is 0; JNE .found
+ # If chi is already num_chars, end (shouldn't happen).
+ CMP chi num_chars
+ JGE .found
+ # Otherwise, increment chi and try again.
+ ADD chi 1
+ JMP .loop
+
+.found:
+ SND chi 0 text
+ SYS SYSC_SPEAK
+ RET 1  # For use with TRIG_Check
+END
+
+# Calculates and sets lighting for the current level.
+PROC UTIL_AdjustLight
+ PARAM force_flags
+
+ VAR flags
+ # Is the level dark (LVLF_DARK flag)?
+ SND LINFO_FLAGS; SYS SYSC_LINFO; REC flags
+ OR flags force_flags
+ TEST flags LVLF_DARK
+ JNZ .is_dark
+ # Level is not dark, so use full lighting.
+ SND LIGHT_FULL; SYS SYSC_SET_LIGHT
+ RET
+
+.is_dark:
+ # Level is dark, so lighting depends on whether or not there
+ # is a light source.
+ CMP GV_PEF_LIGHT 0
+ JG .limited
+ SND LIGHT_NONE
+ SYS SYSC_SET_LIGHT
+ RET
+.limited:
+ SND LIGHT_LIMITED
+ SYS SYSC_SET_LIGHT
+END
+
+# Draws a "badge" with a sprite and possibly a progress bar under it.
+#   spr: the sprite to draw
+#   x, y: position to draw it
+#   num: numerator of the progress bar
+#   den: denominator of the progress bar
+#        If num and den are 0, there is no progress bar.
+PROC UTIL_DrawBadge
+ PARAM spr x y num den
+ VAR fw
+ # Draw the sprite.
+ SND spr x y; SYS SYSC_SPR
+ # Should we draw a bar under it?
+ CMP den 0; JE .ret
+ # Set y to be below the sprite
+ ADD y 10
+ # Draw background of the bar.
+ SND x y 8 1 C_BROWN; SYS SYSC_RECT
+ # Draw foreground of the bar.
+ # fw = (num*8)//den
+ SET fw num; MUL fw 8; DIV fw den
+ # fw = Clamp(fw,0,8)
+ SND fw 0 8; CALL UTIL_Clamp; REC fw
+ # Draw foreground.
+ SND x y fw 1 C_YELLOW; SYS SYSC_RECT
+.ret:
+END
+
+# Temple "learn spell" interaction.
+#   zid: the ZID of the spell to teach.
+#   cost: the cost of the spell
+#   min_level: minimum level required
+#   s_min_level_error: the error to show if the party is not
+#       of a sufficient level yet.
+PROC UTIL_TempleLearnSpell
+ PARAM zid a_desc min_level a_min_level_error
+ VAR level has
+
+ # Give an explanation of the spell.
+ SND 230 SCleric a_desc; SYS SYSC_SPEAK
+ # What level is the party?
+ SND PINFO_LEVEL; SYS SYSC_PINFO; REC level
+ # Do they already have this spell?
+ SND zid; SYS SYSC_HAS_SPELL; REC has
+
+ # Does the party already have this spell?
+ CMP has 0; JNE .already_has
+ # Is party of sufficient level?
+ CMP level min_level; JL .not_enough_level
+ # Ok, let's teach.
+ SND .a_learn_spell ChoiceNoYes CHD_F_CANCELABLE; SYS SYSC_CHOICE
+ VAR choice
+ REC choice
+ CMP choice 2; JNE .ret
+ SND zid; SYS SYSC_LEARN_SPELL
+.ret:
+ RET
+
+.a_learn_spell:
+ DB 1
+ DS Learn spell?
+
+.already_has:
+ SND .a_already_has; SYS SYSC_ALERT
+ RET
+
+.not_enough_level:
+ SND a_min_level_error; SYS SYSC_ALERT
+ RET
+
+.a_already_has:
+ DB 1
+ DS You already know this spell.
+END
+
+# itid: the food item being eaten
+# idx: its index in the inventory
+# hp: hitpoints to heal
+# cef_clear: character effects to clear (mask)
+# cef_grant: character effects to grant (mask)
+PROC UTIL_EatFood
+ PARAM itid idx hp cef_clear cef_grant
+ VAR chi
+ # Who will eat?
+ SND 0 AWhoWillEat CHD_F_CANCELABLE; SYS SYSC_ASK_WHO
+ REC chi
+ # If chi is 0, action was cancelled.
+ CMP chi 0; JE .ret
+ # Heal given character
+ SND chi hp; SYS SYSC_HEAL
+ # Clear/set character effects as needed.
+ SND chi cef_clear; CALL CEF_ClearBit
+ SND chi cef_grant; CALL CEF_SetBit
+ # Spend the item.
+ SND itid idx; SYS SYSC_REMOVE_ITEM
+.ret:
+ RET
+END
+
+PROC UTIL_GetCharBoxXY
+ PARAM chi
+ VAR x
+ # (chi-1)*CHAR_BOX_STRIDE,CHAR_BOX_Y
+ SET x chi
+ SUB x 1
+ MUL x CHAR_BOX_STRIDE
+ RET x CHAR_BOX_Y
+END
+
+# Does the cartographer map update dialogue.
+# If this returns 1, you should update the map. 0 means no map.
+PROC UTIL_CartographerDialogue
+ VAR has choice
+ # Does the party already have the world map?
+ SND ITID_WORLD_MAP; SYS SYSC_GET_ITEM_COUNT; REC has
+ CMP has 0; JE .no_map
+ # Has map.
+ SND 223 SCartographer .a_update_offer; SYS SYSC_SPEAK
+ SND .a_update_prompt ChoiceNoYes; SYS SYSC_CHOICE; REC choice
+ CMP choice 2; JNE .ret0
+ # Asked for update.
+ SND 223 SCartographer .a_update_done; SYS SYSC_SPEAK
+ RET 1
+.no_map:
+ SND 223 SCartographer .a_no_map; SYS SYSC_SPEAK
+.ret0:
+ RET 0
+.a_no_map:
+ DB 6
+ DS I can update world maps.
+ DS Come back when you have one!
+ DS
+ DS If you need one, see the
+ DS cartographer in the Blossom
+ DS Fields.
+.a_update_offer:
+ DB 3
+ DS Hello! I can update world
+ DS maps. Shall I update your
+ DS world map with what I know?
+.a_update_done:
+ DB 3
+ DS Done! Your map now contains
+ DS all the areas that I have
+ DS charted.
+.a_update_prompt:
+ DB 1
+ DS Let him update your map?
+END
+
+# Portal interaction.
+#   prompt: (string[]*) Prompt message.
+#   lvln: level to jump to
+#   entpt: entry point to jump to
+#   mapcr: the world map rawcr corresponding to the
+#          destination (to update the blinking dot in the world map).
+PROC UTIL_Portal
+ PARAM prompt lvln entpt mapcr
+ VAR choice
+ # Do you want to step into the portal?
+ SND prompt ChoiceNoYes; SYS SYSC_CHOICE; REC choice
+ # No? Then nevermind.
+ CMP choice 2; JNE .ret
+ # Send player to destination.
+ SND lvln entpt; SYS SYSC_CHANGE_LVL
+ # Update position in world map.
+ SND mapcr; CALL WMAP_UpdatePos
+.ret:
+ RET
+END
+
+# Given x, returns -x. Because we have no smart way
+# to do that in XL assembly.
+PROC UTIL_Negative
+ PARAM x
+ VAR r
+ SUB r x
+ RET r
+END
+
+# Hurts a character (chi) by the given amount.
+# Use chi=0 for all characters.
+PROC UTIL_Hurt
+ PARAM chi hp
+ SND hp; CALL UTIL_Negative; REC hp
+ SND chi hp; SYS SYSC_HEAL
+END
+
+PROC UTIL_HutWithSpellbook
+ PARAM zid
+ DIA_NARR
+ {
+  DT The hut is abandoned.
+  .. You search it and find an
+  .. old spellbook.
+ }
+ SND zid; CALL UTIL_ReadSpellbook
+END
+
+PROC UTIL_ReadBookOnce
+ PARAM rawcr msg cb udata
+ VAR kf
+ # Was book already read?
+ SND rawcr TINFO_IS_KILLED; SYS SYSC_TINFO; REC kf
+ CMPZ kf; JNE .already_read
+ VAR choice
+ SND msg ChoiceNoYes CHD_F_CANCELABLE; SYS SYSC_CHOICE; REC choice
+ CMP choice 2; JNE .end
+ # Mark tile as killed.
+ SND rawcr; SYS SYSC_KILL_TILE
+ # Call the callback.
+ SND udata; CALL cb
+ RET
+.already_read:
+ SND *; SYS SYSC_ALERT
+ {
+  DT You learn nothing
+  .. new from this book.
+ }
+.end:
+END
+

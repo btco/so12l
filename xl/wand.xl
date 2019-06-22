@@ -1,0 +1,71 @@
+# Wand usage
+
+# Base spell prices. This array must exactly correspond to the list
+# of spells in spells.lua.
+# This is the price for a scroll of the given spell.
+# Wands are 3x more expensive.
+EXPORT ScrollPrices:
+ DB 15  # array length
+   DB 50  # ZID_HEAL
+   DB 30  # ZID_LIGHT
+   DB 40  # ZID_PROTECT
+   DB 30  # ZID_STUN
+   DB 0   # ZID_ACIDRES -- not randomly generated
+   DB 30  # ZID_AWAKEN 6
+   DB 25  # ZID_CURE_POISON 7
+   DB 30  # ZID_STRENGTHEN 8
+   DB 30  # ZID_BURN
+   DB 30  # ZID_FORCE_BEAD
+   DB 100 # ZID_TEMPEST
+   DB 125 # ZID_LIGHTNING
+   DB 25  # ZID_PUSH
+   DB 30  # ZID_INVIS
+   DB 40  # ZID_IDENTIFY
+
+PROC WAND_Use
+ PARAM itid idx chi
+ # note: chi>=1 means this is being used in combat by the given
+ # character.
+ VAR ptr this_itid zid st rnd
+ # Get the wand's state byte.
+ SND idx; SYS SYSC_GET_INV; REC itid st
+ # Any charges left? Num charges is masked by the enchant mask.
+ TEST st ITSF_ENCHANT_MASK
+ # No charges left?
+ JZ .depleted
+ # Ok, we're ready to consume one charge. To do that we subtract 4
+ # from the state (WARNING: this assumes that charges are stored
+ # with a shift of 2, which is true per ../src/items.lua -- keep
+ # these in sync).
+ SUB st 4   # consume 1 charge
+ # Write back.
+ SND idx itid st; SYS SYSC_SET_INV
+ # If the wand is cursed, do the cursed effect with 70% chance.
+ RND rnd 0 100
+ CMP rnd 30; JL .no_curse
+ TEST st ITSF_CURSED; JNZ .cursed
+.no_curse:
+ # A wand casts a spell whose ZID is offset from its itid
+ # by ITID_WAND_FIRST_MINUS_1, so subtract that from the itid
+ # to figure out the ZID
+ SET zid itid
+ SUB zid ITID_WAND_FIRST_MINUS_1
+ # Now cast the spell.
+ # Note that we use chi == 0 to mean that nobody is casting the
+ # spell, as it is being cast by a wand.
+ SND 0 zid; SYS SYSC_CAST_SPELL
+ RET
+.depleted:
+ SND *; SYS SYSC_ALERT
+ {
+  DT You try to use the wand
+  .. but nothing happens.
+ }
+ RET
+.cursed:
+ # Cursed wand effect.
+ SND itid idx chi; CALL CURSED_Effect
+ RET
+.end:
+END
+

@@ -1,0 +1,11 @@
+# This proc is used to execute client-supplied code.
+EXPORT PROC XLEXEC_Proc
+ # 32 bytes
+ RET;RET;RET;RET;RET;RET;RET;RET
+ RET;RET;RET;RET;RET;RET;RET;RET
+ RET;RET;RET;RET;RET;RET;RET;RET
+ RET;RET;RET;RET;RET;RET;RET;RET
+
+ # Plus a guaranteed RET at the end.
+ RET
+END

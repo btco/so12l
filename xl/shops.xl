@@ -1,0 +1,155 @@
+# SHOPS
+
+PROC SHOP_Blacksmith
+ PARAM wares
+ SND 250 SBlacksmith * wares 100 ITK_MWEAP ITK_RWEAP
+ {
+  DT Welcome! We buy and sell
+  .. weapons.
+ }
+ CALL UTIL_ShopUi
+END
+
+PROC SHOP_Fletcher
+ PARAM wares
+ SND 254 SFletcher * wares 100 ITK_RWEAP
+ {
+  DT Welcome! We sell bows.
+ }
+ CALL UTIL_ShopUi
+END
+
+PROC SHOP_ArmorShop
+ PARAM wares
+ SND 251 SArmorShop * wares 100 ITK_ARMOR ITK_HELM ITK_SHIELD ITK_BOOT ITK_BELT
+ {
+  DT Welcome! We buy and sell
+  .. armor.
+ }
+ CALL UTIL_ShopUi
+END
+
+PROC SHOP_BootShop
+ PARAM wares
+ SND 252 SBootShop * wares 100 ITK_BOOT
+ {
+  DT Welcome! We buy and sell
+  .. boots.
+ }
+ CALL UTIL_ShopUi
+END
+
+PROC SHOP_GeneralStore
+ SND 0; CALL SHOP_GeneralStoreCustom
+END
+
+PROC SHOP_GeneralStoreCustom
+ PARAM text  # optional alternate text, if 0 will use default.
+
+ CMP text 0; JNZ .nonzero
+ SET text .msg
+.nonzero:
+
+ SND 252 SGeneralStore text .wares 100 ITK_THING
+ CALL UTIL_ShopUi
+ RET
+.msg:
+ DT Welcome! We sell general
+ .. supplies. What do you need?
+.wares:
+ DB 4
+ DB ITID_RATION
+ DB ITID_TORCH
+ DB ITID_APPLE
+ DB ITID_SHOVEL
+END
+
+PROC SHOP_PotionShop
+ PARAM wares
+ SND 251 SPotionShop .msg wares 100 ITK_POTION ITK_SCROLL ITK_WAND ITK_RING ITK_AMULET
+ CALL UTIL_ShopUi
+ RET
+.msg:
+ DB 2
+ DS Welcome!
+ DS We trade in potions.
+END
+
+SHOP_Wares_Potions1:
+ DB 3
+ DB ITID_POTION_HEALING
+ DB ITID_POTION_MANA
+ DB ITID_POTION_INVIS
+
+SHOP_Wares_Potions2:
+ DB 6
+ DB ITID_POTION_HEALING
+ DB ITID_POTION_MANA
+ DB ITID_POTION_INVIS
+ DB ITID_POTION_AWAKE
+ DB ITID_POTION_FIRE
+ DB ITID_POTION_ANTIDOTE
+
+
+PROC SHOP_ScrollShop
+ SND 251 SScrollShop .msg .wares 100 ITK_SCROLL ITK_POTION ITK_WAND ITK_RING ITK_AMULET
+ CALL UTIL_ShopUi
+ RET
+.msg:
+ DB 2
+ DS Welcome!
+ DS We trade in scrolls.
+.wares:
+ DB 12
+ DB ITID_SCROLL_HEAL
+ DB ITID_SCROLL_LIGHT
+ DB ITID_SCROLL_PROTECT
+ DB ITID_SCROLL_STUN
+ DB ITID_SCROLL_AWAKEN
+ DB ITID_SCROLL_CURE_POISON
+ DB ITID_SCROLL_STRENGTHEN
+ DB ITID_SCROLL_FORCE_BEAD
+ DB ITID_SCROLL_TEMPEST
+ DB ITID_SCROLL_LIGHTNING
+ DB ITID_SCROLL_PUSH
+ DB ITID_SCROLL_INVIS
+END
+
+PROC SHOP_RingShop
+ PARAM wares
+ SND 254 SRingShop .msg wares 100 ITK_SCROLL ITK_POTION ITK_WAND ITK_RING ITK_AMULET
+ CALL UTIL_ShopUi
+ RET
+.msg:
+ DB 2
+ DS Welcome!
+ DS We trade in rings.
+END
+
+SHOP_Wares_Rings1:
+ DB 2
+ DB ITID_RING_OF_SPEED
+ DB ITID_RING_DEFENSE1
+
+SHOP_Wares_Rings2:
+ DB 5
+ DB ITID_RING_OF_SPEED
+ DB ITID_RING_POISON_RES
+ DB ITID_RING_SLEEP_RES
+ DB ITID_RING_DEFENSE1
+ DB ITID_RING_DEFENSE2
+
+SHOP_Wares_Rings3:
+ DB 7
+ DB ITID_RING_OF_SPEED
+ DB ITID_RING_DEFROST
+ DB ITID_RING_POISON_RES
+ DB ITID_RING_SLEEP_RES
+ DB ITID_RING_DEFENSE1
+ DB ITID_RING_DEFENSE2
+ DB ITID_RING_DEFENSE3
+
+PROC SHOP_Expert
+ SND 1; CALL IDENT_Launch
+END
+

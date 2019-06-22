@@ -1,0 +1,70 @@
+# TUNN (Tunnel from SE to SK).
+
+PROC TUNN_EnterFromSE
+ VAR nchars
+ # If Vic is not yet in the party, Lyla complains.
+ SND PINFO_NUM_CHARS; SYS SYSC_PINFO; REC nchars
+ CMP nchars 4; JL .complain
+ # Ask the player if they want to enter.
+ SND ATunnel LVLN_TUNN ENTPT_TUNN_W; CALL UTIL_GoNoGo
+ RET
+
+.complain:
+ DIA_CS_3
+ {
+  DT That cave goes to the
+  .. South Kingdom. Before we
+  .. go, we should meet Vic
+  .. in Sun Port.
+ }
+END
+
+PROC TUNN_EnterFromSK
+ # Ask the player if they want to enter.
+ SND ATunnel LVLN_TUNN ENTPT_TUNN_E; CALL UTIL_GoNoGo
+END
+
+# Interaction proc
+EXPORT PROC TUNN_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr TUNN_Interactibles; CALL UTIL_CheckInteract
+ # Looting a chest?
+ CMP sid 40; SND rawcr LOL_B; CE LOOT_ChestRandom #@q_VQ_TUNN loot_count=4
+ RET
+END
+
+# Walk proc (if needed):
+EXPORT PROC TUNN_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ SND 1 rawcr UTIL_Battle EID_SNAKE EID_SNAKE #@q_VQ_TUNN
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_SNAKE EID_SNAKE EID_RSNAKE #@q_VQ_TUNN
+ CALL TRIG_Check
+ SND 3 rawcr UTIL_Battle EID_SNAKE EID_SNAKE EID_RSNAKE EID_RSNAKE #@q_VQ_TUNN
+ CALL TRIG_Check
+ SND 4 rawcr UTIL_Battle EID_SNAKE EID_SNAKE EID_RSNAKE EID_RSNAKE #@q_VQ_TUNN
+ CALL TRIG_Check
+ RET
+END
+
+# Leave, west end.
+PROC TUNN_LeaveW
+ SND AStairsUp LVLN_WRLD ENTPT_WRLD_FROM_TUNN_SE SFX_STAIRS_UP
+ CALL UTIL_GoNoGo
+END
+
+# Leave, east end.
+PROC TUNN_LeaveE
+ SND AStairsUp LVLN_WRLD ENTPT_WRLD_FROM_TUNN_SK SFX_STAIRS_UP
+ CALL UTIL_GoNoGo
+END
+
+# TUNN INTERACTIBLES LIST
+# (position, title, proc)
+TUNN_Interactibles:
+ DW LOHI(211,71) TUNN_LeaveW
+ DW LOHI(236,79) TUNN_LeaveE
+ DW 0
+

@@ -1,0 +1,228 @@
+# JAIL level
+
+# Value of PCLK at level boot time.
+DEFINE TGV_INIT_PCLK TGV_LVL_A
+
+EXPORT PROC JAIL_Boot
+ SND PINFO_PCLK; SYS SYSC_PINFO
+ REC TGV_INIT_PCLK
+END
+
+EXPORT PROC JAIL_Walk
+ PARAM rawcr pdir
+ VAR ticks
+
+ # Calculate how many ticks have passed since
+ # level was loaded.
+ SND PINFO_PCLK; SYS SYSC_PINFO
+ REC ticks
+ SUB ticks TGV_INIT_PCLK
+
+ # Time to trigger a narration?
+ CMP ticks 10; CE JAIL_Narr0
+ CMP ticks 20; CE JAIL_Narr1
+ CMP ticks 30; CE JAIL_Narr2
+ CMP ticks 40; CE JAIL_Narr3
+ CMP ticks 50; CE JAIL_Narr4
+END
+
+PROC JAIL_Narr0
+ SND 8 7; CALL JAIL_SetHp
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ RET
+.a_narr:
+ DT One year has passed.
+ ..
+ .. Markus, the vice-governor who
+ .. imprisoned you, denied you
+ .. clemency.
+ ..
+ .. You have 29 years left in your
+ .. sentence.
+END
+
+PROC JAIL_Narr1
+ SND 6 5; CALL JAIL_SetHp
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ RET
+.a_narr:
+ DT Two years have passed.
+ ..
+ .. You hear that Markus left town
+ .. with the crystals and
+ .. vanished.
+END
+
+PROC JAIL_Narr2
+ SND 5 4; CALL JAIL_SetHp
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ RET
+.a_narr:
+ DT Five years have passed.
+ ..
+ .. People speak of a new evil
+ .. coming from the East, from
+ .. the city of Ignis. A new
+ .. Sorcerer King rose to power.
+END
+
+PROC JAIL_Narr3
+ SND 4 3 2 1; CALL JAIL_SetHp
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ RET
+.a_narr:
+ DT Ten years have passed.
+ ..
+ .. The once peaceful world is
+ .. now full of monsters,
+ .. controlled by the
+ .. Sorcerer King.
+END
+
+PROC JAIL_Narr4
+ VAR choice
+ SND 2 1; CALL JAIL_SetHp
+
+ SND 0 0 .a_footsteps; SYS SYSC_SPEAK
+ SND 225 SHoodedFigure .a_hooded_hello; SYS SYSC_SPEAK
+ SND 0 .a_hello_replies; SYS SYSC_CHOICE; REC choice
+ CMP choice 4; JNE .continue
+ SND 225 SHoodedFigure .a_yes_you_need_me; SYS SYSC_SPEAK
+.continue:
+ SND 0 0 .a_reveals_herself; SYS SYSC_SPEAK
+ SND 241 SLyla .a_i_am_lyla; SYS SYSC_SPEAK
+ SND 241 SLyla .a_four_crystals; SYS SYSC_SPEAK
+ SND 241 SLyla .a_four_crystals2; SYS SYSC_SPEAK
+ SND 241 SLyla .a_four_crystals3; SYS SYSC_SPEAK
+ SND 241 SLyla .a_four_crystals4; SYS SYSC_SPEAK
+ SND 0 .a_accuse_answers; SYS SYSC_CHOICE; REC choice
+ SND 241 SLyla .a_doesnt_matter; SYS SYSC_SPEAK
+ SND 241 SLyla .a_other_four; SYS SYSC_SPEAK
+ SND 241 SLyla .a_other_four2; SYS SYSC_SPEAK
+ SND 0 0 .a_shows_key; SYS SYSC_SPEAK
+ SND 241 SLyla .a_can_i_join; SYS SYSC_SPEAK
+ SND 0 ChoiceNoYes; SYS SYSC_CHOICE; REC choice
+ CMP choice 2; JE .said_yes
+ SND 241 SLyla .a_no_not_an_option; SYS SYSC_SPEAK
+.said_yes:
+ # Join party.
+ SND LylaChar; SYS SYSC_ADD_CHAR
+
+ SND 0 0 .a_opens_cell; SYS SYSC_SPEAK
+ SND 241 SLyla .a_lets_go; SYS SYSC_SPEAK
+
+ # Open cell doors.
+ SND LOHI(198,28)
+ SYS SYSC_KILL_TILE
+ RET
+
+.a_footsteps:
+ DT You hear footsteps.
+ .. A hooded figure appears.
+ .. Your first visitor!
+.a_hooded_hello:
+ DT Speak quietly. I got
+ .. rid of the guards but
+ .. more may be coming.
+.a_hello_replies:
+ DT Go on.
+ .. Who are you?
+ .. Why are you helping us?
+ .. We don't need you.
+.a_yes_you_need_me:
+ DT I am your only hope of
+ .. escape. If you are not
+ .. ready, should I come back
+ .. in another 10 years?
+.a_reveals_herself:
+ DT The figure removes her hood.
+.a_i_am_lyla:
+ DT My name is Lyla.
+.a_four_crystals:
+ DT Ten years ago, you brought
+ .. the Four Crystals to Markus.
+.a_four_crystals2:
+ DT The Crystals open the gates
+ .. of Ignis, the ancient city
+ .. in the East.
+.a_four_crystals3:
+ DT Markus used the crystals to
+ .. enter and became the new
+ .. Sorcerer King.
+.a_four_crystals4:
+ DT In summary, you have let
+ .. loose a great evil upon
+ .. the world.
+.a_accuse_answers:
+ DT We are... sorry?
+ .. It was not our fault.
+ .. The governor told us to.
+ .. How dare you accuse us?
+.a_doesnt_matter:
+ DT The past does not matter.
+ .. We must fix things.
+.a_other_four:
+ DT Legend speaks of another set
+ .. of Four Crystals.
+.a_other_four2:
+ DT We must find the Four
+ .. Crystals and go defeat
+ .. Markus.
+.a_shows_key:
+ DT Lyla produces a key.
+.a_can_i_join:
+ DT If I free you, will you
+ .. join me in this quest?
+.a_no_not_an_option:
+ DT I was just being polite.
+ .. You don't have a choice.
+.a_opens_cell:
+ DT She opens the cell door.
+.a_lets_go:
+ DT Let's get out of here.
+END
+
+EXPORT PROC JAIL_Interact
+ PARAM rawcr xz sid kf
+ # Leave?
+ CMP sid 12; CE JAIL_Leave
+ # Bars?
+ CMP sid 51; CE JAIL_Bars
+END
+
+PROC JAIL_Leave
+ SND 0 0 .a_leave1; SYS SYSC_SPEAK
+ SND 241 SLyla .a_leave2; SYS SYSC_SPEAK
+ SND LVLN_RSTO ENTPT_RSTO_FROM_JAIL
+ SYS SYSC_CHANGE_LVL
+ RET
+.a_leave1:
+ DT As you exit, you collect your
+ .. items from the guards' room.
+.a_leave2:
+ DT We must seek Vic, a wizard
+ .. who lives in Sun Port.
+ .. He will help us.
+END
+
+PROC JAIL_Bars
+ DIA_CS_1
+ {
+  DT We can't open these bars...
+ }
+ DIA_CS_2
+ {
+  DT I'd say that's an essential
+  .. part of a prison's design.
+ }
+END
+
+PROC JAIL_SetHp
+ PARAM hp1 hp2
+ SND 1 CINFO_HP hp1; SYS SYSC_SET_CINFO
+ SND 2 CINFO_HP hp2; SYS SYSC_SET_CINFO
+ SND 1 CINFO_SP 0; SYS SYSC_SET_CINFO
+ SND 2 CINFO_SP 0; SYS SYSC_SET_CINFO
+END
+
+

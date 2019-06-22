@@ -1,0 +1,133 @@
+# WRLD region: Great Desert (DE)
+# This is the Great Desert at the center of the world map.
+
+# Interactibles list
+WRLD_DE_Interactibles:
+ # Supplies hut.
+ DW LOHI(84,37) WRLD_DE_SuppliesHut
+ # Boat to Southern Kingdom.
+ DW LOHI(86,42) WRLD_DE_BoatToSK
+ # Oasis hut
+ DW LOHI(101,30) WRLD_DE_OasisHut
+ # Cartographer hut
+ DW LOHI(63,20) WRLD_DE_CartographerHut
+ # Entrace to Sand Haven (SAHA):
+ DW LOHI(104,39) SAHA_EnterFromWrld
+ # Hut with spellbook
+ DW LOHI(65,31) WRLD_DE_SpellHut
+ # Hut with hint about buried spellbook
+ DW LOHI(105,25) WRLD_DE_HintHut
+ # Ring Shop
+ DW LOHI(111,11) WRLD_DE_RingShop
+ # -------- End of table marker --------
+ DW 0
+
+PROC WRLD_DE_Walk
+ PARAM rawcr pdir
+END
+
+PROC WRLD_DE_SuppliesHut
+ SND *; CALL SHOP_GeneralStoreCustom
+ {
+  DT The desert is treacherous.
+  .. Carry plenty of food with
+  .. you.
+ }
+END
+
+PROC WRLD_DE_BoatToSK
+ VAR choice
+ SND .a_boat ChoiceNoYes; SYS SYSC_CHOICE; REC choice
+ CMP choice 2; JE .go
+ RET
+.go:
+ SND PINFO_XZDIR LOHI(82,51) DIR_S; SYS SYSC_SET_PINFO
+ RET
+.a_boat:
+ DT Sail back to Riverside?
+END
+
+PROC WRLD_DE_OasisHut
+ VAR choice
+ SND 251 STrader .a_welcome; SYS SYSC_SPEAK
+ SND 0 .a_choices; SYS SYSC_CHOICE; REC choice
+ CMP choice 1; JE .sale
+ CMP choice 2; JE .saha
+ CMP choice 3; JE .life
+ RET
+.sale:
+ SND 251 STrader .a_sale .wares 400 ITK_THING
+ CALL UTIL_ShopUi
+ RET
+.saha:
+ SND 251 STrader .a_saha; SYS SYSC_SPEAK
+ RET
+.life:
+ SND 251 STrader .a_life; SYS SYSC_SPEAK
+ RET
+.a_sale:
+ DT Here is what I have.
+.wares:
+ DB 6
+ DB ITID_RATION
+ DB ITID_PEAR
+ DB ITID_TORCH
+ DB ITID_POTION_HEALING
+ DB ITID_POTION_AWAKE
+ DB ITID_SCROLL_AWAKEN
+.a_welcome:
+ DT Welcome to the Oasis trading
+ .. post.
+.a_choices:
+ DT What do you have for sale?
+ .. We're looking for Sand Haven.
+ .. How is life around here?
+.a_saha:
+ DT Sand Haven is to the south.
+ .. It was abandoned long ago.
+ .. Some say the Obelisk in the
+ .. city's main square is
+ .. cursed.
+.a_life:
+ DT Ever since the Sorcerer King
+ .. rose to power, the Desert is
+ .. filled with monsters.
+ .. Not many travelers since
+ .. then.
+END
+
+PROC WRLD_DE_CartographerHut
+ VAR upd
+ CALL UTIL_CartographerDialogue; REC upd
+ CMP upd 1; JNE .ret
+ # Update map with Desert regions.
+ OR GV_WMAPREV_COL_C WMAPREV_MASK_ROW_0
+ OR GV_WMAPREV_COL_C WMAPREV_MASK_ROW_1
+ OR GV_WMAPREV_COL_C WMAPREV_MASK_ROW_2
+ OR GV_WMAPREV_COL_D WMAPREV_MASK_ROW_0
+ OR GV_WMAPREV_COL_D WMAPREV_MASK_ROW_1
+ OR GV_WMAPREV_COL_D WMAPREV_MASK_ROW_2
+.ret:
+ RET
+END
+
+PROC WRLD_DE_SpellHut
+ SND ZID_LIGHTNING; CALL UTIL_HutWithSpellbook
+END
+
+PROC WRLD_DE_HintHut
+ DIA_NARR
+ {
+  DT This hut is abandoned.
+  .. A diary on the table reads:
+  ..   "To the east of Sand Haven
+  ..   there is a single palm tree.
+  ..   Buried under it is a valuable
+  ..   spellbook."
+ }
+END
+
+PROC WRLD_DE_RingShop
+ SND SHOP_Wares_Rings2; CALL SHOP_RingShop
+END
+

@@ -1,0 +1,1333 @@
+# TILES DB
+
+EXPORT TileDb:
+
+# Empty tile.
+DB TILE_XL_HDR_NORMAL; DB 0
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Stone wall SE
+DB TILE_XL_HDR_NORMAL; DB 1
+ # Flags
+ DW BOR(TF_WALL_E,TF_WALL_S,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_WALL      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Stone wall S
+DB TILE_XL_HDR_NORMAL; DB 2
+ # Flags
+ DW BOR(TF_WALL_S,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_WALL      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Stone wall SW
+DB TILE_XL_HDR_NORMAL; DB 3
+ # Flags
+ DW BOR(TF_WALL_W,TF_WALL_S,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_WALL      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Stone wall E
+DB TILE_XL_HDR_NORMAL; DB 17
+ # Flags
+ DW BOR(TF_WALL_E,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_WALL      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Stone wall W
+DB TILE_XL_HDR_NORMAL; DB 19
+ # Flags
+ DW BOR(TF_WALL_W,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_WALL      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Stone wall NE
+DB TILE_XL_HDR_NORMAL; DB 33
+ # Flags
+ DW BOR(TF_WALL_E,TF_WALL_N,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_WALL      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Stone wall N
+DB TILE_XL_HDR_NORMAL; DB 34
+ # Flags
+ DW BOR(TF_WALL_N,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_WALL      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Stone wall NW
+DB TILE_XL_HDR_NORMAL; DB 35
+ # Flags
+ DW BOR(TF_WALL_W,TF_WALL_N,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_WALL      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Stone floor
+DB TILE_XL_HDR_NORMAL; DB 18
+ # Flags
+ DW 0
+ DB T_STONE_FLOOR     # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Wooden wall SE
+DB TILE_XL_HDR_NORMAL; DB 4
+ # Flags
+ DW BOR(TF_WALL_E,TF_WALL_S,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_WOOD_PLANKS     # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Wooden wall S
+DB TILE_XL_HDR_NORMAL; DB 5
+ # Flags
+ DW BOR(TF_WALL_S,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_WOOD_PLANKS     # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Wooden wall SW
+DB TILE_XL_HDR_NORMAL; DB 6
+ # Flags
+ DW BOR(TF_WALL_W,TF_WALL_S,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_WOOD_PLANKS     # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Wooden wall E
+DB TILE_XL_HDR_NORMAL; DB 20
+ # Flags
+ DW BOR(TF_WALL_E,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_WOOD_PLANKS     # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Wooden wall W
+DB TILE_XL_HDR_NORMAL; DB 22
+ # Flags
+ DW BOR(TF_WALL_W,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_WOOD_PLANKS     # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Wooden wall NE
+DB TILE_XL_HDR_NORMAL; DB 36
+ # Flags
+ DW BOR(TF_WALL_E,TF_WALL_N,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_WOOD_PLANKS     # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Wooden wall N
+DB TILE_XL_HDR_NORMAL; DB 37
+ # Flags
+ DW BOR(TF_WALL_N,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_WOOD_PLANKS     # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Wooden wall NW
+DB TILE_XL_HDR_NORMAL; DB 38
+ # Flags
+ DW BOR(TF_WALL_W,TF_WALL_N,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_WOOD_PLANKS     # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall SE
+DB TILE_XL_HDR_NORMAL; DB 9
+ # Flags
+ DW BOR(TF_WALL_E,TF_WALL_S,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall S
+DB TILE_XL_HDR_NORMAL; DB 10
+ # Flags
+ DW BOR(TF_WALL_S,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall SW
+DB TILE_XL_HDR_NORMAL; DB 11
+ # Flags
+ DW BOR(TF_WALL_W,TF_WALL_S,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall E
+DB TILE_XL_HDR_NORMAL; DB 25
+ # Flags
+ DW BOR(TF_WALL_E,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall W
+DB TILE_XL_HDR_NORMAL; DB 27
+ # Flags
+ DW BOR(TF_WALL_W,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall NE
+DB TILE_XL_HDR_NORMAL; DB 41
+ # Flags
+ DW BOR(TF_WALL_E,TF_WALL_N,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall N
+DB TILE_XL_HDR_NORMAL; DB 42
+ # Flags
+ DW BOR(TF_WALL_N,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall NW
+DB TILE_XL_HDR_NORMAL; DB 43
+ # Flags
+ DW BOR(TF_WALL_W,TF_WALL_N,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall NS
+DB TILE_XL_HDR_NORMAL; DB 67
+ # Flags
+ DW BOR(TF_WALL_S,TF_WALL_N,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall EW
+DB TILE_XL_HDR_NORMAL; DB 68
+ # Flags
+ DW BOR(TF_WALL_E,TF_WALL_W,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall NES
+DB TILE_XL_HDR_NORMAL; DB 69
+ # Flags
+ DW BOR(TF_WALL_N,TF_WALL_E,TF_WALL_S,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall ESW
+DB TILE_XL_HDR_NORMAL; DB 70
+ # Flags
+ DW BOR(TF_WALL_E,TF_WALL_S,TF_WALL_W,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall SWN
+DB TILE_XL_HDR_NORMAL; DB 71
+ # Flags
+ DW BOR(TF_WALL_S,TF_WALL_W,TF_WALL_N,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall WNE
+DB TILE_XL_HDR_NORMAL; DB 72
+ # Flags
+ DW BOR(TF_WALL_W,TF_WALL_N,TF_WALL_E,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave wall (all 4 walls)
+DB TILE_XL_HDR_NORMAL; DB 90
+ # Flags
+ DW BOR(TF_WALL_W,TF_WALL_N,TF_WALL_E,TF_WALL_S,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_CAVE_WALL       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Window (horizontal)
+DB TILE_XL_HDR_NORMAL; DB 66
+ # Flags
+ DW BOR(TF_WALL_N,TF_SOLID,TF_WALL_TRANSPARENT,TF_WALL_OFFSET_NS_50)
+ DB T_CAVE_FLOOR      # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_WINDOW          # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Stairs UP
+DB TILE_XL_HDR_NORMAL; DB 12
+ # Flags
+ DW BOR(TF_WALL_E,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STAIRS_UP       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Stairs DOWN
+DB TILE_XL_HDR_NORMAL; DB 28
+ # Flags
+ DW BOR(TF_WALL_W,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STAIRS_DOWN     # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Interior wooden floor
+DB TILE_XL_HDR_NORMAL; DB 21
+ # Flags
+ DW 0
+ DB T_WOOD_PLANKS     # Floor TID
+ DB T_WOOD_PLANKS     # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Cave floor
+DB TILE_XL_HDR_NORMAL; DB 26
+ # Flags
+ DW 0
+ DB T_CAVE_FLOOR      # Floor TID
+ DB T_CAVE_FLOOR      # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Door S
+DB TILE_XL_HDR_NORMAL; DB 16
+ # Flags
+ DW BOR(TF_WALL_S,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_DOOR      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Door E
+DB TILE_XL_HDR_NORMAL; DB 32
+ # Flags
+ DW BOR(TF_WALL_E,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_DOOR      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Door W
+DB TILE_XL_HDR_NORMAL; DB 101
+ # Flags
+ DW BOR(TF_WALL_W,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_DOOR      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Door N
+DB TILE_XL_HDR_NORMAL; DB 102
+ # Flags
+ DW BOR(TF_WALL_N,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_DOOR      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Grass, outdoors.
+DB TILE_XL_HDR_NORMAL; DB 7
+ # Flags
+ DW 0
+ DB T_GRASS           # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Sand, outdoors.
+DB TILE_XL_HDR_NORMAL; DB 44
+ # Flags
+ DW 0
+ DB T_SAND            # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Water, outdoors.
+DB TILE_XL_HDR_NORMAL; DB 23
+ # Flags
+ DW BOR(TF_SOLID,TF_LEAPABLE)
+ DB T_WATER           # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Swamp
+DB TILE_XL_HDR_NORMAL; DB 62
+ # Flags
+ DW BOR(TF_LEAPABLE)
+ DB T_SWAMP           # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Swamp with vegetation
+DB TILE_XL_HDR_NORMAL; DB 107
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET)
+ DB T_SWAMP           # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_SWAMP_GRASS     # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 80                # Sprite size (/100)
+
+# Tall grass fields.
+DB TILE_XL_HDR_NORMAL; DB 61 
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET)
+ DB T_GRASS           # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_TALL_GRASS      # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 90                # Sprite size (/100)
+
+# Flower fields.
+DB TILE_XL_HDR_NORMAL; DB 91 
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET)
+ DB T_GRASS           # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_FLOWERS         # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 90                # Sprite size (/100)
+
+# Lavender fields.
+DB TILE_XL_HDR_NORMAL; DB 105
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET)
+ DB T_GRASS           # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_LAVENDER        # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 90                # Sprite size (/100)
+
+# Bamboo field
+DB TILE_XL_HDR_NORMAL; DB 87 
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET)
+ DB T_GRASS           # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_BAMBOO          # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 120               # Sprite size (/100)
+
+# Woods, dense
+DB TILE_XL_HDR_NORMAL; DB 45
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET)
+ DB T_GRASS           # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_FOREST          # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 120               # Sprite size (/100)
+
+# Woods, light.
+DB TILE_XL_HDR_NORMAL; DB 29
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET)
+ DB T_GRASS           # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_WOODS           # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Dirt road, outdoors.
+DB TILE_XL_HDR_NORMAL; DB 55
+ # Flags
+ DW 0
+ DB T_DIRT            # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Mountains, small.
+DB TILE_XL_HDR_NORMAL; DB 58
+ # Flags
+ DW BOR(TF_SOLID,TF_SPR_RAND_OFFSET)
+ DB T_GRASS           # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_MOUNTAIN        # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Mountains, large
+DB TILE_XL_HDR_NORMAL; DB 59
+ # Flags
+ DW BOR(TF_SOLID,TF_SPR_RAND_OFFSET)
+ DB T_GRASS           # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_MOUNTAIN        # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 200               # Sprite size (/100)
+
+# Desert mountains, small.
+DB TILE_XL_HDR_NORMAL; DB 14
+ # Flags
+ DW BOR(TF_SOLID,TF_SPR_RAND_OFFSET)
+ DB T_SAND            # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_BROWN_BOULDER   # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Desert mountains, large
+DB TILE_XL_HDR_NORMAL; DB 30
+ # Flags
+ DW BOR(TF_SOLID,TF_SPR_RAND_OFFSET)
+ DB T_SAND            # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_BROWN_BOULDER   # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 200               # Sprite size (/100)
+
+# Swamp stone
+DB TILE_XL_HDR_NORMAL; DB 108
+ # Flags
+ DW BOR(TF_SOLID,TF_SPR_RAND_OFFSET)
+ DB T_SWAMP           # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_MOSSY_STONE     # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 80                # Sprite size (/100)
+
+# Dry vegetation (desert)
+DB TILE_XL_HDR_NORMAL; DB 46
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET)
+ DB T_SAND            # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_DRY_TREES       # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 90                # Sprite size (/100)
+
+# Door on wooden wall, N
+DB TILE_XL_HDR_NORMAL; DB 56
+ # Flags
+ DW BOR(TF_WALL_N,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_WOODEN_DOOR     # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Door on wooden wall, S
+DB TILE_XL_HDR_NORMAL; DB 57
+ # Flags
+ DW BOR(TF_WALL_S,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_WOODEN_DOOR     # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Town gate S
+DB TILE_XL_HDR_NORMAL; DB 48
+ # Flags
+ DW BOR(TF_SOLID,TF_WALL_S)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_GATE      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Town gate N
+DB TILE_XL_HDR_NORMAL; DB 64
+ # Flags
+ DW BOR(TF_SOLID,TF_WALL_N)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_GATE      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Town gate W
+DB TILE_XL_HDR_NORMAL; DB 103
+ # Flags
+ DW BOR(TF_SOLID,TF_WALL_W)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_GATE      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Town gate E
+DB TILE_XL_HDR_NORMAL; DB 104
+ # Flags
+ DW BOR(TF_SOLID,TF_WALL_E)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_STONE_GATE      # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Bridge (outdoors)
+DB TILE_XL_HDR_NORMAL; DB 49
+ # Flags
+ DW 0
+ DB T_WOOD_PLANKS     # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Door on coarse stone (horizontal)
+DB TILE_XL_HDR_NORMAL; DB 73
+ # Flags
+ DW BOR(TF_WALL_N,TF_SOLID,TF_WALL_TRANSPARENT,TF_WALL_OFFSET_NS_50)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_COARSE_DOOR     # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Door on coarse stone (vertical)
+DB TILE_XL_HDR_NORMAL; DB 74
+ # Flags
+ DW BOR(TF_WALL_E,TF_SOLID,TF_WALL_TRANSPARENT,TF_WALL_OFFSET_EW_50)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_COARSE_DOOR     # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Door on coarse stone (horizontal, locked)
+DB TILE_XL_HDR_NORMAL; DB 75
+ # Flags
+ DW BOR(TF_WALL_N,TF_SOLID,TF_WALL_TRANSPARENT,TF_WALL_OFFSET_NS_50)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_COARSE_DOOR_L   # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Door on coarse stone (vertical, locked)
+DB TILE_XL_HDR_NORMAL; DB 76
+ # Flags
+ DW BOR(TF_WALL_E,TF_SOLID,TF_WALL_TRANSPARENT,TF_WALL_OFFSET_EW_50)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_COARSE_DOOR_L   # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# ------------------------------------------------------------ 
+# OVERLAYS (these combine with other tiles)
+
+# Cave entrance
+DB TILE_XL_HDR_OVERLAY; DB 24
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_CAVE_ENTRANCE   # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Hut
+DB TILE_XL_HDR_OVERLAY; DB 8
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_HUT             # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Tree
+DB TILE_XL_HDR_OVERLAY; DB 39
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_TREE            # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Tree with apple.
+DB TILE_XL_HDR_OVERLAY; DB 50
+ # Flags
+ DW BOR(TF_SOLID,TF_KILLABLE)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_TREE_FULL       # Sprite TID
+ DB T_TREE            # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Palm tree.
+DB TILE_XL_HDR_OVERLAY; DB 60
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_PALM_TREE       # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Well.
+DB TILE_XL_HDR_OVERLAY; DB 31
+ # Flags
+ DW BOR(TF_SOLID,TF_KILLABLE)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_WELL            # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 80                # Sprite size (/100)
+
+# Altar.
+DB TILE_XL_HDR_OVERLAY; DB 47
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_ALTAR           # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 80                # Sprite size (/100)
+
+# Treasure chest.
+DB TILE_XL_HDR_OVERLAY; DB 40
+ # Flags
+ DW BOR(TF_SOLID,TF_KILLABLE)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_CHEST           # Sprite TID
+ DB T_CHEST_K         # Killed sprite TID
+ DB 40                # Sprite size (/100)
+
+# Iron bars.
+DB TILE_XL_HDR_OVERLAY; DB 51
+ # Flags
+ DW BOR(TF_SOLID_IF_ALIVE,TF_KILLABLE)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_IRON_BARS       # Sprite TID
+ DB T_IRON_BARS_K     # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Lever.
+DB TILE_XL_HDR_OVERLAY; DB 52
+ # Flags
+ DW BOR(TF_SOLID,TF_KILLABLE)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_LEVER           # Sprite TID
+ DB T_LEVER_K         # Killed sprite TID
+ DB 60                # Sprite size (/100)
+
+# Sign
+DB TILE_XL_HDR_OVERLAY; DB 53
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_SIGN            # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 40                # Sprite size (/100)
+
+# Fountain
+DB TILE_XL_HDR_OVERLAY; DB 54
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_FOUNTAIN        # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 80                # Sprite size (/100)
+
+# Pyre
+DB TILE_XL_HDR_OVERLAY; DB 78
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_PYRE            # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 80                # Sprite size (/100)
+
+# Gate
+DB TILE_XL_HDR_NORMAL; DB 15
+ # Flags
+ DW BOR(TF_KILLABLE,TF_SOLID_IF_ALIVE)
+ DB T_WOOD_PLANKS     # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_EMERALD_GATE    # Sprite TID
+ DB T_EMERALD_GATE_K  # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Mound on the dirt (something buried).
+DB TILE_XL_HDR_OVERLAY; DB 63
+ # Flags
+ DW BOR(TF_KILLABLE)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_BURIED          # Sprite TID
+ DB T_BURIED_K        # Killed sprite TID
+ DB 40                # Sprite size (/100)
+
+# Pillar.
+DB TILE_XL_HDR_OVERLAY; DB 65
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_PILLAR          # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Book stand.
+DB TILE_XL_HDR_OVERLAY; DB 77
+ # Flags
+ DW BOR(TF_SOLID,TF_KILLABLE)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_BOOKSTAND       # Sprite TID
+ DB T_BOOKSTAND_K     # Killed sprite TID
+ DB 60                # Sprite size (/100)
+
+# Stone portal.
+DB TILE_XL_HDR_OVERLAY; DB 13
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_STONE_ARCH      # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Custom marker 1
+DB TILE_XL_HDR_OVERLAY; DB 128
+ # Flags
+ DW BOR(TF_KILLABLE,TF_MAP_NO_OVERLAY)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Custom marker 2
+DB TILE_XL_HDR_OVERLAY; DB 129
+ # Flags
+ DW BOR(TF_KILLABLE,TF_MAP_NO_OVERLAY)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Custom marker 3
+DB TILE_XL_HDR_OVERLAY; DB 130
+ # Flags
+ DW BOR(TF_KILLABLE,TF_MAP_NO_OVERLAY)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Custom marker 4
+DB TILE_XL_HDR_OVERLAY; DB 131
+ # Flags
+ DW BOR(TF_KILLABLE,TF_MAP_NO_OVERLAY)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Custom marker 5
+DB TILE_XL_HDR_OVERLAY; DB 132
+ # Flags
+ DW BOR(TF_KILLABLE,TF_MAP_NO_OVERLAY)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Custom marker 6
+DB TILE_XL_HDR_OVERLAY; DB 133
+ # Flags
+ DW BOR(TF_KILLABLE,TF_MAP_NO_OVERLAY)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Autumn Grass, outdoors.
+DB TILE_XL_HDR_NORMAL; DB 80
+ # Flags
+ DW 0
+ DB T_AUT_GRASS       # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Autumn Woods, light.
+DB TILE_XL_HDR_NORMAL; DB 81
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET)
+ DB T_AUT_GRASS       # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_AUT_WOODS       # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Autumn theme: small mountain
+DB TILE_XL_HDR_NORMAL; DB 82
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET,TF_SOLID)
+ DB T_AUT_GRASS       # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_MOUNTAIN        # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Autumn theme: large mountain
+DB TILE_XL_HDR_NORMAL; DB 83
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET,TF_SOLID)
+ DB T_AUT_GRASS       # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_MOUNTAIN        # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 200               # Sprite size (/100)
+
+# Autumn theme: dense forest.
+DB TILE_XL_HDR_NORMAL; DB 86
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET)
+ DB T_AUT_GRASS       # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_AUT_FOREST      # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 120               # Sprite size (/100)
+
+# Snow Grass, outdoors.
+DB TILE_XL_HDR_NORMAL; DB 93
+ # Flags
+ DW 0
+ DB T_SNOW_GRASS      # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Snow Road, outdoors.
+DB TILE_XL_HDR_NORMAL; DB 95
+ # Flags
+ DW 0
+ DB T_SNOW_ROAD       # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Snow Woods, light.
+DB TILE_XL_HDR_NORMAL; DB 94
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET)
+ DB T_SNOW_GRASS      # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_SNOW_WOODS      # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Snow Woods, dense
+DB TILE_XL_HDR_NORMAL; DB 100
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET)
+ DB T_SNOW_GRASS      # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_SNOW_FOREST     # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 120               # Sprite size (/100)
+
+# Snow theme: small mountain
+DB TILE_XL_HDR_NORMAL; DB 96
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET,TF_SOLID)
+ DB T_SNOW_GRASS      # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_SNOW_STONE      # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 90                # Sprite size (/100)
+
+# Snow theme: large mountain
+DB TILE_XL_HDR_NORMAL; DB 97
+ # Flags
+ DW BOR(TF_SPR_RAND_OFFSET,TF_SOLID)
+ DB T_SNOW_GRASS      # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_SNOW_STONE      # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 200               # Sprite size (/100)
+
+# Snow Hut
+DB TILE_XL_HDR_OVERLAY; DB 98
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_SNOW_HUT        # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Snow lake (ice).
+DB TILE_XL_HDR_NORMAL; DB 99
+ # Flags
+ DW 0
+ DB T_SNOW_LAKE       # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Wooden gate S
+DB TILE_XL_HDR_NORMAL; DB 84
+ # Flags
+ DW BOR(TF_SOLID,TF_WALL_S)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_WOOD_GATE       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Wooden gate N
+DB TILE_XL_HDR_NORMAL; DB 85
+ # Flags
+ DW BOR(TF_SOLID,TF_WALL_N)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB T_WOOD_GATE       # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Boat
+DB TILE_XL_HDR_NORMAL; DB 88
+ # Flags
+ DW BOR(TF_SOLID)
+ DB T_WATER           # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_BOAT            # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 80                # Sprite size (/100)
+
+# Obelisk
+DB TILE_XL_HDR_OVERLAY; DB 89
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_OBELISK         # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Sarcophagus
+DB TILE_XL_HDR_OVERLAY; DB 79
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_SARCOPHAGUS     # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Portal
+DB TILE_XL_HDR_OVERLAY; DB 92
+ # Flags
+ DW BOR(TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_PORTAL          # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 90                # Sprite size (/100)
+
+# Grave
+DB TILE_XL_HDR_OVERLAY; DB 106
+ # Flags
+ DW BOR(TF_SOLID,TF_KILLABLE)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_GRAVE           # Sprite TID
+ DB T_GRAVE_K         # Killed sprite TID
+ DB 90                # Sprite size (/100)
+
+# Transparent killable tile.
+# Used when a tile has to be killable, but without any visual
+# indication.
+DB TILE_XL_HDR_OVERLAY; DB 109
+ # Flags
+ DW BOR(TF_KILLABLE,TF_MAP_NO_OVERLAY)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# King's Statue
+DB TILE_XL_HDR_OVERLAY; DB 110
+ # Flags
+ DW BOR(TF_KILLABLE,TF_SOLID)
+ DB 0                 # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_STATUE          # Sprite TID
+ DB T_STATUE_K        # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Throne
+DB TILE_XL_HDR_OVERLAY; DB 111
+ # Flags
+ DW BOR(TF_SOLID)
+ DB T_CAVE_FLOOR      # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_THRONE          # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 100               # Sprite size (/100)
+
+# Lava
+DB TILE_XL_HDR_NORMAL; DB 112
+ # Flags
+ DW BOR(TF_SOLID,TF_LEAPABLE)
+ DB T_LAVA            # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB 0                 # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 0                 # Sprite size (/100)
+
+# Burnt trees over ash floor.
+DB TILE_XL_HDR_NORMAL; DB 113
+ # Flags
+ DW 0
+ DB T_FIRE_GROUND     # Floor TID
+ DB 0                 # Ceiling TID
+ DB 0                 # Wall TID
+ DB T_FIRE_WOODS      # Sprite TID
+ DB 0                 # Killed sprite TID
+ DB 80                # Sprite size (/100)
+
+# ------------------------------------------------------------ 
+# END OF DB
+DB 255
+

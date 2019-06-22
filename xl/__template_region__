@@ -1,0 +1,28 @@
+
+
+   # REPLACE XX BY THE REGION ABBREV
+
+# WRLD region: NAME NAME (XX)
+# < enter description of what the region is >
+
+# Interactibles list
+WRLD_XX_Interactibles:
+ # Cartographer's hut.
+ DW LOHI(26,89); DW 0; DW WRLD_XX_Hut1
+ # -------- End of table marker --------
+ DW 0
+
+PROC WRLD_XX_Hut1
+ RET
+END
+
+PROC WRLD_XX_Walk
+ PARAM rawcr pdir
+END
+
+PROC WRLD_XX_UseItem
+ PARAM itid idx chi
+ RET 0
+END
+
+

@@ -1,0 +1,200 @@
+# SAHA - Sand Haven
+
+PROC SAHA_EnterFromWrld
+ # Ask the player if they want to enter.
+ SND .msg LVLN_SAHA ENTPT_SAHA_FROM_WRLD; CALL UTIL_GoNoGo
+ RET 0
+
+.msg:
+ DB 2
+ DS Enter the ruins
+ DS of Sand Haven?
+END
+
+PROC SAHA_Boot
+ # Finished OBE? If so, replace obelisk with portal.
+ TEST GM_C_OBELISK; JZ .ret
+ SND LOHI(187,78) 92; SYS SYSC_CHANGE_SID
+.ret:
+END
+
+# Interaction proc
+EXPORT PROC SAHA_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr SAHA_Interactibles; CALL UTIL_CheckInteract
+ RET
+END
+
+# Walk proc (if needed):
+EXPORT PROC SAHA_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ SND 1 rawcr SAHA_EnterNarr; CALL TRIG_Check
+ SND 2 rawcr SAHA_SecondNarr; CALL TRIG_Check
+ SND 3 rawcr SAHA_ThirdNarr; CALL TRIG_Check
+ SND 4 rawcr SAHA_FourthNarr; CALL TRIG_Check
+ RET
+END
+
+# Leave.
+PROC SAHA_Leave
+ SND ALeaveTown LVLN_WRLD ENTPT_WRLD_FROM_SAHA
+ CALL UTIL_GoNoGo
+ RET
+END
+
+PROC SAHA_EnterNarr
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND 0 0 .a_narr2; SYS SYSC_SPEAK
+ RET 1  # For TRIG_Check
+.a_narr:
+ DT At last you have found it.
+ .. The ruins of Sand Haven.
+ ..
+ .. There is nothing but
+ .. emptiness here now. There
+ .. is nobody left.
+.a_narr2:
+ DT ...or is there?
+ ..
+ .. A presence is calling you,
+ .. directing you to the
+ .. Obelisk of the Sun at the
+ .. south part of the city.
+END
+
+PROC SAHA_SecondNarr
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND 0 0 .a_narr2; SYS SYSC_SPEAK
+ RET
+.a_narr:
+ DB 1
+ DS A voice whispers...
+.a_narr2:
+ DB 6
+ DS It is an ancient language
+ DS you don't understand.
+ DS
+ DS But you feel that it's
+ DS some sort of warning
+ DS about the Obelisk.
+END
+
+PROC SAHA_ThirdNarr
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ RET
+.a_narr:
+ DB 4
+ DS The voice continues to
+ DS whisper its warning in
+ DS your ears, now more
+ DS insistently.
+END
+
+PROC SAHA_FourthNarr
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND 0 0 .a_narr2; SYS SYSC_SPEAK
+ RET
+.a_narr:
+ DB 3
+ DS The whispers become louder,
+ DS a thousand voices speaking
+ DS in your ear.
+.a_narr2:
+ DB 6
+ DS You undestand that you
+ DS are not to read the
+ DS inscription on the Obelisk.
+ DS
+ DS Yet, you feel strangely
+ DS drawn to do so.
+END
+
+PROC SAHA_Blacksmith
+ VAR looted
+ SND GM_SAHA_LOOT_BLACKSMITH .a_narr 0 ITID_TWO_HANDED_SWORD
+ CALL SAHA_OldShop; REC looted
+ CMP looted 0; JNE .looted
+ RET
+.looted:
+ # Mark it as looted.
+ OR GM_SAHA_LOOT_BLACKSMITH
+ RET
+.a_narr:
+ DB 2
+ DS This appears to be an abandoned
+ DS Blacksmith shop.
+END
+
+PROC SAHA_ArmorShop
+ VAR looted
+ SND GM_SAHA_LOOT_ARMOR_SHOP .a_narr 0 ITID_RING_ARMOR
+ CALL SAHA_OldShop; REC looted
+ CMP looted 0; JNE .looted
+ RET
+.looted:
+ # Mark it as looted.
+ OR GM_SAHA_LOOT_ARMOR_SHOP
+ RET
+.a_narr:
+ DB 2
+ DS This appears to be an abandoned
+ DS armorer's shop.
+END
+
+PROC SAHA_OldShop
+ PARAM gvar gmask narr gold itid
+ VAR choice
+ # Already looted?
+ TEST gvar gmask; JNZ .nothing
+ # Narration.
+ SND 0 0 narr; SYS SYSC_SPEAK
+ # Choice.
+ SND 0 AChoiceLootOrUndisturbed; SYS SYSC_CHOICE; REC choice
+ CMP choice 2; JE .loot
+ RET 0
+.loot:
+ # Give loot.
+ CMP gold 0; JE .no_gold
+ SND gold; SYS SYSC_GIVE_GOLD
+ # (fall-through)
+.no_gold:
+ CMP itid 0; JE .no_item
+ SND itid; SYS SYSC_GIVE
+ # (fall-through)
+.no_item:
+ RET 1
+.nothing:
+ SND ANothing; SYS SYSC_ALERT
+ RET 0
+END
+
+PROC SAHA_ObeliskOrPortal
+ TEST GM_C_OBELISK; JNZ .portal
+ CALL OBE1_EnterFromWrld
+ RET
+.portal:
+ SND .a_msg LVLN_RSTO ENTPT_RSTO_PORTAL LOHI(60,60); CALL UTIL_Portal
+ RET
+.a_msg:
+ DB 2
+ DS This portal will take you
+ DS back to Riverside. Enter?
+END
+
+# SAHA INTERACTIBLES LIST
+# (position, title, proc)
+SAHA_Interactibles:
+ DW LOHI(187,68) SAHA_Leave
+ DW LOHI(183,72) SAHA_Blacksmith
+ DW LOHI(183,75) SAHA_ArmorShop
+ DW LOHI(187,78) SAHA_ObeliskOrPortal
+ #DW LOHI(191,72) <-- unused
+ #DW LOHI(191,75) <-- unused
+ #DW LOHI(191,78) <-- unused
+ #DW LOHI(183,75) <-- unused
+ #DW LOHI(187,75) <-- unused
+ #DW LOHI(183,78) <-- unused
+ DW 0
+

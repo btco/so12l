@@ -1,0 +1,28 @@
+
+VicChar: #@char_vic
+
+DB 186
+DS Vic                      # @name
+DB CLS_WIZARD               # @class
+DB 243                      # Face
+DB 0                        # @att
+DB 3                        # @def
+DB 20                       # @speed
+DW 9                        # @hp
+DW 9                        # @maxHp
+DW 15                       # @sp
+DW 15                       # @maxSp
+# Equipped items per kind:
+  DB ITID_CLOTHES 0                        # @eq_ITK_ARMOR
+  DB 0 0                                   # @eq_ITK_HELM
+  DB ITID_DAGGER 0                         # @eq_ITK_MWEAP
+  DB 0 0                                   # @eq_ITK_RWEAP
+  DB 0 0                                   # @eq_ITK_SHIELD
+  DB 0 0                                   # @eq_ITK_BOOT
+  DB 0 0                                   # @eq_ITK_BELT
+  DB 0 0                                   # @eq_ITK_AMULET
+  DB 0 0                                   # @eq_ITK_RING
+DB 2                        # Count of spells
+  DB ZID_BURN
+  DB ZID_FORCE_BEAD
+

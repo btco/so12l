@@ -1,0 +1,349 @@
+# IGNI - City of Ignis
+
+PROC IGNI_EnterFromWrld
+ VAR has
+ SND ITID_CRYSTAL_RED; SYS SYSC_GET_ITEM_COUNT; REC has; CMP has 0; JE .nope
+ SND ITID_CRYSTAL_GREEN; SYS SYSC_GET_ITEM_COUNT; REC has; CMP has 0; JE .nope
+ SND ITID_CRYSTAL_YELLOW; SYS SYSC_GET_ITEM_COUNT; REC has; CMP has 0; JE .nope
+ SND ITID_CRYSTAL_BLUE; SYS SYSC_GET_ITEM_COUNT; REC has; CMP has 0; JE .nope
+
+ DIA_NARR
+ {
+  DT You reach into the portal.
+  .. It welcomes you, now that
+  .. you hold the Four Crystals.
+ }
+ DIA_NARR
+ {
+  DT A fiery landscape awaits
+  .. on the other side, the
+  .. city of Ignis, the realm
+  .. of the Sorcerer King.
+ }
+ SND * LVLN_IGNI ENTPT_IGNI; CALL UTIL_GoNoGo
+ {
+  DT Step through the
+  .. portal to Ignis?
+ }
+ RET
+
+.nope:
+ DIA_NARR
+ {
+  DT The portal shimmers in and out
+  .. of existence. Through it, you
+  .. see a dark, fiery landscape,
+  .. the legendary city of Ignis.
+  ..
+  .. You try to reach into it but
+  .. it repels you. You need the
+  .. Four Crystals to enter.
+ }
+
+END
+
+# Interaction proc
+EXPORT PROC IGNI_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr IGNI_Interactibles; CALL UTIL_CheckInteract
+ RET
+END
+
+PROC IGNI_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ SND 1 rawcr UTIL_Battle EID_FLAME EID_FLAME #@q_FINAL
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_FLAME EID_FLAME EID_FCLER #@q_FINAL
+ CALL TRIG_Check
+ SND 3 rawcr UTIL_Battle EID_FLAME EID_FCLER EID_FCLER #@q_FINAL
+ CALL TRIG_Check
+ SND 4 rawcr IGNI_FinalBattle
+ CALL TRIG_Check
+END
+
+PROC IGNI_FinalBattle
+ VAR choice
+ DIA_MARKUS_EVIL
+ {
+  DT You!? How did you find
+  .. the crystals?
+ }
+ DIA_MARKUS_EVIL
+ {
+  DT Fools. You will now...
+ }
+ DIA_MARKUS_EVIL
+ {
+  DT Well... I don't have an
+  .. epic speech prepared. I
+  .. didn't expect you to make 
+  .. it this far.
+ }
+ DIA_MARKUS_EVIL
+ {
+  DT Seriously, good job,
+  .. you all.
+  ..
+  .. But let's get to business.
+ }
+ DIA_MARKUS_EVIL
+ {
+  DT I suppose you came here to
+  .. kill me and free the land
+  .. of the curse of the
+  .. Sorcerer King, etc, etc?
+ }
+ DIA_CHOICE
+ {
+  DT Yes! Prepare to die!
+  .. Actually we're lost.
+  .. Who? What is a Sorcerer King?
+  .. Can we all be Sorcerer Kings?
+ }
+ CMP choice 1; JE .battle
+ DIA_MARKUS_EVIL
+ {
+  DT Very funny. You have not
+  .. lost your sense of humor.
+  ..
+  .. Let's see who laughs last.
+ }
+ # (fall through)
+.battle:
+ DIA_NARR
+ {
+  DT Markus rises from his
+  .. throne and his body starts
+  .. to change into a giant
+  .. demon with many tentacles.
+ }
+ DIA_MARKUS_SK
+ {
+  DT I recognize you...
+ }
+ DIA_MARKUS_SK
+ {
+  DT From a thousand years ago.
+ }
+ DIA_MARKUS_SK
+ {
+  DT You are King Vahn, who
+  .. has returned to complete
+  .. his mission of defeating
+  .. me.
+ }
+ DIA_MARKUS_SK
+ {
+  DT I admire your persistence.
+  .. I have defeated you
+  .. twenty-seven times, King
+  .. Vahn. I will not lose on
+  .. the twenty-eighth.
+ }
+ SET TGV_BATTLE_END_CB IGNI_Phase2
+ SND EID_SRKING; CALL UTIL_Battle #@q_FINAL
+ RET 1
+END
+
+PROC IGNI_Phase2
+ DIA_NARR
+ {
+  DT The demon collapses to
+  .. the ground and starts to
+  .. melt away in a cloud of
+  .. smoke.
+ }
+ DIA_MARKUS_EVIL
+ {
+  DT King Vahn... You have
+  .. finally defeated me.
+ }
+ DIA_MARKUS_EVIL
+ {
+  DT You probably didn't plan
+  .. for what happens next.
+  ..
+  .. So brave, yet so naive.
+ }
+ DIA_MARKUS_EVIL
+ {
+  DT Anyone who defeats the
+  .. Sorcerer King becomes the
+  .. next Sorcerer King.
+ }
+ DIA_MARKUS_EVIL
+ {
+  DT Enjoy your new powers.
+ }
+ DIA_NARR
+ {
+  DT As Markus disintegrates
+  .. into a pile of ashes,
+  .. you feel something strange.
+ }
+ DIA_NARR
+ {
+  DT Everything goes dark.
+ }
+ DIA_NARR
+ {
+  DT When you wake up, you see
+  .. your companions gathered
+  .. around you.
+ }
+
+ # Everyone has full HP for a while
+ # (for the conversation below).
+ SND 1 1000; CALL UTIL_SilentHeal
+ SND 2 1000; CALL UTIL_SilentHeal
+ SND 3 1000; CALL UTIL_SilentHeal
+ SND 4 1000; CALL UTIL_SilentHeal
+ SET GV_CEF_CHAR1 0
+ SET GV_CEF_CHAR2 0
+ SET GV_CEF_CHAR3 0
+ SET GV_CEF_CHAR4 0
+
+ # Change Alex's face to the evil version.
+ SND 1 CINFO_FACE 204; SYS SYSC_SET_CINFO
+
+ DIA_CS_2
+ {
+  DT Alex? Are you okay?
+ }
+ DIA_CS_3
+ {
+  DT He is not well.
+ }
+ DIA_CS_2
+ {
+  DT What makes you think he
+  .. is not well?
+ }
+ DIA_CS_4
+ {
+  DT Well, I'd say the evil eyes
+  .. are a dead giveaway.
+ }
+ DIA_NARR
+ {
+  DT You awaken, your mind slowly
+  .. adjusting to a new reality.
+  .. You are powerful now.
+  .. The entire world is yours
+  .. to rule.
+ }
+ DIA_NARR
+ {
+  DT These fools, who were your
+  .. travel companions, are the
+  .. only thing in your way.
+ }
+ DIA_NARR
+ {
+  DT They must be dealt with
+  .. now. It should be easy.
+ }
+ DIA_CS_2
+ {
+  DT Alex... Alex?
+  .. What are you doing?
+ }
+ DIA_CS_3
+ {
+  DT Alex! You are under the
+  .. curse of the Sorcerer King.
+  .. This is not you!
+ }
+ DIA_NARR
+ {
+  DT You don't listen to these
+  .. fools. They only want to
+  .. steal your power.
+  ..
+  .. They will pay.
+ }
+ # Alex gets a lot of HP
+ SND 1 CINFO_MAX_HP 250; SYS SYSC_SET_CINFO
+ SND 1 CINFO_HP 250; SYS SYSC_SET_CINFO
+ # Rest of party is out.
+ SND 4; SYS SYSC_REM_CHAR
+ SND 3; SYS SYSC_REM_CHAR
+ SND 2; SYS SYSC_REM_CHAR
+
+ SET TGV_BATTLE_END_CB IGNI_Finale
+ # NOTE: First one must be EID_LEON because of
+ # hacky special battle.lua logic.
+ SND EID_LEON EID_LYLA EID_VIC; CALL UTIL_Battle #@q_FINAL
+ RET 1
+END
+
+PROC IGNI_Finale
+ PARAM surrender
+ CMPZ surrender; JNE .surrendered
+ DIA_NARR
+ {
+  DT Your weak friends collapse
+  .. easily, as you expected.
+  .. They will no longer be
+  .. a threat to you.
+ }
+ DIA_NARR
+ {
+  DT As the new Sorcerer King,
+  .. you become the absolute
+  .. ruler of all.
+ }
+ SND ENDN_EVIL; SYS SYSC_WIN
+ DIA_NARR
+ {
+  DT Your reign will continue
+  .. for eternity. Or least
+  .. until another party of
+  .. adventurers finds the
+  .. Four Crystals.
+ }
+ SYS SYSC_WIN
+ RET
+.surrendered:
+ DIA_NARR
+ {
+  DT Your drop your weapon.
+  .. Your friends drop their
+  .. weapons too. You feel
+  .. the evil inside of you
+  .. vanishing.
+ }
+ DIA_NARR
+ {
+  DT Slowly, you return to
+  .. your normal self.
+  ..
+  .. Which doesn't stop Leon
+  .. from knocking you
+  .. unconscious for safety.
+ }
+ DIA_NARR
+ {
+  DT But that's okay, you
+  .. probably deserved that.
+ }
+ DIA_NARR
+ {
+  DT When you awake, you are
+  .. back in Riverside.
+  ..
+  .. The people rejoice as they
+  .. hear of King Vahn's return.
+ }
+ SND ENDN_GOOD; SYS SYSC_WIN
+ RET
+END
+
+# IGNI INTERACTIBLES LIST
+# (position, title, proc)
+IGNI_Interactibles:
+ #DW LOHI(???,???); DW IGNI_Leave
+ DW 0
+

@@ -1,0 +1,176 @@
+# WRLD region: Frostlands
+
+# Interactibles list
+WRLD_FI_Interactibles:
+ # Entrance to YNIS.
+ DW LOHI(123,104) YNIS_EnterFromWrld
+ # King's Statue.
+ DW LOHI(162,83) WRLD_FI_Statue
+ # Entrance to Ice Maze (ICEM)
+ DW LOHI(115,125) ICEM_EnterFromWrld
+ # Portal to Ignis
+ DW LOHI(124,73) IGNI_EnterFromWrld
+ # Hut with hint about King's Sword.
+ DW LOHI(137,102) WRLD_FI_SwordHintHut
+ # Cartographer hut
+ DW LOHI(102,108) WRLD_FI_Cartographer
+ # Huts:
+ DW LOHI(137,73) WRLD_FI_Hut1
+ DW LOHI(112,116) WRLD_FI_Hut2
+ DW LOHI(123,90) WRLD_FI_Hut3
+ # Ring Shop
+ DW LOHI(156,78) WRLD_FI_RingShop
+ # Amulet Shop
+ DW LOHI(141,79) WRLD_FI_AmuletShop
+ # -------- End of table marker --------
+ DW 0
+
+PROC WRLD_FI_Walk
+ PARAM rawcr pdir
+END
+
+PROC WRLD_FI_Statue
+ PARAM rawcr
+ VAR kf choice
+ # Already got sword?
+ SND rawcr TINFO_IS_KILLED; SYS SYSC_TINFO; REC kf
+ CMP kf 0; JNZ .already
+ # Sword sequence:
+ SND 0 0 .a_narr1; SYS SYSC_SPEAK
+ SND 0 0 .a_narr2; SYS SYSC_SPEAK
+ SND 0 0 .a_narr3; SYS SYSC_SPEAK
+ SND 0 0 .a_narr4; SYS SYSC_SPEAK
+ SND 0 0 .a_narr5; SYS SYSC_SPEAK
+ SND .a_prompt .a_choices; SYS SYSC_CHOICE; REC choice
+ SND 0 0 .a_narr6; SYS SYSC_SPEAK
+ SND ITID_KINGS_SWORD; SYS SYSC_GIVE
+ SND rawcr; SYS SYSC_KILL_TILE
+ SND 5000; CALL REW_GiveQuestReward #@q_KINGS_SWORD
+ RET
+.already:
+ RET
+.a_narr1:
+ DT This is a statue of King Vahn.
+ .. A plaque tells its story.
+.a_narr2:
+ DT King Vahn's greed ruined his
+ .. kingdom when he sold it to
+ .. the Sorcerer King in
+ .. exchange for power.
+ ..
+ .. He later repented and went
+ .. on a quest to defeat the
+ .. Sorcerer King.
+.a_narr3:
+ DT He perished here, fighting
+ .. the Sorcerer King's minions.
+ .. This statue was built in 
+ .. his honor.
+.a_narr4:
+ DT His sword remains here.
+ .. Legend says King Vahn will
+ .. return to claim it and
+ .. finish his mission.
+.a_narr5:
+ DT Such a beautiful sword...
+ .. You feel compelled to
+ .. try to steal it.
+.a_prompt:
+ DT Steal King Vahn's sword?
+.a_choices:
+ DT Yes. He would have wanted us to.
+ .. Yes. It's no use to him now.
+ .. Yes. Our mission is crucial.
+ .. Yes. It doesn't matter why or how.
+.a_narr6:
+ DT You take the sword. 
+ .. You like it.
+ .. You feel that you deserve to
+ .. have it.
+END
+
+PROC WRLD_FI_SwordHintHut
+ DIA_VILLAGER_4
+ {
+  DT Oh... you look familiar.
+  .. There's a statue of someone
+  .. who looks very much like
+  .. you.
+  ..
+  .. It's a statue of King Vahn
+  .. with his Flame Sword.
+ }
+ DIA_VILLAGER_4
+ {
+  DT To find the statue, follow
+  .. the meandering path of this
+  .. frozen river.
+  ..
+  .. You will find it where the
+  .. river meets the sea.
+ }
+END
+
+PROC WRLD_FI_Cartographer
+ VAR upd
+ CALL UTIL_CartographerDialogue; REC upd
+ CMP upd 1; JNE .ret
+ OR GV_WMAPREV_COL_D WMAPREV_MASK_ROW_5
+ OR GV_WMAPREV_COL_D WMAPREV_MASK_ROW_6
+ OR GV_WMAPREV_COL_D WMAPREV_MASK_ROW_7
+ OR GV_WMAPREV_COL_E WMAPREV_MASK_ROW_4
+ OR GV_WMAPREV_COL_E WMAPREV_MASK_ROW_5
+ OR GV_WMAPREV_COL_E WMAPREV_MASK_ROW_6
+ OR GV_WMAPREV_COL_E WMAPREV_MASK_ROW_7
+ OR GV_WMAPREV_COL_F WMAPREV_MASK_ROW_4
+ OR GV_WMAPREV_COL_F WMAPREV_MASK_ROW_5
+ OR GV_WMAPREV_COL_F WMAPREV_MASK_ROW_6
+ OR GV_WMAPREV_COL_F WMAPREV_MASK_ROW_7
+.ret:
+ RET
+END
+
+PROC WRLD_FI_Hut1
+ DIA_VILLAGER_9
+ {
+  DT Beware of ice creatures.
+  .. If you become frozen, you
+  .. can drink a Potion of Fire
+  .. to return to life.
+ }
+END
+
+PROC WRLD_FI_Hut2
+ DIA_VILLAGER_7
+ {
+  DT I heard there is something
+  .. buried on the island in the
+  .. middle of the lake.
+ }
+END
+
+PROC WRLD_FI_Hut3
+ DIA_VILLAGER_3
+ {
+  DT The ice city of Glacies
+  .. lies just to the south.
+ }
+END
+
+PROC WRLD_FI_RingShop
+ SND SHOP_Wares_Rings3; CALL SHOP_RingShop
+END
+
+PROC WRLD_FI_AmuletShop
+ SND 254 SMerchant .msg * 100 ITK_AMULET; CALL UTIL_ShopUi
+ {
+  DB 3
+  DB ITID_AMULET_OF_HEALTH
+  DB ITID_AMULET_OF_WIZ
+  DB ITID_AMULET_STEADY
+ }
+ RET
+.msg:
+ DT I sell amulets.
+END
+

@@ -1,0 +1,36 @@
+# SPECIAL EFFECTS FOR EQUIPPED ITEMS
+
+# Process special effects for equipped items when walking.
+PROC EQUIP_Walk
+ PARAM rawcr pdir
+ VAR nchars i itid
+ SND PINFO_NUM_CHARS; SYS SYSC_PINFO; REC nchars
+ SET i 1
+.loop:
+ CMP i nchars
+ JG .end_loop
+
+ # Check for special items on character i
+ SND i ITK_AMULET; SYS SYSC_CHAR_EQ; REC itid
+ CMP itid ITID_AMULET_OF_HEALTH; SND i; CE EQUIP_AmuletOfHealth
+
+ ADD i 1
+ JMP .loop
+.end_loop:
+
+END
+
+PROC EQUIP_AmuletOfHealth
+ PARAM chi
+ VAR pclk
+
+ # Only heal every 2 steps.
+ SND PINFO_PCLK; SYS SYSC_PINFO; REC pclk
+ MOD pclk 2
+ CMP pclk 0
+ JE .ret
+ # Heal the wearer.
+ SND chi 1; CALL UTIL_SilentHeal
+.ret:
+END
+

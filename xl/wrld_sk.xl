@@ -1,0 +1,267 @@
+# WRLD region: Southern Kingdom (SK)
+# This is the large island just south of Serpent Island.
+
+# Interactibles list
+WRLD_SK_Interactibles:
+ # NORTHWEST QUADRANT -----------
+  # Entrance to Mountain Town
+  DW LOHI(59,96) WRLD_SK_EnterMTN1
+  # Hut near crossroads
+  DW LOHI(53,95) WRLD_SK_Hut1
+  # Hut 2 near crossroads
+  DW LOHI(51,97) WRLD_SK_Hut2
+  # Entrance to tunnel (TUNN).
+  DW LOHI(52,92) TUNN_EnterFromSK
+ # SOUTHWEST QUADRANT -----------
+  # Hut near coast
+  DW LOHI(39,105) WRLD_SK_Hut3
+  DW LOHI(41,113) WRLD_SK_Hut4
+  # Entrance to CAST (Castle South)
+  DW LOHI(51,125) CAST_EnterFromWrld
+ # SOUTHEAST QUADRANT ------------
+  # Entrance to MONA
+  DW LOHI(86,115) MONA_EnterFromWrld
+  # Cartographer hut
+  DW LOHI(83,127) WRLD_SK_CartographerHut
+  # Hut near river
+  DW LOHI(78,112) WRLD_SK_HutNearRiver
+  # Hut on beach (thief's hut)
+  DW LOHI(70,127) WRLD_SK_ThiefsHut
+ # NORTHEAST QUADRANT ------------
+  # Shops
+  DW LOHI(69,95) SHOP_GeneralStore
+  DW LOHI(69,93) WRLD_SK_WeaponHut
+  # Wizard's Hut
+  DW LOHI(64,86) WRLD_SK_WizardHut
+  # Hut on north shore
+  DW LOHI(83,89) WRLD_SK_NorthHut
+
+ # -------- End of table marker --------
+ DW 0
+
+PROC WRLD_SK_EnterMTN1
+ SND .a_desc LVLN_MTN1 ENTPT_MTN1_FROM_WRLD; CALL UTIL_GoNoGo
+ RET
+
+.a_desc:
+ DT A steel trail leads up
+ .. to Pinnacle Town. Climb?
+END
+
+PROC WRLD_SK_Hut1
+ SND 255 SVillager .a_msg; SYS SYSC_SPEAK
+ RET
+.a_msg:
+ DT Travel east to go to
+ .. Pinnacle Town.
+END
+
+PROC WRLD_SK_Hut2
+ SND 254 SVillager .a_msg; SYS SYSC_SPEAK
+ RET
+.a_msg:
+ DT I heard the eastern side of
+ .. the kingdom is in perpetual
+ .. darkness. It's a curse that
+ .. emanates from the Ancient
+ .. Monastery to the east.
+END
+
+PROC WRLD_SK_Hut3
+ SND 252 SVillager .a_msg; SYS SYSC_SPEAK
+ RET
+.a_msg:
+ DT They say there is a treasure
+ .. buried on the beach to
+ .. the northwest of Serpent
+ .. Woods.
+ ..
+ .. It's a tiny beach with a
+ .. single rock, they say.
+END
+
+PROC WRLD_SK_Hut4
+ DIA_VILLAGER_3
+ {
+  DT Directly south of here
+  .. is a grave belonging to
+  .. one who could see secrets
+  .. paths that other could not.
+ }
+END
+
+PROC WRLD_SK_IsOnDarkSide
+ VAR rawcr c r
+
+ # If the player completed the Light quest, there is no dark side.
+ TEST GM_C_SK_LIGHT; JNZ .no
+ # Otherwise, the dark side is map pages (2,5), (2,6) and (2,7).
+ SND PINFO_XZDIR; SYS SYSC_PINFO; REC rawcr
+ SND rawcr; CALL UTIL_WordToBytes; REC c r
+ DIV c 30; DIV r 17
+ CMP c 2; JNE .no
+ CMP r 5; JL .no
+ RET 1  # Yes
+.no:
+ RET 0  # No
+END
+
+PROC WRLD_SK_Walk
+ PARAM rawcr pdir c r
+ VAR dark
+
+ # If the player is on the right side of the island and has not
+ # received permission from the King and Queen, stop them.
+ CALL WRLD_SK_IsOnDarkSide; REC dark
+ CMP dark 0; JNE .dark
+.ret:
+ RET
+
+.dark:
+ # If the got the permission from the King/Queen, it's OK.
+ TEST GM_A_SK_LIGHT; JNZ .ret
+ # If they advance east of column 62, stop them.
+ SND rawcr; CALL UTIL_WordToBytes; REC c r
+ CMP c 62; JL .ret
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND 210 SGuard .a_speak; SYS SYSC_SPEAK
+ SND PINFO_XZDIR LOHI(51,113) DIR_E; SYS SYSC_SET_PINFO
+ RET
+.a_narr:
+ DT You find yourself surrounded
+ .. by a group of soldiers.
+.a_speak:
+ DT You may not wander the dark
+ .. side without royal approval.
+ ..
+ .. We will escort you back.
+END
+
+PROC WRLD_SK_WeaponHut
+ SND *; CALL SHOP_Blacksmith
+ {
+  DB 4
+  DB ITID_TWO_HANDED_SWORD #@wares_SK_HUTS
+  DB ITID_CROSSBOW #@wares_SK_HUTS
+  DB ITID_AXE #@wares_SK_HUTS
+  DB ITID_LONG_BOW #@wares_SK_HUTS
+ }
+END
+
+PROC WRLD_SK_WizardHut
+ VAR has
+ # Already taught?
+ SND ZID_LIGHTNING; SYS SYSC_HAS_SPELL; REC has
+ CMP has 0; JNE .already
+ # Light quest completed?
+ TEST GM_C_SK_LIGHT; JZ .not_yet
+ # Teach the spell.
+ SND 251 SWizard .a_will_teach; SYS SYSC_SPEAK
+ SND ZID_LIGHTNING; SYS SYSC_LEARN_SPELL #@q_SK_LIGHT
+ RET
+.already:
+ SND 251 SWizard .a_already; SYS SYSC_SPEAK
+ RET
+.not_yet:
+ SND 251 SWizard .a_not_yet; SYS SYSC_SPEAK
+ RET
+.a_not_yet:
+ DT If you lift the Curse of
+ .. Night, I will teach you
+ .. a useful spell!
+.a_already:
+ DT Good luck in your quest!
+.a_will_teach:
+ DT You have brought back the
+ .. light. As a reward I will
+ .. teach you a spell.
+END
+
+PROC WRLD_SK_NorthHut
+ SND 250 SVillager .a_speak; SYS SYSC_SPEAK
+ RET
+.a_speak:
+ DT Don't forget to visit the
+ .. wizard to lives on the
+ .. coast north-west of here.
+END
+
+PROC WRLD_SK_CartographerHut
+ VAR upd
+ CALL UTIL_CartographerDialogue; REC upd
+ CMP upd 1; JNE .ret
+ # Update map with Southern Kingdom regions.
+ OR GV_WMAPREV_COL_C WMAPREV_MASK_ROW_5
+ OR GV_WMAPREV_COL_C WMAPREV_MASK_ROW_6
+ OR GV_WMAPREV_COL_C WMAPREV_MASK_ROW_7
+.ret:
+ RET
+END
+
+PROC WRLD_SK_HutNearRiver
+ SND 255 SVillager .a_msg; SYS SYSC_SPEAK
+ RET
+.a_msg:
+ DT Did you know there is only
+ .. one apple tree on this
+ .. whole island? There is a
+ .. treasure buried just south
+ .. of it.
+END
+
+PROC WRLD_SK_ThiefsHut
+ VAR count choice paid
+ # If JEWELRY_BOX is completed or failed, this
+ # hut is empty.
+ TEST GM_R_JEWELRY_BOX; JNZ .empty
+ TEST GM_F_JEWELRY_BOX; JNZ .empty
+ # If player already has the jewelry box, it's empty too.
+ SND ITID_JEWELRY_BOX; SYS SYSC_GET_ITEM_COUNT; REC count
+ CMP count 0; JG .empty
+ # Offer to sell jewelry box.
+ SND 211 SThief .a_offer; SYS SYSC_SPEAK
+ SND 0 .a_choices; SYS SYSC_CHOICE; REC choice
+ CMP choice 1; JE .buy
+ CMP choice 2; JE .ret
+ # Accused.
+ SND 211 SThief .a_accuse; SYS SYSC_SPEAK
+ SET TGV_BATTLE_END_CB WRLD_SK_FindJewelryBox
+ # Fight!
+ SND EID_BANDIT EID_BANDIT EID_BANDIT EID_BANDIT EID_BANDIT EID_BANDIT; SYS SYSC_BATTLE #@q_JEWELRY_BOX
+ RET
+.buy:
+ SND .a_pay_msg 300; SYS SYSC_PAY; REC paid
+ CMP paid 0; JE .ret
+ CALL WRLD_SK_FindJewelryBox
+ RET
+.empty:
+ SND AHutEmpty; SYS SYSC_ALERT
+ RET
+.ret:
+ RET
+.a_offer:
+ DT Hey! You look like a smart
+ .. buyer. We... found... this
+ .. jewelry box. Want to buy it?
+.a_accuse:
+ DT Stole it? You accuse me?
+ .. You will pay for your life
+ .. with your insolence! I mean,
+ .. your insolence will be the
+ .. price of... no.. your LIFE
+ .. will.. no...
+ ..
+ .. Anyway, prepare to die!
+.a_pay_msg:
+ DT Buy jewelry box from thieves?
+.a_choices:
+ DT Yes, we will buy it.
+ .. No, thanks.
+ .. Found? We know you stole it!
+END
+
+PROC WRLD_SK_FindJewelryBox
+ SND ITID_JEWELRY_BOX; SYS SYSC_GIVE
+END
+
+

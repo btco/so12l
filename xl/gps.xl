@@ -1,0 +1,132 @@
+# GPS (GLOBAL PERSISTENT STATE) CONSTANTS
+
+# GPS var# and masks for each quest:
+# Naming:
+#   GM: "GPS and Mask" (when individual bits of variables are used).
+#   GV: "GPS variable" (when the full variable is used for something).
+#
+#   A: Quest Assigned
+#   C: Quest Completed
+#   R: Quest Rewarded
+#   F: Quest Failed (when applicable).
+
+# Quest: Rescue the Governor of Riverside
+DEFINE GM_A_RESCUE_GOV                    VAR_GPS1 1
+DEFINE GM_C_RESCUE_GOV                    VAR_GPS1 2
+DEFINE GM_R_RESCUE_GOV                    VAR_GPS1 4
+  # NOTE: game.lua hard-codes VAR_GPS1,4 as the test to see whether
+  # it will show the key map onscreen.
+# Quest: Rid the Orchard of monsters
+DEFINE GM_A_ORCHARD                       VAR_GPS1 8
+DEFINE GM_C_ORCHARD                       VAR_GPS1 16
+DEFINE GM_R_ORCHARD                       VAR_GPS1 32
+# Did user accept shares of the Orchard?
+DEFINE GM_ORCHARD_SHARES                  VAR_GPS1 64
+# Quest: Seek Myra.
+DEFINE GM_A_MYRA                          VAR_GPS2 1
+DEFINE GM_C_MYRA                          VAR_GPS2 2
+DEFINE GM_R_MYRA                          VAR_GPS2 4
+# Quest: Return the Jewelry box.
+# (ITID_JEWELRY_BOX is the quest item, so there is no need for
+# a 'completed' flag, as possession of the box indicates that).
+DEFINE GM_A_JEWELRY_BOX                   VAR_GPS2 8
+DEFINE GM_R_JEWELRY_BOX                   VAR_GPS2 16
+DEFINE GM_F_JEWELRY_BOX                   VAR_GPS2 32
+# Has player been offered to sell the jewelry box?
+DEFINE GM_JEWELRY_BOX_SELL_OFFERED        VAR_GPS2 64
+# Quest: Defeat the ghost at the top of the Old Tower.
+DEFINE GM_A_OTO_GHOST                     VAR_GPS2 128
+DEFINE GM_C_OTO_GHOST                     VAR_GPS3 1
+DEFINE GM_R_OTO_GHOST                     VAR_GPS3 2
+# Quest: Recover the bundle of incense from the Riverside cellar.
+DEFINE GM_A_RSTO_INCENSE                  VAR_GPS3 4
+DEFINE GM_R_RSTO_INCENSE                  VAR_GPS3 8
+# OTO level-specific variables
+DEFINE GM_OTO2_BRIDGE_EXTENDED            VAR_GPS3 16
+DEFINE GM_OTO2_VOICE_SPOKE                VAR_GPS3 32
+DEFINE GM_OTO4_BRIDGE_EXTENDED            VAR_GPS3 64
+# Story flags
+DEFINE GM_INTRO_STORY                     VAR_GPS4 1
+DEFINE GM_INTRO_LEON                      VAR_GPS4 2
+# Quest: recover stolen bracelet
+DEFINE GM_A_BRACELET                      VAR_GPS4 4
+DEFINE GM_R_BRACELET                      VAR_GPS4 8
+# Dug up Serpent Woods beach treasure?
+DEFINE GM_GOT_SE_TREASURE                 VAR_GPS4 16
+# Visited Vic's house in Sun Port?
+DEFINE GM_VICS_HOUSE                      VAR_GPS4 32
+# Quest: bring light back to Southern Kingdom.
+DEFINE GM_A_SK_LIGHT                      VAR_GPS4 64
+DEFINE GM_C_SK_LIGHT                      VAR_GPS4 128
+DEFINE GM_R_SK_LIGHT                      VAR_GPS5 1
+# Looted the writer's shack in Sunny Islands?
+DEFINE GM_LOOTED_WRITER_HUT               VAR_GPS5 2
+# SAHA: looted shops?
+DEFINE GM_SAHA_LOOT_BLACKSMITH            VAR_GPS5 4
+DEFINE GM_SAHA_LOOT_ARMOR_SHOP            VAR_GPS5 8
+# Already did the ferry trip to the Great Desert?
+DEFINE GM_TOOK_DESERT_BOAT                VAR_GPS5 16
+# Finished the Obelisk dungeon (Red Crystal)?
+DEFINE GM_C_OBELISK                       VAR_GPS5 32
+# Music Box quest (assigned in WPTO)
+DEFINE GM_R_MUSIC_BOX                     VAR_GPS5 64
+# Quest: restore Indigo town (INTO)
+#  (there is no R bit because it coincides with completion)
+DEFINE GM_C_INTO                          VAR_GPS5 128
+# Already claimed King's throne in NOKE?
+DEFINE GM_CLAIMED_THRONE                  VAR_GPS6 1
+# Quest: return Ancient Dictionary to scholar in WPTO
+DEFINE GM_R_DICTIONARY                    VAR_GPS6 2
+
+# This stores how many wells the player has already
+# thrown a coin into. This determines what's the next
+# effect.
+DEFINE GV_WELL_COUNT                     VAR_GPS17
+
+# This stores at what level the party was when they last collected
+# dividends from Steve's apple hut.
+DEFINE GV_ORCH_DIVIDEND_LVL              VAR_GPS18
+
+# ------------------------------------------------------------------
+# CURRENT PARTY EFFECTS (things that have durations and that
+# influence gameplay, such as spells, light, etc).
+
+# Number of turns of light left.
+DEFINE GV_PEF_LIGHT                       VAR_GPS19
+# Acid resistance on?
+DEFINE GM_PEF_ACIDRES                     VAR_GPS20   1
+
+# ------------------------------------------------------------------
+# CHARACTER EFFECTS (things that have durations and that affect
+# individual characters, such as being poisoned, etc).
+#
+# THIS WAS MOVED TO ../src/cef.lua SO IT CAN BE SHARED
+# WITH LUA CODE.
+#
+# It uses VAR_GPS21 .. VAR_GPS24
+
+# Player's position on the world map (x, y)
+DEFINE GV_WMAP_X                         VAR_GPS25
+DEFINE GV_WMAP_Y                         VAR_GPS26
+
+# ------------------------------------------------------------------
+# MAP REVEAL FLAGS. These flags indicate which areas of the
+# world have been revealed on the player's map.
+# The map is 6 sectors wide x 8 sectors tall.
+# Each byte indicates the reveal state of each column of sectors.
+DEFINE GV_WMAPREV_COL_A                    VAR_GPS27
+DEFINE GV_WMAPREV_COL_B                    VAR_GPS28
+DEFINE GV_WMAPREV_COL_C                    VAR_GPS29
+DEFINE GV_WMAPREV_COL_D                    VAR_GPS30
+DEFINE GV_WMAPREV_COL_E                    VAR_GPS31
+DEFINE GV_WMAPREV_COL_F                    VAR_GPS32
+   # Masks for each row:
+   DEFINE WMAPREV_MASK_ROW_0 1
+   DEFINE WMAPREV_MASK_ROW_1 2
+   DEFINE WMAPREV_MASK_ROW_2 4
+   DEFINE WMAPREV_MASK_ROW_3 8
+   DEFINE WMAPREV_MASK_ROW_4 16
+   DEFINE WMAPREV_MASK_ROW_5 32
+   DEFINE WMAPREV_MASK_ROW_6 64
+   DEFINE WMAPREV_MASK_ROW_7 128
+

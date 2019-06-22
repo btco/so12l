@@ -1,0 +1,127 @@
+# LLIB - The Lost Library
+
+PROC LLIB_EnterFromWrld
+ # Ask the player if they want to enter.
+ SND .msg LVLN_LLIB ENTPT_LLIB; CALL UTIL_GoNoGo
+ RET 0
+.msg:
+ DB 1
+ DS Enter the Lost Library?
+END
+
+# Interaction proc
+EXPORT PROC LLIB_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr LLIB_Interactibles; CALL UTIL_CheckInteract
+ # Looting a chest?
+ #CMP sid 40; SND rawcr LOOT_X; CE LOOT_ChestRandom #@q_XXXXXX loot_count=X
+ RET
+END
+
+# Walk proc (if needed):
+EXPORT PROC LLIB_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ SND 1 rawcr DIA_CS_4_ARG; CALL TRIG_Check
+ {
+  DT The Lost Library! There
+  .. are ancient and powerful
+  .. books here. We should also
+  .. look out for paper golems.
+ }
+ # Battles:
+ SND 2 rawcr UTIL_Battle EID_PGOLEM; CALL TRIG_Check #@q_LLIB
+ SND 3 rawcr UTIL_Battle EID_PGOLEM EID_PGOLEM; CALL TRIG_Check #@q_LLIB
+END
+
+# Leave.
+PROC LLIB_Leave
+ SND ALeave LVLN_WRLD ENTPT_WRLD_FROM_LLIB; CALL UTIL_GoNoGo
+END
+
+PROC LLIB_Book1
+ PARAM rawcr
+ SND rawcr * LLIB_Book1Read; CALL UTIL_ReadBookOnce
+ {
+  DT Manual of Effective Combat.
+  .. Read book?
+ }
+END
+
+PROC LLIB_Book1Read
+ SND CINFO_ATT 5; CALL UTIL_IncStatForAll
+ SND 0 * C_LBLUE SFX_POWERUP; SYS SYSC_BLINK
+ {
+  DS +5 att
+ }
+ RET
+END
+
+PROC LLIB_Book2
+ PARAM rawcr
+ SND rawcr * LLIB_Book2Read; CALL UTIL_ReadBookOnce
+ {
+  DT Manual of Speed.
+  .. Read book?
+ }
+END
+
+PROC LLIB_Book2Read
+ SND CINFO_SPEED 15; CALL UTIL_IncStatForAll
+ SND 0 * C_LBLUE SFX_POWERUP; SYS SYSC_BLINK
+ {
+  DS +15 speed
+ }
+ RET
+END
+
+PROC LLIB_Book3
+ PARAM rawcr
+ VAR read
+ SND ZID_IDENTIFY; CALL UTIL_ReadSpellbook; REC read
+ CMPZ read; JZ .end
+ SND rawcr; SYS SYSC_KILL_TILE
+.end:
+END
+
+PROC LLIB_Book4
+ PARAM rawcr
+ SND rawcr * LLIB_Book4Read; CALL UTIL_ReadBookOnce
+ {
+  DT "Lore and Wealth of
+  .. the Ancients".
+  .. Read book?
+ }
+END
+
+PROC LLIB_Book4Read
+ DIA_NARR
+ {
+  DT Afte reading, you feel much
+  .. wiser, and a bit wealthier too.
+ }
+ SND 10000; CALL REW_GiveQuestReward #@q_LLIB
+END
+
+PROC LLIB_ChestWithDictionary
+ PARAM rawcr
+ VAR kf
+ SND rawcr TINFO_IS_KILLED; SYS SYSC_TINFO; REC kf
+ CMPZ kf; JNZ .end
+ SND ITID_DICTIONARY; SYS SYSC_GIVE
+ SND rawcr; SYS SYSC_KILL_TILE
+.end:
+END
+
+# LLIB INTERACTIBLES LIST
+# (position, title, proc)
+LLIB_Interactibles:
+ DW LOHI(195,103) LLIB_Leave
+ DW LOHI(196,108) LLIB_Book1
+ DW LOHI(203,108) LLIB_Book2
+ DW LOHI(208,103) LLIB_Book3
+ DW LOHI(207,108) LLIB_Book4
+ DW LOHI(208,105) LLIB_ChestWithDictionary
+ DW 0
+

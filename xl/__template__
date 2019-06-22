@@ -1,0 +1,48 @@
+# Template
+
+# Replace NAME by the name of the level.
+
+PROC NAME_EnterFromWrld
+ # Ask the player if they want to enter.
+ SND .msg LVLN_NAME ENTPT_NAME; CALL UTIL_GoNoGo
+ RET 0
+
+.msg:
+ DB 1
+ DS Enter?
+END
+
+# Interaction proc
+EXPORT PROC NAME_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr NAME_Interactibles; CALL UTIL_CheckInteract
+ # Looting a chest?
+ #CMP sid 40; SND rawcr LOOT_X; CE LOOT_ChestRandom #@q_XXXXXX loot_count=X
+ RET
+END
+
+# Walk proc (if needed):
+EXPORT PROC NAME_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ #SND 1 rawcr UTIL_CharSpeak 2 .a_supplies
+ #CALL TRIG_Check
+ #SND 2 rawcr UTIL_Battle EID_SLIME EID_SLIME
+ #CALL TRIG_Check
+ RET
+END
+
+# Leave.
+PROC NAME_Leave
+ SND ALeaveTown LVLN_WRLD ENTPT_WRLD_FROM_NAME SFX_????
+ CALL UTIL_GoNoGo
+ RET
+END
+
+# NAME INTERACTIBLES LIST
+# (position, title, proc)
+NAME_Interactibles:
+ #DW LOHI(???,???); DW NAME_Leave
+ DW 0
+

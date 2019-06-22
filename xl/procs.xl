@@ -1,0 +1,171 @@
+# GLOBAL PROCS
+# Called by engine when something interesting happens, like
+# the player walks, tries to interact with something, etc.
+
+# Called when player interacts with a solid tile.
+EXPORT PROC PROC_Interact
+ PARAM rawcr xz sid kf
+ VAR proc
+
+ # Common interactions
+ SND rawcr sid kf; CALL COMMON_Interact
+
+ # Delegate to level proc.
+ SND LINFO_IPROC; SYS SYSC_LINFO
+ REC proc
+ SND rawcr xz sid kf
+ CALL proc
+END
+
+PROC PROC_MaybeHandleSwamp
+ PARAM rawcr
+ VAR sid
+ # What did the player step on?
+ SND rawcr TINFO_SID; SYS SYSC_TINFO; REC sid
+ # Was it the acid swamp?
+ CMP sid 62; CE PROC_HandleSwamp
+ CMP sid 107; CE PROC_HandleSwamp
+END
+
+# Called when player takes a step.
+EXPORT PROC PROC_Walk
+ PARAM rawcr pdir
+ VAR proc
+
+ SND rawcr; CALL PROC_MaybeHandleSwamp
+
+ # Increment the global step clock.
+ ADD TGV_STEP_CLK 1
+
+ # Set position of player on world map, if we are within the world
+ # map area.
+ SND rawcr; CALL WMAP_UpdatePos
+
+ # Process effects of equipment worn by characters.
+ SND rawcr pdir; CALL EQUIP_Walk
+ # Process effect of conditions.
+ SND rawcr pdir; CALL CEF_Walk
+
+ # Consume light, if light > 0.
+ CMP GV_PEF_LIGHT 0
+ JLE .end_consume_light
+ SUB GV_PEF_LIGHT 1
+.end_consume_light:
+
+ # Delegate to level proc.
+ SND LINFO_WPROC; SYS SYSC_LINFO
+ REC proc
+ SND rawcr pdir
+ CALL proc
+END
+
+# Called when the player wants to use an item.
+#  itid: ITID of the item being used
+#  idx: index of the item being used, in P.inv[]
+#  chi: if not nil, item is being used in combat by the given player
+EXPORT PROC PROC_UseItem
+ PARAM itid idx chi
+ VAR proc ptr this_itid this_proc handled
+ # Delegate to level proc first.
+ # Level proc will return 1 to say it handled it, 0 to say it didn't.
+ SND LINFO_UPROC; SYS SYSC_LINFO
+ REC proc
+ # If there is no proc, go to .not_handled.
+ CMP proc 0; JE .not_handled
+ # Ok, we have a proc. Let's call it.
+ SND itid idx chi
+ CALL proc
+ # Did it handle it?
+ REC handled
+ CMP handled 0; JE .not_handled
+ # Was handled. Nothing more to do.
+ RET
+.not_handled:
+ # If we got here, the level item proc didn't handle it.
+ # Now let's look for the item's use proc in the ItemUseLUT table.
+ SET ptr ItemUseLUT
+.loop:
+ # Read current LUT entry's ITID into this_itid.
+ REAB this_itid ptr
+ # If this_itid is 0, it's the end of the table.
+ CMP this_itid 0; JE .not_found
+ # Read proc address into this_proc.
+ ADD ptr 1
+ REAW this_proc ptr
+ ADD ptr 2
+ # Is this_itid is the itid we are looking for?
+ # If not, go back to .loop
+ CMP this_itid itid; JNE .loop
+ # It is the ITID we are looking for. So call the proc.
+ SND itid idx chi
+ CALL this_proc
+ JMP .ret
+ # End.
+.not_found:
+ # Not found in table. Tell use that they can't use this item.
+ SND ANothingHappened; SYS SYSC_ALERT
+.ret:
+END
+
+EXPORT PROC PROC_BootLevel
+ VAR proc
+
+ # Calculate lighting (this is done every frame, but we need to
+ # do it at boot so it's correct for the first frame).
+ CALL PROC_ApplyLighting
+
+ # Delegate to level proc.
+ SND LINFO_BPROC; SYS SYSC_LINFO
+ REC proc
+ SND 0
+ CALL proc
+END
+
+EXPORT PROC PROC_DrawFrame
+ PARAM in_battle
+ # Advance clock.
+ ADD TGV_CLK 1
+ # Call the non-battle stuff, if we are not in battle.
+ CMP in_battle 0; CE PROC_ApplyLighting
+ # Draw the light indicator, if light > 0
+ CMP GV_PEF_LIGHT 0; JE .no_light
+ SND 320 188 64 GV_PEF_LIGHT 255; CALL UTIL_DrawBadge
+.no_light:
+ # Draw the Protect indicator.
+ TEST TGM_PEF_PROTECT; JZ .no_protect
+ SND 235 200 64; CALL UTIL_DrawBadge
+.no_protect:
+ # Draw the "acid resistance" indicator.
+ TEST GM_PEF_ACIDRES; JZ .no_acidres
+ SND 215 212 64; CALL UTIL_DrawBadge
+.no_acidres:
+ # Draw character effect indicators
+ CALL CEF_DrawIndicators
+END
+
+PROC PROC_ApplyLighting
+ VAR dark force_flags
+ # If player is in the eastern side of Southern Kingdom and
+ # they have not yet completed the Light quest, it's dark.
+ CALL WRLD_SK_IsOnDarkSide; REC dark
+ CMP dark 0; JE .not_sk_dark
+ SET force_flags LVLF_DARK
+.not_sk_dark:
+ # If on Night Island, it's always dark.
+ CALL WRLD_NI_IsInDarkArea; REC dark
+ CMP dark 0; JE .not_ni_dark
+ SET force_flags LVLF_DARK
+.not_ni_dark:
+ # Set lighting.
+ SND force_flags; CALL UTIL_AdjustLight
+END
+
+PROC PROC_HandleSwamp
+ VAR nchars i hp
+ # Is the GM_PEF_ACIDRES effect on? If so, immune.
+ TEST GM_PEF_ACIDRES; JNZ .end
+ RND hp 10 20
+ SND 0 hp; CALL UTIL_Hurt
+.end:
+END
+

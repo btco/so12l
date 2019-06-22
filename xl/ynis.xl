@@ -1,0 +1,118 @@
+# Template
+
+# Replace YNIS by the name of the level.
+
+PROC YNIS_EnterFromWrld
+ # Ask the player if they want to enter.
+ SND .msg LVLN_YNIS ENTPT_YNIS; CALL UTIL_GoNoGo
+ RET 0
+
+.msg:
+ DT Enter Glacies, the
+ .. City of Ice?
+END
+
+# Interaction proc
+EXPORT PROC YNIS_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr YNIS_Interactibles; CALL UTIL_CheckInteract
+ RET
+END
+
+# Leave.
+PROC YNIS_Leave
+ SND ALeaveTown LVLN_WRLD ENTPT_WRLD_FROM_YNIS
+ CALL UTIL_GoNoGo
+ RET
+END
+
+PROC YNIS_KingsRingHint
+ DIA_VILLAGER_6
+ {
+  DT They say King Vahn presented
+  .. his ring to his most trusted
+  .. advisor. However, after the
+  .. King went mad with power,
+  .. he demanded it back.
+ }
+ DIA_VILLAGER_6
+ {
+  DT The advisor, knowing the
+  .. ring's power, refused to
+  .. return it and took refuge
+  .. in the Ice Maze.
+  ..
+  .. It's south-west of here.
+ }
+END
+
+PROC YNIS_TrainingHall
+ SND 12; CALL Train #@train_YNIS
+END
+
+# Blacksmith
+PROC YNIS_Blacksmith
+ SND *; CALL SHOP_Blacksmith
+ {
+  DB 6
+  DB ITID_BATTLE_HAMMER #@wares_YNIS
+  DB ITID_BATTLE_AXE #@wares_YNIS
+  DB ITID_TWO_HANDED_SWORD #@wares_YNIS
+  DB ITID_AXE #@wares_YNIS
+  DB ITID_LONG_SWORD #@wares_YNIS
+  DB ITID_CROSSBOW #@wares_YNIS
+ }
+END
+
+# Armor shop
+PROC YNIS_ArmorShop
+ SND *; CALL SHOP_ArmorShop
+ {
+  DB 10
+  DB ITID_PLATE_ARMOR #@wares_YNIS
+  DB ITID_SPLINTED_ARMOR #@wares_YNIS
+  DB ITID_CHAIN_ARMOR #@wares_YNIS
+  DB ITID_RING_ARMOR #@wares_YNIS
+  DB ITID_BATTLE_SHIELD #@wares_YNIS
+  DB ITID_STEEL_SHIELD #@wares_YNIS
+  DB ITID_IRON_SHIELD #@wares_YNIS
+  DB ITID_BATTLE_HELM #@wares_YNIS
+  DB ITID_STEEL_HELM #@wares_YNIS
+  DB ITID_BATTLE_BOOTS #@wares_YNIS
+ }
+END
+
+PROC YNIS_Inn
+ SND 255 .a_welcome 45; CALL UTIL_Inn
+ RET
+.a_welcome:
+ DB 1
+ DS Welcome to the Ice Inn.
+END
+
+PROC YNIS_House1
+ DIA_VILLAGER_9
+ {
+  DT Legend says that whoever
+  .. has King Vahn's SWORD,
+  .. CROWN and RING can
+  .. claim the throne in
+  .. North Keep.
+ }
+END
+
+# YNIS INTERACTIBLES LIST
+# (position, title, proc)
+YNIS_Interactibles:
+ DW LOHI(187,85) YNIS_Leave
+ DW LOHI(182,87) YNIS_KingsRingHint
+ DW LOHI(192,87) YNIS_TrainingHall
+ DW LOHI(190,87) YNIS_Blacksmith
+ DW LOHI(190,93) YNIS_ArmorShop
+ DW LOHI(192,93) SHOP_GeneralStore
+ DW LOHI(193,90) SHOP_ScrollShop
+ DW LOHI(182,94) YNIS_Inn
+ DW LOHI(182,90) YNIS_House1
+ DW 0
+

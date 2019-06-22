@@ -1,0 +1,324 @@
+# STRINGS used in LUA code.
+# If it's not something used in LUA code, it should go in
+# istrs.xl.
+
+EXPORT SPressZToStart:
+ DS Press [Z] to start
+
+EXPORT SPressZToLoad:
+ DS Press [Z] to resume saved game
+
+EXPORT SPressZToContinue:
+ DS Press ACTION to continue
+
+EXPORT AErasePrompt:
+ DB 3
+ DS ERASE save??
+ DS Press [Z] 15 times to confirm.
+ DS Press [X] to cancel.
+
+EXPORT SGameOver:
+ DS GAME OVER
+
+EXPORT SItsDark:
+ DS It's dark!
+
+EXPORT AInvActions:
+ DB 8
+ # The first four are replaced by character names at run time.
+ DS .
+ DS .
+ DS .
+ DS .
+ DS Remove
+ DS Use
+ DS Examine
+ DS Discard
+
+EXPORT SInventory:
+ DS Inventory
+
+EXPORT SCantUseThis:
+ DS  can't use this.
+
+EXPORT SMustFirstRemove:
+ DS  must first remove
+
+EXPORT ATwoHandedShieldConflict:
+ DB 2
+ DS A two-handed weapon can't be
+ DS used with a shield.
+
+EXPORT SCantRemoveInvFull:
+ DS Can't remove. Inventory full.
+
+EXPORT SCantRemoveCursed:
+ DS Can't remove. Item is cursed.
+
+EXPORT SCantDiscardLooksImportant:
+ DS Can't discard this. It looks important.
+
+EXPORT SReallyDiscard:
+ DS Really discard
+
+EXPORT ACancelDiscard:
+ DB 2
+ DS No, cancel.
+ DS Yes, discard.
+
+EXPORT AItkNames:
+ DB 15
+ DS armor
+ DS helm
+ DS weapon
+ DS ranged weapon
+ DS shield
+ DS boot
+ DS belt
+ DS amulet
+ DS ring
+ DS wand
+ DS scroll
+ DS potion
+ DS food
+ DS thing
+ DS quest
+
+EXPORT AClassNames:
+ DB 4
+ SClassFighter:; DS Fighter
+ SClassPaladin:; DS Paladin
+ SClassArcher:;  DS Archer
+ SClassWizard:;  DS Wizard
+# Needed for PSHEET_Draw:
+AClassNamePtrs:
+ DW SClassFighter
+ DW SClassPaladin
+ DW SClassArcher
+ DW SClassWizard
+
+EXPORT SSaving:
+ DS Saving...
+
+EXPORT SSaveWarning:
+ DS Do not power off or remove cartridge.
+
+EXPORT SGameSaved:
+ DS Game saved.
+
+EXPORT AGeneralMenu:
+ DB 4
+ DS Interact
+ DS Items
+ DS Cast spell
+ DS Party info
+
+EXPORT ANoRangedWeapon:
+ DB 3
+ DS No ranged weapon.
+ DS To equip a ranged weapon, use
+ DS the inventory screen.
+
+EXPORT ANoMeleeWeapon:
+ DB 3
+ DS No melee weapon.
+ DS To equip a melee weapon, use
+ DS the inventory screen.
+
+EXPORT SWhoWillCast:
+ DS Who will cast?
+
+EXPORT SKnowsNoSpells:
+ DS  does not know any spells.
+
+EXPORT SChooseSpell:
+ DS Choose spell (
+
+EXPORT ANotEnoughSp:
+ DB 1
+ DS Not enough spell points.
+
+EXPORT SBuyWhat:
+ DS What do you want to buy?
+
+EXPORT SNoItemsToSell:
+ DS No items to sell.
+
+EXPORT ADontSellSell:
+ DB 2
+ DS No, don't sell.
+ DS Yes, sell.
+
+EXPORT SNotEnoughGold:
+ DS Not enough gold.
+
+EXPORT SLearnedNewSpell:
+ DS  learned a new spell:
+
+EXPORT SAlreadyKnewSpell:
+ DS You already know this spell:
+
+EXPORT ASpellMustBeCastInBattle:
+ DB 2
+ DS This spell can only be cast
+ DS while engaged in combat.
+
+EXPORT ASpellCannotBeCastInBattle:
+ DB 2
+ DS This spell can't be cast 
+ DS while engaged in combat.
+
+EXPORT ABatActions:
+ DB 7
+ DS Attack
+ DS Arrow
+ DS Spell
+ DS Item
+ DS Move ->
+ DS Move <-
+ DS Pass
+ # IMPORTANT: If the order or number of these
+ # change, you also need to update the
+ # logic in BatHandleCharTurn that replaces
+ # the last item (Pass) by SURRENDER.
+
+EXPORT ABatMoveAdvanceFail:
+ DB 2
+ DS Can't advance. Enemies are in
+ DS the way. Defeat them first.
+
+EXPORT ABatMoveRetreatFail:
+ DB 1
+ DS Can't retreat further.
+
+EXPORT ABatNoFoesInRange:
+ DB 1
+ DS No enemies in range.
+
+EXPORT BsPalmapPenumbra:
+ DB 0 0 0 1 1 4 3 2 4 3 5 4 2 4 3
+
+EXPORT BsPalmapUmbra:
+ DB 0 0 0 1 1 1 1 1 1 1 1 1 1 3 3
+
+# Background color for each battle visual style# (from 1)
+EXPORT BsBatBgColor:
+ DB 9   # LENGTH
+ DB 5 1 3 12 2 1 10 1 1
+
+EXPORT SReceived:
+ DS You received
+
+EXPORT ABatNoItems:
+ DB 2
+ DS You don't have any items that
+ DS can be used while in battle.
+
+EXPORT ANoItems:
+ DB 2
+ DS You don't have any of your
+ DS items with you right now.
+
+EXPORT ANoCasters:
+ DB 1
+ DS You don't know any spells yet.
+
+EXPORT ACarryingTooMuchFood:
+ DB 2
+ DS You are already carrying
+ DS too many food items.
+
+EXPORT AOutOfStock:
+ DB 2
+ DS You can't carry any more 
+ DS of that item.
+
+EXPORT AUnidentDesc:
+ DT Unidentified item.
+ .. To know more about it,
+ .. identify it first.
+
+EXPORT SNothingEquipped:
+ DS  has nothing equipped.
+
+EXPORT STheEnd:
+ DS - THE END -
+
+EXPORT ACutSceneStrings:
+ DB 16
+ DS Resting...
+ DS Resting at the inn...
+ DS Town of Riverside
+ DS Forest Village
+ DS Old Tower
+ DS Pinnacle Town
+ DS Sun Port
+ DS Castle South
+ DS Monastery
+ DS Sand Haven
+ DS Town of Umbra
+ DS Town of Glacies
+ DS Westport Town
+ DS North Keep
+ DS Ignis
+ DS Indigo Town
+
+EXPORT ARegularItem:
+ DT (No further info)
+
+EXPORT AStory:
+ DT STORY
+ .. Your name is Alex.
+ ..
+ .. After months at sea, you and your
+ .. brother Leon have arrived in Riverside,
+ .. capital of the prosperous Twelve Lands.
+ ..
+ .. Perhaps you will become heroes, sung
+ .. throughout the land. Or perhaps you will
+ .. just die pathetically on that first battle
+ .. that was supposed to be easy. Who knows?
+ .. Only one way to find out.
+
+EXPORT ANothingToInteract:
+ DT Nothing to interact
+ .. with here.
+
+EXPORT SCopyright:
+ DS Copyright (c) 2019 by Bruno Oliveira. All rights reserved.
+
+EXPORT AEpilogueGood:
+ DT The shadow of the Sorcerer King was
+ .. lifted at last from the Twelve Lands.
+ ..
+ .. King Vahn II ruled for many decades,
+ .. advised by his loyal friends Lyla
+ .. and Leon.
+ ..
+ .. He never sold his kingdom to any
+ .. evil villains, a marked improvement
+ .. over his predecessors.
+ ..
+ .. Vic enjoys a carefree retirement in
+ .. Sun Port, interrupted only by the
+ .. occasional giant spider.
+ ..
+ ..                   THE END
+
+EXPORT AEpilogueEvil:
+ DT Alex the Treacherous became the
+ .. new Sorcerer King. People thought
+ .. Markus was bad, but Alex actually
+ .. brought about a surprising amount
+ .. of innovation in the subject of 
+ .. fear and despair, becoming a
+ .. truly outstanding Sorcerer King.
+ ..
+ .. Immortal and extremely powerful, his
+ .. reign shall last for eternity.
+ ..
+ .. Or at least until another party of
+ .. adventurers find the Four Crystals...
+ ..
+ ..                   THE END
+

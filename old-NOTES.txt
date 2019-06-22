@@ -1,0 +1,352 @@
+TODO:
+
+     BALANCING:
+
+       scenario1: bare bones, only essential quests plus a few
+         side quests. Game should be beatable, if only barely.
+
+       scenario2: do all side quests for xp/money.
+         Game should be relatively easy.
+
+
+     [X] Add an identify spell somewhere, or an identify service in towns
+     [X] Make loot give unidentified items; add more loot
+
+
+ Adjustments:
+     [x] remove Emerald Key from after SK quest
+     [x] put 2nd gem in MONA
+     [x] put Indigo Statuette in Bamboo Grove
+     [x] move WPTO's Music Box to FI (buried?)
+     [x] move cemetery to another location, blocked by marshes.
+         East of Great Desert??
+           cemetery has the King's crown
+     [x] adjust Marshes Palace, require sword, ring, crown
+           to sit on throne;
+             then, give armor, 4th gem.
+             restore kingdom.
+     [x] give Emerald Key in NOKE or nearby
+     [x] build YNIS, remove statue, hints about crown and sword
+     [x] build King's ring quest -- Ice Caves
+     [x] build sword quest -- statue at NE end of island
+     [x] build Marshes Palace Vaults - find 4th gem, armor
+     [x] build Portal.
+     [x] remake cemetery -- Dark Lands
+
+ NEXT: After Desert quest:
+
+     - Monastery has 2nd gem
+     - so, after Obelisk player has 3 gems.
+     - Statuette is not in Graveyard, it's in Bamboo Grove.
+     - get Statuette from Bamboo Grove, return it to Indigo, get
+         Marshes spell
+     - enter Marshes Palace, find out about vault, hint:
+         need Sword, Crown. Find them in FI.
+         Get Emerald Key.
+     - Go to FI, enter with Emerald Key
+     - Subquests:
+         crown - in the Ice Caves
+         sword - in the statue NE of the island
+     - Return to Marshes Palace, open vault, get 4th gem,
+         get King's Armor (ultimate armor).
+     - Go w/ 4 gems to Portal.
+     - Portal is somewhere more accessible -- east of BL?
+         Don't require player to travel through FI again.
+
+     - WPTO's Music Box is somewhere else (side quest).
+         Buried in the snow in FI somewhere??
+
+     ALT (with AQTO):
+       - Return to Marshes Palace, enter vaults, get Compass.
+       - With Compass, go to WPTO and sail to AQTO.
+       - Explore AQTO, find 4th gem.
+
+
+
+ * PROBLEM: if player doesn't have money to pay boatman to DE,
+   how do they get money?? Are they stuck?
+   (they could sell stuff... but is it enough?)
+
+   How can the game give the player money to ensure they
+   have a certain "net worth" at each given level?
+
+   IDEA: add an Arena hut: don't gain experience, but each
+   fight pays a certain $. That way player can always grind the
+   arena for cash if they want to. The arena temporarily closes
+   when player's cash is above 1000?
+   ...or some other slot machine like thing. Casino?
+   ...can play some sort of game to gain gp?
+
+ * Next: entering the Marshes City requires you to wear
+   King Vahn's armor and wield King Vahn's sword
+   because it says "only the king can enter".
+   In the city player will find the item that allows them
+   to go to the Underwater City.
+
+
+ * Make Protect spell affect a single character so it's less
+   overpowered?
+
+ * Add traps? Spell to detect traps? Amulet that warns about
+   traps?
+ 
+ * Invisible enemies?
+
+
+OPEN ENDS:
+
+ * There must be cartographers in each region to update the map.
+
+ * Lena's Jewelry box must be found somewhere
+
+ * IMPORTANT: King must prevent player from getting SK_LIGHT quest
+   if they don't have Vic in their party (king says "it's too
+   dangerous, you can go as long as Vic goes with you").
+
+ * IMPORTANT: There must be a way to remove a cursed item?
+
+
+
+BUGS:
+
+[ ] JAIL level has blue sky now, leaking
+
+[ ] Resting at an inn does not exercise the same logic as
+    eating a food ration, so it's missing stuff like clearing
+    CEF_RESISTANT.
+
+[X] World map position does not update after portal travel.
+
+[ ] Stunned enemies still hit correctly; they should normally miss
+
+[X] Ranged attack target selection does not allow selecting middle
+    cell when all 3 enemy cells are occupied.
+
+[X] ** Battle against 3 slimes occasionally gets stuck
+    when Lyla attacks first
+
+[X] Unconscious casters can still cast spells, drink potions, etc.
+
+[ ] *** Using item does not advance battle turn!
+
+[ ] Paladin spell cast anim in battle is melee attack, needs
+    to be spell anim if BAT_AF_SPELL flag is on.
+
+[X] Check if battle correctly goes to GAME OVER when no chars left
+[X] Don't let players access their equipment in JAIL level.
+[X] Don't let player save game in JAIL level.
+
+[ ] What if player saves game via fountain, in a dark level,
+    and has no torches?
+
+[X] Implement AMULET_OF_HEALTH effect!
+
+
+IDEA FOR PROGRESSION:
+
+  Quest rewards are marked as S, M or L.
+  The actual XP and gold value varies depending on the party level,
+  such that to advance to the next level the party needs 4 S quests,
+  2 M quests or 1 L quest.
+
+
+SPELL IDEAS:
+  * Bravery: increases att but decreases def
+  * causes damage AND heals
+  * make enemies more likely not to target you
+  / push an enemy away
+  * pull enemy toward party
+  * remove stunned status (Steady)
+  * enable someone to have 2 attacks next turn (Haste)
+
+
+ITEM IDEAS:
+  * Merchant's ring -- gets better prices.
+
+
+IDEA: Objective of the game is to collect all 50 crystal shards
+that are scattered around the world. So the player must explore.
+Leveling up, etc, are just a way to explore, because with
+better levels previously very hard areas become easier so you can
+go there and collect shards. Some of them are lying around in caves,
+some of them are part of trading sequences with NPCs, some of them
+can be bought for large $$$, some of them require side quests,
+but all are optional -- the player just has to get 50 shards,
+in whichever way they like. There are more than 50 in the game,
+say ~100, so the player only has to get half of them to win.
+This way, the entire world can be open for exploration,
+Dragon Quest style, with death simply resetting the player to
+the central town with some money loss.
+
+IDEA 2: It's open world. The only objective is to East and defeat
+the Sorcerer King. The player is free to go anywhere and do anything
+to level up.
+
+TODO:
+
+[X] NEW COMBAT CALC: Dmg Mult = 1 + (Att-Def)/20
+    Player att is approx 6 * L
+    This means that:
+      * every 4 levels player gains +1x damage.
+      * every 20 of defense of an enemy,
+          it negates 1x damage, so effectively 4 levels of the player
+
+    We can do away with damage resistance in this case.
+
+[ ] Add more equipment shops in FOVI/MTN/SUTO so player can
+    upgrade a bit.
+
+[X] Don't let the player have more than 6 of the same item
+    when buying so they can't fill up their inventory with stuff?
+    Make it so that the store "runs out of stock" so it doesn't
+    seem artificial.
+
+[ ] ranged attacks: make it so that on combats where one side has
+    ranged weapons, it starts at a distance and automatically
+    closes in? So there are 2-3 rounds or so of only ranged
+    attacks?
+    So at every full turn everyone moves closer to the center of
+    the screen automatically.
+
+[ ] add descriptions to all items
+
+[X] do away with LPS entirely? Move all to GPS?
+
+[ ] Inn should *also* save to a backup slot
+[X] Monsters should drop gold (so that there's an endless source
+    of gold with wandering monsters).
+
+[ ] Implement apple revenue system
+[ ] Implement altar rewards system
+
+----
+BATTLE:
+
+Plan: leave battle as-is, cell-based maneuvering is interesting
+if there are enemies with ranged attacks that stay back while
+enemies with melee attacks stay at the front.
+
+Idea: auto close gaps: if there is an empty cell between
+players and enemies, automatically move either side closer to
+the other to close the gap without requiring anyone to explicitly
+move. That way when players clear the first line of enemies,
+there won't be a boring turn where they just tell everyone to
+advance to the new space.
+
+----
+
+CLERIC SPELLS:
+
+Heal              Heals up to 10 hp
+Defense           Increase DR by 1
+Accuracy          Increase ATT by 15
+Confuse           Decrease enemy ATT
+Strengthen        Increase DM20
+Heal+             Heals up to 40hp
+Release           Removes HELD effect from a char
+Cure Poison       Removes POI effect from a char
+Heal All          Heals all by up to 40hp
+Withdraw          Escapes from battle.
+Avoid             Avoids wandering monsters
+Shelter           Guaranteed rest in wilderness
+
+WIZARD SPELLS:
+
+Burn              Up to 10 damage, melee
+Fire orb          Up to 30 damage, ranged
+Fire storm        Up to 20 damage, area
+Haste             Selected party member gets 2 attacks next turn
+Hold              Hold enemy
+Light             Light
+Kill              Kill one enemy (low enough level)
+Leap              Leap 1 tile
+Merchant          Get better prices
+
+SYS SYSC_SPEAK text limits:
+
+10 lines, 28 columns
+(set cc=33, to account for ' DS ' prefix).
+
+NEW PLOT:
+Party rescues Lucas, receives set of 4 crystals.
+Lucas says take the crystals to Marcus.
+Marcus steals crystals, puts party in jail.
+Party leaves jail with help from Olmur.
+
+Olmur explains that the 4 crystals open a portal to the Astral Plane,
+which allows someone to go in there and either save the world from
+evil, or become the new evil ruler.
+
+Olmur says there is another set of 4 crystals hidden around the world,
+and now they must find them.
+
+Buy-in: anyone who touches the crystals is bound to the mission (like
+a curse). Olmur himself is cursed.
+
+STORY:
+
+An Evil Sorcerer, for no reason other than
+furthering the plot of this game, has
+cast an evil spell upon the land, creating
+monsters and cutting off cities from one another.
+
+The world awaits a brave warrior to go defeat
+the Evil Sorcerer and reclaim the land.
+Spoiler: that's you. Although that's highly
+optimistic, given your limited funds and
+equipment. No pressure, but the whole world
+is counting on you.
+
+Good luck!
+
+
+QUESTS:
+
+PART I - Isle
+
+* main: get to Northshore <- [cross forest]
+
+* cross forest (sea?) <- potion of Orientation <-
+  northberry to Tower wise man <- [northberry], [Jump spell]
+
+* northberry <- cross swamp <- special Cleric spell of protection <-
+  temple of X can grant, but needs idols back for altar to work <-
+  return the [3 idols].
+
+* jump spell <- get from reading book in Orchard Owner's Office
+  <- get key from Orchard Owner <- save orchard
+
+* idol 1 <- cave near Orchard Road
+* idol 2 (stolen by band of thieves) <- enter hideout to find it <-
+  reveal secret entrance <- [Reveal spell], [hint about entrance]
+
+* [hint about entrance] <- hut in Riverside, in exchange for
+  [Apple cider] <- obtained from Orchard Owner
+
+* idol 3 (bought by Y) <- exchange w/ Y for [emerald].
+
+* Reveal spell <- taught by wizard in City Z.
+
+* emerald <- get to bottom of Great Mines <- need pick to clear rocks
+  <- sold in Riverside?
+
+
+
+FUTURE:
+
+plane shift <- plane shift spell <- Great Library <-
+  membership ring to Great Library <- some quest
+
+
+
+BALANCING:
+
+S: 4 + 4.4 * (L-1)
+Ag: 4 + 4.1 * (L-1)
+HP: 15 + 6.8 * (L-1)
+
+Basic weap = +1 level for attack
+Good weap = +2-3 levels for attack
+Great weap = +4-5 levels for attack
+Epic weap = +7 levels for attack
+

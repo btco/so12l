@@ -1,0 +1,84 @@
+# UGTO (Underground Town)
+
+PROC UGTO_EnterFromWrld
+ # Ask the player if they want to enter.
+ SND .msg LVLN_UGTO ENTPT_UGTO; CALL UTIL_GoNoGo
+ RET 0
+
+.msg:
+ DB 2
+ DS Enter the
+ DS Underground City?
+END
+
+# Interaction proc
+EXPORT PROC UGTO_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr UGTO_Interactibles; CALL UTIL_CheckInteract
+ RET
+END
+
+# Leave.
+PROC UGTO_Leave
+ SND ALeaveTown LVLN_WRLD ENTPT_WRLD_FROM_UGTO
+ CALL UTIL_GoNoGo
+ RET
+END
+
+# Armor shop
+PROC UGTO_ArmorShop
+ SND *; CALL SHOP_ArmorShop
+ {
+  DB 9
+  DB ITID_PLATE_ARMOR #@wares_UGTO
+  DB ITID_SPLINTED_ARMOR #@wares_UGTO
+  DB ITID_CHAIN_ARMOR #@wares_UGTO
+  DB ITID_RING_ARMOR #@wares_UGTO
+  DB ITID_BATTLE_SHIELD #@wares_UGTO
+  DB ITID_STEEL_SHIELD #@wares_UGTO
+  DB ITID_IRON_SHIELD #@wares_UGTO
+  DB ITID_BATTLE_HELM #@wares_UGTO
+  DB ITID_STEEL_HELM #@wares_UGTO
+ }
+END
+
+# Blacksmith
+PROC UGTO_Blacksmith
+ SND *; CALL SHOP_Blacksmith
+ {
+  DB 6
+  DB ITID_BATTLE_HAMMER #@wares_UGTO
+  DB ITID_BATTLE_AXE #@wares_UGTO
+  DB ITID_TWO_HANDED_SWORD #@wares_UGTO
+  DB ITID_AXE #@wares_UGTO
+  DB ITID_LONG_SWORD #@wares_UGTO
+  DB ITID_CROSSBOW #@wares_UGTO
+ }
+END
+
+PROC UGTO_Inn
+ SND 255 .a_welcome 30; CALL UTIL_Inn
+ RET
+.a_welcome:
+ DB 1
+ DS Welcome to the Umbra Inn.
+END
+
+PROC UGTO_PotionShop
+ SND SHOP_Wares_Potions2; CALL SHOP_PotionShop
+END
+
+# UGTO INTERACTIBLES LIST
+# (position, title, proc)
+UGTO_Interactibles:
+ DW LOHI(189,98) UGTO_Leave
+ DW LOHI(201,97) SHOP_GeneralStore
+ DW LOHI(207,97) UGTO_ArmorShop
+ DW LOHI(201,100) UGTO_Blacksmith
+ DW LOHI(198,98) UGTO_PotionShop
+ DW LOHI(204,100) TEMPLE_Interact
+ DW LOHI(208,99) SHOP_Expert
+ DW LOHI(194,100) UGTO_Inn
+ DW 0
+

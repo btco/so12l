@@ -1,0 +1,74 @@
+# RIVERSIDE CELLAR
+
+EXPORT PROC CELR_Interact
+ PARAM rawcr xz sid kf
+
+ # Exit cellar?
+ CMP sid 12; JE .leave
+ # Looting the final chest, with the incense?
+ CMP rawcr LOHI(207,14); JE .incense
+ # Looting a chest?
+ CMP sid 40; JE .loot_chest
+ RET
+
+ .leave:; CALL CELR_Leave; RET
+ .incense:; SND rawcr; CALL CELR_Incense; RET
+ .loot_chest:; SND rawcr LOL_A; CALL LOOT_ChestRandom; RET #@q_RSTO_INCENSE loot_count=2
+END
+
+PROC CELR_Walk
+ PARAM rawcr
+
+ CMP rawcr LOHI(183,13); JE .trigger
+
+ # Check for triggers:
+ SND 1 rawcr UTIL_Battle EID_RSLIME EID_RSLIME EID_RSLIME #@q_RSTO_INCENSE
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_RAT EID_RAT EID_RSLIME EID_RSLIME #@q_RSTO_INCENSE
+ CALL TRIG_Check
+ RET
+
+.trigger:
+ # If player didn't get the temple mission, get it now.
+ TEST GM_A_RSTO_INCENSE; JZ .assign_mission
+ # Mission already assigned. Nothing to do.
+ RET
+
+.assign_mission:
+ OR GM_A_RSTO_INCENSE
+ SND 251 SCleric .msg
+ SYS SYSC_SPEAK
+ RET
+
+.msg:
+ DT I am a cleric at the Temple.
+ .. I was trying to go get
+ .. incense for our rituals but
+ .. the cellar is full of
+ .. monsters!
+ ..
+ .. Please, get the incense and
+ .. return it to the temple.
+ .. It's just east of the city.
+END
+
+PROC CELR_Leave
+ SND AStairsUp LVLN_RSTO ENTPT_RSTO_FROM_CELR; CALL UTIL_GoNoGo
+ RET
+END
+
+PROC CELR_Incense
+ PARAM rawcr
+ VAR looted
+ SND rawcr ITID_INCENSE; CALL LOOT_ChestItem; REC looted
+ CMP looted 0; JE .end
+ SND *; SYS SYSC_ALERT
+ {
+  DT Inside the chest you find a
+  .. bundle of fragrant incense
+  .. belonging to the Temple just
+  .. east of Riverside. 
+ }
+.end:
+END
+

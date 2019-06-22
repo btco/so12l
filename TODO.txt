@@ -1,0 +1,103 @@
+TODO
+
+Notes about savegames:
+
+* TIC-80 web seems broken if 'saveid:' is present. Works if absent.
+* itch.io export seems to ignore 'saveid:'.
+* HOWEVER, installed TIC-80 playing via 'surf' works with 'saveid:'
+           installed TIC-80 manual cart add works with 'saveid:'
+
+Solution:
+ 
+  TIC-80 web: export without saveid and hope to not update?
+     -> no, not a good idea because people can download
+        the cart
+
+  itch.io: export with saveid, but it won't work; just hope
+     to not update it :(
+
+  TIC-80 .tic file: use WITH saveid (people can add it with the 'add' command)
+  Win/MacOSX/Linux: export WITH saveid
+ 
+[[ PLAY TESTING ]]
+
+ [ ] random loot giving too many potions
+ [ ] RSTO: can go to CELR before finishing governor quest
+ [X] Music restarts twice after battle
+
+[[ P0 ]]
+
+ [X] Music stops after resting.
+ [X] *** GAME OVER flow -- must stop music, play sad tune,
+     reset to title music before returning to title screen.
+ [X] ** CRASH: STMP !TID 141@2
+ [X] music for IGNI?
+ [X] rename Ynis -> Glacies
+ [X] place ITID_SPECTACLES on the world
+ [X] finish up LVLN_LLIB -- make books give XP, tell lore
+ [X] find Dictionary LLIB
+ [X] WPTO scholar receives Dictionary, gives XP
+ [X] debug rings, make sure they work (and the cursed versions too)
+ [X] cursed ring of speed should slow
+ [X] implement ignis, end of game
+ [X] cursed scrolls, wands
+ [X] go through all spells, add them somewhere in the world
+ [X] add city service to remove cursed items
+ [X] Add monsters that cause CEF_ASLEEP, CEF_FROZEN
+ [X] Add ways to resist/counter CEF_ASLEEP, CEF_FROZEN
+ [X] rewrite all legends, etc, including hut in WRLD_MA
+ [X] add more fountains to more places
+ [X] add a way to return to Riverside, as last resort
+ [X] finish up cartographers, place them, etc
+ [X] figure out what the Inn is useful for (bonus HP?)
+ [X] add inns to more cities, now that they are actually useful
+ [X] Lena's Jewelry box somewhere
+ [X] Don't let party into SK without Vic
+ [X] JAIL level has blue sky
+ [X] Fix inn rest logic -- must exercise same logic as ration
+ [X] Stunned enemies still hitting correctly?
+ [X] Using scroll/wand does not advance battle turn? (confirm)
+ [X] Add description to all items
+ [-] fix saving system (2 slots)
+ [X] fix battle visual styles everywhere
+ [X] ensure all huts do something
+ [X] don't indicate charges left on wands
+ [X] CRASH during battle w/ snakes,
+       attempt to compare number with nil
+       CEF_Get <- CEF_Test <- BatHandleFoeMelee <- BatHandleFoeTurn
+ [X] where do players SELL wands/scrolls/potions?
+ [X] ensure all cities have subtitles on DrawFrame
+ [X] crash while exiting RSTO: !TD116 TileInit <- L_Load <- G_ChangeLvl
+ [X] music
+       #0  finished       Title
+       #1  need revamp    Overworld 1
+       #2  need revamp    Town
+       #3  finished       Dungeon
+       #4  finished       Battle
+       #5  needs work     Town 2
+       #6  finished       Overworld 
+       #7  tweaks         Overworld
+
+[[ P1 ]]
+
+ [ ] more rings and amulets
+   - sleep resistance
+   - freeze resistance
+   - poison resistance
+   - stun resistance
+   - push resistance
+ [ ] give rings of resistance somewhere
+ [X] effect of cursed potions/scrolls/wands
+ [ ] music
+ [ ] sfx revamp
+ [ ] visual feedback when using wand, inflicting effect, etc
+
+[[ P2 ]]
+
+ [ ] traps? spell to detect, etc.
+ [ ] spell: haste (allows 2 attacks next turn)
+ [ ] spell: pull enemy towards party
+ [ ] ring of bravery: inc att, def def
+ [X] add better animation to rest/inn
+ [ ] some way to recharge wands?
+

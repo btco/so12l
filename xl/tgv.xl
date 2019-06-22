@@ -1,0 +1,30 @@
+# TRANSIENT GLOBAL VARIABLES
+# These are NOT persisted to the savegame. They get reset
+# every time a game is loaded.
+
+# If nonzero, this is how much xp to give to the player when
+# loading LVLN_WRLD (for transitions where there is a quest reward to
+# give when exiting a level).
+DEFINE TGV_WRLD_REW_QUEST_XP _146
+DEFINE TGV_WRLD_GIVE_ITEM _147
+
+# Level-specific TGVs. Meaning is up to the level.
+DEFINE TGV_LVL_A _148
+DEFINE TGV_LVL_B _149
+
+# Effects of spells during battle (var and mask):
+# Protect spell in effect 
+DEFINE TGM_PEF_PROTECT _150 1
+
+# Global clock, increments 1 per frame.
+DEFINE TGV_CLK _151
+# Global step clock, increments 1 per step.
+DEFINE TGV_STEP_CLK _152
+
+# Battle-end callback. If set, this proc will be called after
+# the end of the current battle.
+DEFINE TGV_BATTLE_END_CB _153
+
+# NOTE: LIMIT IS _170 inclusive AS 171 IS WHERE DEBUG
+# GLOBAL VARIABLES START (defined in xlvm.lua)
+

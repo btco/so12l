@@ -1,0 +1,1070 @@
+# LEVEL DEFINITIONS
+
+EXPORT LevelDb:
+
+# ------------------------------------------------------------ 
+# LEVEL 1: OVERWORLD
+DB LEVEL_XL_HDR
+DB LVLN_WRLD
+DS .         # Level name (for WRLD, this is replaced at runtime)
+DB 0         # col where level starts
+DB 0         # row where level starts
+DB 180       # level width in columns
+DB 136       # level height in rows
+DB LVLF_TEXB2
+DB MUT_OVERWORLD  # music track
+DB 20        # length in bytes of the kill flags
+DB BAT_VST_GRASS      # battle visual style
+# Proc addresses:
+DW WRLD_Interact                 # Interaction
+DW WRLD_UseItem                  # Item usage
+DW WRLD_Walk                     # Walking
+DW WRLD_Boot                     # Boot proc
+
+DB 26        # count of entry points
+  # Entry point 1 (new game)
+  DB 46; DB 65; DB DIR_E    # (x, z, dir)
+  # Entry point 2 (from RSTO, south gate)
+  DB 59; DB 62; DB DIR_S    # (x, z, dir)
+  # Entry point 3 (from RSTO, north gate)
+  DB 60; DB 58; DB DIR_N    # (x, z, dir)
+  # Entry point 4 (exit from RSC1)
+  DB 54; DB 53; DB DIR_S    # (x, z, dir)
+  # Entry point 5 (exit from STMP)
+  DB 65; DB 61; DB DIR_N    # (x, z, dir)
+  # Entry point 6 (exit from ORCH)
+  DB 75; DB 55; DB DIR_N
+  # Entry point 7 (exit from PASS, south)
+  DB 82; DB 64; DB DIR_N
+  # Entry point 8 (exit from PASS, north)
+  DB 87; DB 64; DB DIR_E
+  # Entry point 9 (exit from MTN)
+  DB 58; DB 96; DB DIR_W
+  # Entry point 10 (exit from FOVI)
+  DB 55; DB 78; DB DIR_S
+  # Entry point 11 (exit from TUNN, in Serpent Island)
+  DB 58; DB 83; DB DIR_N
+  # Entry point 12 (exit from TUNN, in South Kingdom)
+  DB 52; DB 93; DB DIR_S
+  # Entry point 13 (exit from SUTO)
+  DB 29; DB 94; DB DIR_S
+  # Entry point 14 (exit from OTO1)
+  DB 21; DB 112; DB DIR_N
+  # Entry point 15 (exit from CAST)
+  DB 51; DB 124; DB DIR_N
+  # Entry point 16 (exit from MONA)
+  DB 86; DB 114; DB DIR_N
+  # Entry point 17 (exit from SAHA)
+  DB 104; DB 38; DB DIR_N
+  # Entry point 18 (entrance to Desert -- debug)
+  DB 86; DB 41; DB DIR_N
+  # Entry point 19 (portal from SAHA)
+  DB 72; DB 52; DB DIR_S
+  # Entry point 20 (exit from WPTO)
+  DB  7; DB 52; DB DIR_E
+  # Entry point 21 (exit from INTO)
+  DB 19; DB 23; DB DIR_S
+  # Entry point 22 (exit from NOKE)
+  DB 34; DB 24; DB DIR_S
+  # Entry point 23 (exit from YNIS)
+  DB 123; DB 103; DB DIR_N
+  # Entry point 24 (exit from UGTO)
+  DB 145; DB 56; DB DIR_W
+  # Entry point 25 (exit from ICEM)
+  DB 114; DB 125; DB DIR_W
+  # Entry point 26 (exit from LLIB)
+  DB 168; DB 22; DB DIR_W
+  # WARNING: When adding entry points here, also update the
+  # entry point count at the top.
+DB 1          # count of tile TID substitutions
+  DB T_CAVE_WALL  T_ICE_WALL
+
+# ------------------------------------------------------------ 
+# LEVEL 2: Riverside cave, level 1
+DB LEVEL_XL_HDR
+DB LVLN_RSC1
+#  _____________
+DS River Cave L1
+DB 210       # col where level starts
+DB 0         # row where level starts
+DB 30        # level width in columns
+DB 17        # level height in rows
+DB LVLF_DARK # level flags
+DB MUT_DUNGEON # music track
+DB 3         # length in bytes of the kill flags
+DB BAT_VST_CAVE       # battle visual style
+# Proc addresses:
+DW RSC1_Interact                 # Interaction
+DW 0                             # Item usage
+DW RSC1_Walk                     # Walking
+DW 0                             # Boot
+
+DB 2         # count of entry points
+  # Entry point 1 (from overworld)
+  DB 212; DB 14; DB DIR_E      # (x, z, dir)
+  # Entry point 2 (up from level 2)
+  DB 234; DB 14; DB DIR_W     # (x, z, dir)
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 3: Riverside cave, level 2
+DB LEVEL_XL_HDR
+DB LVLN_RSC2
+#  _____________
+DS River Cave L2
+DB 210       # col where level starts
+DB 17        # row where level starts
+DB 30        # level width in columns
+DB 17        # level height in rows
+DB LVLF_DARK # level flags
+DB MUT_DUNGEON # music track
+DB 2         # length in bytes of the kill flags
+DB BAT_VST_CAVE       # battle visual style
+# Proc addresses:
+DW RSC2_Interact                 # Interaction
+DW 0                             # Item usage
+DW RSC2_Walk                     # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Entry point 1 (from level 1)
+  DB 213; DB 19; DB DIR_E     # (x, z, dir)
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 4: Riverside town.
+DB LEVEL_XL_HDR
+DB LVLN_RSTO
+#  _____________
+DS Riverside
+DB 210       # col where level starts
+DB 34        # row where level starts
+DB 30        # level width in columns
+DB 17        # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_GRASS      # battle visual style
+# Proc addresses:
+DW RSTO_Interact                 # Interaction
+DW 0                             # Item usage
+DW RSTO_Walk                     # Walking
+DW RSTO_Boot                     # Boot
+
+DB 5         # count of entry points
+  # Entry point 1 (South Gate)
+  DB 219; DB 48; DB DIR_N     # (x, z, dir)
+  # Entry point 2 (North Gate)
+  DB 233; DB 35; DB DIR_S
+  # Entry point 3 (from CELR)
+  DB 238; DB 48; DB DIR_W
+  # Entry point 4 (from JAIL)
+  DB 237; DB 37; DB DIR_S 
+  # Entry point 5 (portal)
+  DB 223; DB 39; DB DIR_W 
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 5: Orchard
+DB LEVEL_XL_HDR
+DB LVLN_ORCH
+#  _____________
+DS Orchard
+DB 210       # col where level starts
+DB 51        # row where level starts
+DB 16        # level width in columns
+DB 17        # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 3         # length in bytes of the kill flags
+DB BAT_VST_GRASS      # battle visual style
+# Proc addresses:
+DW ORCH_Interact                 # Interaction
+DW 0                             # Item usage
+DW ORCH_Walk                     # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Entry point
+  DB 217; DB 53; DB DIR_S     # (x, z, dir)
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 6: Mountain pass from Plains to Tranquility Beach
+DB LEVEL_XL_HDR
+DB LVLN_PASS
+#  _____________
+DS Mountain Pass
+DB 226       # col where level starts
+DB 51        # row where level starts
+DB 14        # level width in columns
+DB 17        # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 2         # length in bytes of the kill flags
+DB BAT_VST_CAVE       # battle visual style
+# Proc addresses:
+DW PASS_Interact                 # Interaction
+DW 0                             # Item usage
+DW PASS_Walk                     # Walking
+DW 0                             # Boot
+
+DB 2         # count of entry points
+  # South entry point
+  DB 233; DB 64; DB DIR_N     # (x, z, dir)
+  # North entry point
+  DB 236; DB 53; DB DIR_W     # (x, z, dir)
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 7: Tunnel in South Plains
+DB LEVEL_XL_HDR
+DB LVLN_TUNN
+#  _____________
+DS Tunnel
+DB 210       # col where level starts
+DB 68        # row where level starts
+DB 30        # level width in columns
+DB 17        # level height in rows
+DB LVLF_DARK # level flags
+DB MUT_DUNGEON # music track
+DB 2         # length in bytes of the kill flags
+DB BAT_VST_CAVE       # battle visual style
+# Proc addresses:
+DW TUNN_Interact                 # Interaction
+DW 0                             # Item usage
+DW TUNN_Walk                     # Walking
+DW 0                             # Boot
+
+DB 2         # count of entry points
+  # West entry point
+  DB 212; DB 71; DB DIR_E     # (x, z, dir)
+  # East entry point
+  DB 237; DB 79; DB DIR_E     # (x, z, dir)
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 8: Beach town of Sun Port (SUTO)
+DB LEVEL_XL_HDR
+DB LVLN_SUTO
+#  _____________
+DS Sun Port Town
+DB 210       # col where level starts
+DB 85        # row where level starts
+DB 16        # level width in columns
+DB 17        # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_DESERT     # battle visual style
+# Proc addresses:
+DW SUTO_Interact                 # Interaction
+DW 0                             # Item usage
+DW SUTO_Walk                     # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Town entrance
+  DB 218; DB 100; DB DIR_N     # (x, z, dir)
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 9: Old Tower, level 1 (OTO1)
+DB LEVEL_XL_HDR
+DB LVLN_OTO1
+#  _____________
+DS Old Tower L1
+DB 226       # col where level starts
+DB 85        # row where level starts
+DB 14        # level width in columns
+DB 17        # level height in rows
+DB LVLF_DARK # level flags
+DB MUT_DUNGEON # music track
+DB 2         # length in bytes of the kill flags
+DB BAT_VST_TOWER      # battle visual style
+# Proc addresses:
+DW OTO1_Interact                 # Interaction
+DW 0                             # Item usage
+DW OTO1_Walk                     # Walking
+DW 0                             # Boot
+
+DB 2         # count of entry points
+  # From outside
+  DB 232; DB 100; DB DIR_N     # (x, z, dir)
+  # From OTO2
+  DB 227; DB 89; DB DIR_E
+DB 2          # count of tile TID substitutions
+  # Replace cave wall with tower wall (mossy stone)
+  DB T_CAVE_WALL; DB T_COARSE_STONE
+  # Replace cave floor with stone floor.
+  DB T_CAVE_FLOOR; DB T_STONE_FLOOR
+
+# ------------------------------------------------------------ 
+# LEVEL 10: Old Tower, level 2 (OTO2)
+DB LEVEL_XL_HDR
+DB LVLN_OTO2
+#  _____________
+DS Old Tower L2
+DB 210       # col where level starts
+DB 102       # row where level starts
+DB 15        # level width in columns
+DB 17        # level height in rows
+DB LVLF_DARK # level flags
+DB MUT_DUNGEON # music track
+DB 2         # length in bytes of the kill flags
+DB BAT_VST_TOWER      # battle visual style
+# Proc addresses:
+DW OTO2_Interact                 # Interaction
+DW 0                             # Item usage
+DW OTO2_Walk                     # Walking
+DW OTO2_Boot                     # Boot
+
+DB 2         # count of entry points
+  # From OTO1
+  DB 223; DB 104; DB DIR_W     # (x, z, dir)
+  # From OTO3
+  DB 212; DB 104; DB DIR_E     # (x, z, dir)
+DB 2          # count of tile TID substitutions
+  # Replace cave wall with tower wall (mossy stone)
+  DB T_CAVE_WALL; DB T_COARSE_STONE
+  # Replace cave floor with stone floor.
+  DB T_CAVE_FLOOR; DB T_STONE_FLOOR
+
+# ------------------------------------------------------------ 
+# LEVEL 11: Old Tower, level 3 (OTO3)
+DB LEVEL_XL_HDR
+DB LVLN_OTO3
+#  _____________
+DS Old Tower L3
+DB 225       # col where level starts
+DB 102       # row where level starts
+DB 15        # level width in columns
+DB 17        # level height in rows
+DB LVLF_DARK # level flags
+DB MUT_DUNGEON # music track
+DB 2         # length in bytes of the kill flags
+DB BAT_VST_TOWER      # battle visual style
+# Proc addresses:
+DW OTO3_Interact                 # Interaction
+DW 0                             # Item usage
+DW OTO3_Walk                     # Walking
+DW 0                             # Boot
+
+DB 2         # count of entry points
+  # From OTO2
+  DB 238; DB 104; DB DIR_W     # (x, z, dir)
+  # From OTO4
+  DB 227; DB 117; DB DIR_E     # (x, z, dir)
+DB 2          # count of tile TID substitutions
+  # Replace cave wall with tower wall (mossy stone)
+  DB T_CAVE_WALL; DB T_COARSE_STONE
+  # Replace cave floor with stone floor.
+  DB T_CAVE_FLOOR; DB T_STONE_FLOOR
+
+# ------------------------------------------------------------ 
+# LEVEL 12: Old Tower, level 4 (OTO4)
+DB LEVEL_XL_HDR
+DB LVLN_OTO4
+#  _____________
+DS Old Tower L4
+DB 210       # col where level starts
+DB 119       # row where level starts
+DB 15        # level width in columns
+DB 17        # level height in rows
+DB 0         # level flags
+DB MUT_DUNGEON # music track
+DB 2         # length in bytes of the kill flags
+DB BAT_VST_TOWER      # battle visual style
+# Proc addresses:
+DW OTO4_Interact                 # Interaction
+DW 0                             # Item usage
+DW OTO4_Walk                     # Walking
+DW OTO4_Boot                     # Boot
+
+DB 2         # count of entry points
+  # From OTO3
+  DB 223; DB 127; DB DIR_W     # (x, z, dir)
+  # From OTO5
+  DB 211; DB 127; DB DIR_E     # (x, z, dir)
+DB 3          # count of tile TID substitutions
+  # Replace cave wall with tower wall (mossy stone)
+  DB T_CAVE_WALL; DB T_COARSE_STONE
+  # Replace cave floor with stone floor.
+  DB T_CAVE_FLOOR; DB T_STONE_FLOOR
+  # Replace city door with coarse stone door.
+  DB T_STONE_DOOR; DB T_COARSE_DOOR
+
+# ------------------------------------------------------------ 
+# LEVEL 13: Old Tower, level 5 (OTO5), the Library
+DB LEVEL_XL_HDR
+DB LVLN_OTO5
+#  _____________
+DS Old Tower L5
+DB 225       # col where level starts
+DB 119       # row where level starts
+DB 15        # level width in columns
+DB 17        # level height in rows
+DB LVLF_DARK # level flags
+DB MUT_DUNGEON # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_TOWER      # battle visual style
+# Proc addresses:
+DW OTO5_Interact                 # Interaction
+DW 0                             # Item usage
+DW OTO5_Walk                     # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # From OTO4
+  DB 232; DB 120; DB DIR_S     # (x, z, dir)
+DB 4          # count of tile TID substitutions
+  # Replace cave wall with tower wall (mossy stone)
+  DB T_CAVE_WALL; DB T_COARSE_STONE
+  # Replace cave floor with stone floor.
+  DB T_CAVE_FLOOR; DB T_STONE_FLOOR
+  # Replace city door with coarse stone door.
+  DB T_STONE_DOOR; DB T_COARSE_DOOR
+  # Replace wooden walls with library wall.
+  DB T_WOOD_PLANKS; DB T_BOOKSHELF
+
+# ------------------------------------------------------------ 
+# LEVEL 14: Indigo town, abandoned version.
+DB LEVEL_XL_HDR
+DB LVLN_INTX
+#  _____________
+DS Indigo (ruin)
+DB 180       # col where level starts
+DB 0         # row where level starts
+DB 15        # level width in columns
+DB 11        # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 0         # length in bytes of the kill flags
+DB BAT_VST_GRASS      # battle visual style
+# Proc addresses:
+DW INTX_Interact                 # Interaction
+DW 0                             # Item usage
+DW INTX_Walk                     # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  DB 187; DB 1; DB DIR_S     # (x, z, dir)
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 15: Indigo town, alive version.
+DB LEVEL_XL_HDR
+DB LVLN_INTO
+#  _____________
+DS Indigo
+DB 195       # col where level starts
+DB 0         # row where level starts
+DB 15        # level width in columns
+DB 11        # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 0         # length in bytes of the kill flags
+DB BAT_VST_GRASS      # battle visual style
+# Proc addresses:
+DW INTO_Interact                 # Interaction
+DW 0                             # Item usage
+DW INTO_Walk                     # Walking
+DW INTO_Boot                     # Boot
+
+DB 2         # count of entry points
+  # Entpt 1 (entrance)
+  DB 202; DB 1; DB DIR_S     # (x, z, dir)
+  # entpt 2 (after quest complete)
+  DB 202; DB 5; DB DIR_E
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 16: Riverside cellar
+DB LEVEL_XL_HDR
+DB LVLN_CELR
+#  _____________
+DS Cellar
+DB 180       # col where level starts
+DB 11        # row where level starts
+DB 30        # level width in columns
+DB 6         # level height in rows
+DB LVLF_DARK # level flags
+DB MUT_DUNGEON # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_CAVE       # battle visual style
+# Proc addresses:
+DW CELR_Interact                 # Interaction
+DW 0                             # Item usage
+DW CELR_Walk                     # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Entry point 1 (from overworld)
+  DB 181; DB 13; DB DIR_E      # (x, z, dir)
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 17: South Temple (STMP).
+DB LEVEL_XL_HDR
+DB LVLN_STMP
+#  _____________
+DS South Temple
+DB 180       # col where level starts
+DB 17        # row where level starts
+DB 13        # level width in columns
+DB 10        # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_GRASS      # battle visual style
+# Proc addresses:
+DW STMP_Interact                 # Interaction
+DW 0                             # Item usage
+DW 0                             # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Entry point.
+  DB 186; DB 18; DB DIR_S     # (x, z, dir)
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 18: Riverside Jail (JAIL)
+DB LEVEL_XL_HDR
+DB LVLN_JAIL
+#  _____________
+DS Jail
+DB 193       # col where level starts
+DB 17        # row where level starts
+DB 12        # level width in columns
+DB 14        # level height in rows
+DB BOR(LVLF_NO_ITEMS,LVLF_BLACK_SKY)   # flags
+DB MUT_DUNGEON # music track
+DB 3         # length in bytes of the kill flags
+DB BAT_VST_CAVE       # battle visual style
+# Proc addresses:
+DW JAIL_Interact                 # Interaction
+DW 0                             # Item usage
+DW JAIL_Walk                     # Walking
+DW JAIL_Boot                     # Boot
+
+DB 1         # count of entry points
+  # Entry point 1 (main).
+  DB 203; DB 28; DB DIR_W      # (x, z, dir)
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 19: Mountain Town, level 1 (MTN1).
+DB LEVEL_XL_HDR
+DB LVLN_MTN1
+#  _____________
+DS Pinnacle L1
+DB 180       # col where level starts
+DB 34        # row where level starts
+DB 10        # level width in columns
+DB 17        # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_AUT        # battle visual style
+# Proc addresses:
+DW MTN1_Interact                 # Interaction
+DW 0                             # Item usage
+DW 0                             # Walking
+DW 0                             # Boot
+
+DB 2         # count of entry points
+  # Entry point #1 (from WRLD)
+  DB 187; DB 48; DB DIR_N     # (x, z, dir)
+  # Entry point #2 (from MTN2)
+  DB 181; DB 38; DB DIR_E     # (x, z, dir)
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 20: Mountain Town, level 2 (MTN2).
+DB LEVEL_XL_HDR
+DB LVLN_MTN2
+#  _____________
+DS Pinnacle L2
+DB 190       # col where level starts
+DB 34        # row where level starts
+DB 10        # level width in columns
+DB 17        # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_AUT        # battle visual style
+# Proc addresses:
+DW MTN2_Interact                 # Interaction
+DW 0                             # Item usage
+DW 0                             # Walking
+DW 0                             # Boot
+
+DB 2         # count of entry points
+  # Entry point #1 (from MTN1)
+  DB 198; DB 36; DB DIR_W     # (x, z, dir)
+  # Entry point #2 (from MTN3)
+  DB 191; DB 47; DB DIR_E     # (x, z, dir)
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 21: Mountain Town, level 3 (MTN3).
+DB LEVEL_XL_HDR
+DB LVLN_MTN3
+#  _____________
+DS Pinnacle L3
+DB 200       # col where level starts
+DB 34        # row where level starts
+DB 10        # level width in columns
+DB 7         # level height in rows
+DB BOR(LVLF_SEA_BG,LVLF_TEXB2)  # level flags
+DB MUT_TOWN # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_AUT        # battle visual style
+# Proc addresses:
+DW MTN3_Interact                 # Interaction
+DW 0                             # Item usage
+DW MTN3_Walk                     # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Entry point
+  DB 208; DB 36; DB DIR_W     # (x, z, dir)
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 22: Forest Village (FOVI)
+DB LEVEL_XL_HDR
+DB LVLN_FOVI
+#  _____________
+DS Forest City
+DB 200       # col where level starts
+DB 41        # row where level starts
+DB 10        # level width in columns
+DB 10        # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 0         # length in bytes of the kill flags
+DB BAT_VST_GRASS      # battle visual style
+# Proc addresses:
+DW FOVI_Interact                 # Interaction
+DW 0                             # Item usage
+DW 0                             # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Town entrance
+  DB 205; DB 48; DB DIR_N     # (x, z, dir)
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 23: Castle South (CAST)
+DB LEVEL_XL_HDR
+DB LVLN_CAST
+#  _____________
+DS Castle South
+DB 180       # col where level starts
+DB 51        # row where level starts
+DB 15        # level width in columns
+DB 17        # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 0         # length in bytes of the kill flags
+DB BAT_VST_AUT        # battle visual style
+# Proc addresses:
+DW CAST_Interact                 # Interaction
+DW 0                             # Item usage
+DW CAST_Walk                     # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Entrance from WRLD
+  DB 187  52 DIR_S     # (x, z, dir)
+DB 2          # count of tile TID substitutions
+  DB T_WOOD_GATE T_FANCY_GATE
+  DB T_CAVE_WALL T_PALACE_WALL
+
+# ------------------------------------------------------------ 
+# LEVEL 24: Monastery (MONA)
+DB LEVEL_XL_HDR
+DB LVLN_MONA
+#  _____________
+DS The Monastery
+DB 195       # col where level starts
+DB 51        # row where level starts
+DB 15        # level width in columns
+DB 17        # level height in rows
+DB LVLF_DARK # level flags
+DB MUT_DUNGEON # music track
+DB 3         # length in bytes of the kill flags
+DB BAT_VST_TOWER      # battle visual style
+# Proc addresses:
+DW MONA_Interact                 # Interaction
+DW 0                             # Item usage
+DW MONA_Walk                     # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Entrance from WRLD
+  DB 202  52 DIR_S     # (x, z, dir)
+DB 7          # count of tile TID substitutions
+  DB T_CAVE_WALL      T_MON_WALL
+  DB T_STONE_WALL     T_MON_BANNER
+  DB T_WOOD_PLANKS    T_BOOKSHELF
+  DB T_PILLAR         T_MON_TORCH
+  DB T_WINDOW         T_MON_WINDOW
+  DB T_WOODEN_DOOR    T_MON_DOOR
+  DB T_CAVE_FLOOR     T_MON_FLOOR
+
+# ------------------------------------------------------------ 
+# LEVEL 25: Sand Haven (SAHA)
+DB LEVEL_XL_HDR
+DB LVLN_SAHA
+#  _____________
+DS Sand Haven
+DB 180       # col where level starts
+DB 68        # row where level starts
+DB 15        # level width in columns
+DB 13        # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_DESERT     # battle visual style
+# Proc addresses:
+DW SAHA_Interact                 # Interaction
+DW 0                             # Item usage
+DW SAHA_Walk                     # Walking
+DW SAHA_Boot                     # Boot
+
+DB 2         # count of entry points
+  # Entrance from WRLD
+  DB 187  69 DIR_S     # (x, z, dir)
+  # Entrance from OBE1
+  DB 187  77 DIR_N     # (x, z, dir)
+DB 3          # count of tile TID substitutions
+  DB T_STONE_WALL       T_SAND_WALL
+  DB T_STONE_DOOR       T_SAND_DOOR
+  DB T_STONE_GATE       T_SAND_GATE
+
+# ------------------------------------------------------------ 
+# LEVEL 26: Obelisk, Level 1 (OBE1)
+DB LEVEL_XL_HDR
+DB LVLN_OBE1
+#  _____________
+DS Sand Tomb L1
+DB 180       # col where level starts
+DB 81        # row where level starts
+DB 15        # level width in columns
+DB 4         # level height in rows
+DB LVLF_DARK # level flags
+DB MUT_DUNGEON # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_CAVE       # battle visual style
+# Proc addresses:
+DW OBE1_Interact                 # Interaction
+DW 0                             # Item usage
+DW OBE1_Walk                     # Walking
+DW 0                             # Boot
+
+DB 2         # count of entry points
+  # Entrance from WRLD
+  DB 181  82 DIR_E     # (x, z, dir)
+  # Entrance from OBE2
+  DB 192  83 DIR_W     # (x, z, dir)
+DB 6          # count of tile TID substitutions
+  DB T_CAVE_WALL         T_TOMB_WALL
+  DB T_CAVE_FLOOR        T_TOMB_FLOOR
+  DB T_STONE_WALL        T_TOMB_PANEL
+  DB T_STAIRS_UP         T_TOMB_STAIRS_UP
+  DB T_STAIRS_DOWN       T_TOMB_STAIRS_DOWN
+  DB T_WINDOW            T_TOMB_WINDOW
+
+# ------------------------------------------------------------ 
+# LEVEL 27: Obelisk, Level 2 (OBE2)
+DB LEVEL_XL_HDR
+DB LVLN_OBE2
+#  _____________
+DS Sand Tomb L2
+DB 195       # col where level starts
+DB 68        # row where level starts
+DB 15        # level width in columns
+DB 7         # level height in rows
+DB LVLF_DARK # level flags
+DB MUT_DUNGEON # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_CAVE       # battle visual style
+# Proc addresses:
+DW OBE2_Interact                 # Interaction
+DW 0                             # Item usage
+DW OBE2_Walk                     # Walking
+DW 0                             # Boot
+
+DB 2         # count of entry points
+  # Entrance from OBE1
+  DB 196  69 DIR_E     # (x, z, dir)
+  # Entrance from OBE3
+  DB 207  73 DIR_W     # (x, z, dir)
+DB 6          # count of tile TID substitutions
+  DB T_CAVE_WALL         T_TOMB_WALL
+  DB T_CAVE_FLOOR        T_TOMB_FLOOR
+  DB T_STONE_WALL        T_TOMB_PANEL
+  DB T_STAIRS_UP         T_TOMB_STAIRS_UP
+  DB T_STAIRS_DOWN       T_TOMB_STAIRS_DOWN
+  DB T_WINDOW            T_TOMB_WINDOW
+
+
+# ------------------------------------------------------------ 
+# LEVEL 28: Obelisk, Level 3 (OBE3)
+DB LEVEL_XL_HDR
+DB LVLN_OBE3
+#  _____________
+DS Sand Tomb L3
+DB 195       # col where level starts
+DB 75        # row where level starts
+DB 15        # level width in columns
+DB 10        # level height in rows
+DB LVLF_DARK # level flags
+DB MUT_DUNGEON # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_CAVE       # battle visual style
+# Proc addresses:
+DW OBE3_Interact                 # Interaction
+DW 0                             # Item usage
+DW OBE3_Walk                     # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Entrance from OBE2
+  DB 207  76 DIR_E     # (x, z, dir)
+DB 6          # count of tile TID substitutions
+  DB T_CAVE_WALL         T_TOMB_WALL
+  DB T_CAVE_FLOOR        T_TOMB_FLOOR
+  DB T_STONE_WALL        T_TOMB_PANEL
+  DB T_STAIRS_UP         T_TOMB_STAIRS_UP
+  DB T_STAIRS_DOWN       T_TOMB_STAIRS_DOWN
+  DB T_WINDOW            T_TOMB_WINDOW
+
+# ------------------------------------------------------------ 
+# LEVEL 29: Westport Town (WPTO)
+DB LEVEL_XL_HDR
+DB LVLN_WPTO
+#  _____________
+DS Westport Town
+DB 195       # col where level starts
+DB 85        # row where level starts
+DB 15        # level width in columns
+DB 12        # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_GRASS      # battle visual style
+# Proc addresses:
+DW WPTO_Interact                 # Interaction
+DW 0                             # Item usage
+DW WPTO_Walk                     # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Entrance from WRLD
+  DB 208 91 DIR_W
+DB 0          # count of tile TID substitutions
+
+# ------------------------------------------------------------ 
+# LEVEL 30: North Keep (NOKE)
+DB LEVEL_XL_HDR
+DB LVLN_NOKE
+#  _____________
+DS North Keep   
+DB 180       # col where level starts
+DB 27        # row where level starts
+DB 13        # level width in columns
+DB 7         # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_MARSHES    # battle visual style
+# Proc addresses:
+DW NOKE_Interact                 # Interaction
+DW 0                             # Item usage
+DW NOKE_Walk                     # Walking
+DW NOKE_Boot                     # Boot
+
+DB 2         # count of entry points
+  # Entrance from WRLD
+  DB 186 32 DIR_N
+  # Return from NOKT
+  DB 186 28 DIR_S
+DB 2          # count of tile TID substitutions
+  DB T_WOOD_GATE T_FANCY_GATE
+  DB T_CAVE_WALL T_PALACE_WALL
+
+# ------------------------------------------------------------ 
+# LEVEL 31: City of Glacies (YNIS) -- aka City of Ice
+DB LEVEL_XL_HDR
+DB LVLN_YNIS
+#  _____________
+DS Glacies
+DB 180       # col where level starts
+DB 85        # row where level starts
+DB 15        # level width in columns
+DB 11        # level height in rows
+DB LVLF_TEXB2
+DB MUT_TOWN # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_SNOW       # battle visual style
+# Proc addresses:
+DW YNIS_Interact                 # Interaction
+DW 0                             # Item usage
+DW 0                             # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Entrance from WRLD
+  DB 187 86 DIR_S
+DB 2          # count of tile TID substitutions
+  DB T_STONE_WALL T_ICE_WALL
+  DB T_STONE_DOOR T_ICE_DOOR
+
+# ------------------------------------------------------------ 
+# LEVEL 32: North Keep Throne Room (NOKT)
+DB LEVEL_XL_HDR
+DB LVLN_NOKT
+#  _____________
+DS Throne Room
+DB 180       # col where level starts
+DB 96        # row where level starts
+DB 9         # level width in columns
+DB 6         # level height in rows
+DB 0         # flags
+DB MUT_DUNGEON # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_MARSHES    # battle visual style
+# Proc addresses:
+DW NOKT_Interact                 # Interaction
+DW 0                             # Item usage
+DW 0                             # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Entry point 1 (main).
+  DB 184; DB 100; DB DIR_N      # (x, z, dir)
+DB 3          # count of tile TID substitutions
+  DB T_WOOD_GATE  T_MON_DOOR  
+  DB T_CAVE_FLOOR T_MON_FLOOR
+  DB T_CAVE_WALL  T_MON_WALL
+
+# ------------------------------------------------------------ 
+# LEVEL 33: Undergrond Town (UGTO)
+DB LEVEL_XL_HDR
+DB LVLN_UGTO
+#  _____________
+DS Town of Umbra
+DB 189       # col where level starts
+DB 96        # row where level starts
+DB 21        # level width in columns
+DB 6         # level height in rows
+DB LVLF_DARK # flags
+DB MUT_DUNGEON # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_CAVE       # battle visual style
+# Proc addresses:
+DW UGTO_Interact                 # Interaction
+DW 0                             # Item usage
+DW 0                             # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Entry point 1 (main).
+  DB 190; DB 98; DB DIR_E      # (x, z, dir)
+DB 2          # count of tile TID substitutions
+  DB T_STONE_WALL T_COARSE_STONE
+  DB T_STONE_DOOR T_COARSE_DOOR
+
+# ------------------------------------------------------------ 
+# LEVEL 34: Ice Maze (ICEM)
+DB LEVEL_XL_HDR
+DB LVLN_ICEM
+#  _____________
+DS Ice Maze
+DB 180       # col where level starts
+DB 102       # row where level starts
+DB 16        # level width in columns
+DB 17        # level height in rows
+DB LVLF_TEXB2
+DB MUT_DUNGEON # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_SNOW       # battle visual style
+# Proc addresses:
+DW ICEM_Interact                 # Interaction
+DW 0                             # Item usage
+DW ICEM_Walk                     # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Entrance from WRLD
+  DB 186 103 DIR_E
+DB 1          # count of tile TID substitutions
+  DB T_CAVE_WALL T_ICE_WALL
+
+# ------------------------------------------------------------ 
+# LEVEL 35: Ignis (IGNI)
+DB LEVEL_XL_HDR
+DB LVLN_IGNI
+#  _____________
+DS Ignis
+DB 180       # col where level starts
+DB 119       # row where level starts
+DB 30        # level width in columns
+DB 17        # level height in rows
+DB BOR(LVLF_TEXB2,LVLF_DARK)
+DB MUT_DUNGEON # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_LAVA       # battle visual style
+# Proc addresses:
+DW IGNI_Interact                 # Interaction
+DW 0                             # Item usage
+DW IGNI_Walk                     # Walking
+DW 0                             # Boot
+
+DB 1         # count of entry points
+  # Entrance from WRLD
+  DB 190 133 DIR_N
+DB 4          # count of tile TID substitutions
+  DB T_CAVE_WALL T_FIRE_WALL
+  DB T_STONE_FLOOR T_FIRE_GROUND
+  DB T_CAVE_FLOOR T_FIRE_GROUND
+  DB T_PILLAR T_FIRE_COLUMN
+
+# ------------------------------------------------------------ 
+# LEVEL 36: The Lost Library (LLIB)
+DB LEVEL_XL_HDR
+DB LVLN_LLIB
+#  _____________
+DS Lost Library
+DB 195       # col where level starts
+DB 102       # row where level starts
+DB 15        # level width in columns
+DB 8         # level height in rows
+DB LVLF_DARK # level flags
+DB MUT_DUNGEON # music track
+DB 1         # length in bytes of the kill flags
+DB BAT_VST_TOWER      # battle visual style
+# Proc addresses:
+DW LLIB_Interact                 # Interaction
+DW 0                             # Item usage
+DW LLIB_Walk                     # Walking
+DW 0                             # Boot
+DB 1         # count of entry points
+  DB 196 103 DIR_E             # (x, z, dir)
+DB 3          # count of tile TID substitutions
+  # Replace cave wall with tower wall (mossy stone)
+  DB T_CAVE_WALL; DB T_BOOKSHELF
+  # Replace cave floor with stone floor.
+  DB T_CAVE_FLOOR; DB T_STONE_FLOOR
+  # Replace city door with coarse stone door.
+  DB T_STONE_DOOR; DB T_COARSE_DOOR
+
+# --------------------------------------------------------
+# Marks end of level DB.
+DB 0
+

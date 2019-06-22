@@ -1,0 +1,14 @@
+# Array of names of characters.
+# Used when names are dynamically displayed.
+CharNames:
+ DW SCharName1
+ DW SCharName2
+ DW SCharName3
+ DW SCharName4
+
+SCharName1:; DS Alex
+SCharName2:; DS Leon
+SCharName3:; DS Lyla
+SCharName4:; DS Vic
+
+

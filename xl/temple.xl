@@ -1,0 +1,106 @@
+# Temple
+
+PROC TEMPLE_Interact
+ VAR choice
+ SND 230 SCleric *; SYS SYSC_SPEAK
+ {
+  DT Welcome to the Temple.
+  .. What can we do for you?
+ }
+ SND 0 * CHD_F_CANCELABLE
+ {
+  DT Temple blessing
+  .. Remove curse
+ }
+ SYS SYSC_CHOICE; REC choice
+ CMP choice 1; CE TEMPLE_Blessing
+ CMP choice 2; CE TEMPLE_RemoveCurse
+END
+
+PROC TEMPLE_Blessing
+ VAR price lvl
+ # Price depends on party level.
+ SND PINFO_LEVEL; SYS SYSC_PINFO; REC lvl
+ # Price is 5*level
+ SET price lvl; MUL price 5
+
+ VAR paid
+ SND 230 SCleric .a_heal; SYS SYSC_SPEAK
+ # Pay. Or not
+ SND 230 SCleric .a_prompt price;
+ CALL UTIL_PayIfHasMoney; REC paid
+ CMP paid 0;
+ JE .ret
+ # Remove all bad conditions.
+ SND CEF_POISON; CALL CEF_ClearBitAll
+ SND CEF_ASLEEP; CALL CEF_ClearBitAll
+ SND CEF_FROZEN; CALL CEF_ClearBitAll
+ SND 0 .s_blink C_BBLUE SFX_POWERUP; SYS SYSC_BLINK
+.ret:
+ RET
+
+.a_prompt:
+ DB 1
+ DS Receive the temple blessing?
+
+.a_heal:
+ DB 6
+ DS The temple blessing will
+ DS remove ailments such as
+ DS poisons and spell effects,
+ DS but will not heal wounds.
+ DS
+ DS We require a small donation.
+
+.s_blink:
+ DS Temple blessing
+END
+
+PROC TEMPLE_RemoveCurse
+ VAR price chi itk itid st paid
+ SND 230 SCleric *; SYS SYSC_SPEAK
+ {
+  DT This will remove a cursed
+  .. item someone has put on. 
+  .. Who has the cursed item?
+ }
+ # Who's wearing it?
+ SND 0 0 CHD_F_CANCELABLE; SYS SYSC_ASK_WHO; REC chi
+ CMPZ chi; JE .end
+ # Which equipped item should we remove curse?
+ SND chi *; SYS SYSC_CHOOSE_EQUIPPED; REC itk
+ {
+  DS Which item?
+ }
+ CMPZ itk; JE .end
+ # Get the ITID and item state byte:
+ SND chi itk; SYS SYSC_CHAR_EQ; REC itid st
+ # Is it really cursed?
+ TEST st ITSF_CURSED; JZ .not_cursed
+ # Ask for payment.
+ # Price to remove curse is party level * 20
+ SND PINFO_LEVEL; SYS SYSC_PINFO; REC price; MUL price 20
+ SND 230 SCleric * price
+ {
+  DT We can remove that cursed
+  .. item for a small fee.
+ }
+ CALL UTIL_PayIfHasMoney; REC paid
+ CMPZ paid; JE .end
+ # Remove it.
+ SND chi itk 0 0; SYS SYSC_SET_CHAR_EQ
+ # Identify it.
+ ANDC st ITSF_UNIDENT
+ # Add it back to inventory.
+ SND itid st; SYS SYSC_GIVE
+ RET
+
+.not_cursed:
+ SND 230 SCleric *; SYS SYSC_SPEAK
+ {
+  DT That item is not cursed.
+  .. You can remove it yourself.
+ }
+.end:
+END
+

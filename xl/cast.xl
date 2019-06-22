@@ -1,0 +1,247 @@
+# Template
+
+# Replace CAST by the name of the level.
+
+PROC CAST_EnterFromWrld
+ # Ask the player if they want to enter.
+ SND .msg LVLN_CAST ENTPT_CAST; CALL UTIL_GoNoGo
+ RET 0
+
+.msg:
+ DB 1
+ DS Enter the Castle?
+END
+
+# Interaction proc
+EXPORT PROC CAST_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr CAST_Interactibles; CALL UTIL_CheckInteract
+ RET
+END
+
+# Walk proc (if needed):
+EXPORT PROC CAST_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ #SND 1 rawcr UTIL_CharSpeak 2 .a_supplies
+ #CALL TRIG_Check
+ #SND 2 rawcr UTIL_Battle EID_SLIME EID_SLIME
+ #CALL TRIG_Check
+ RET
+END
+
+# Leave.
+PROC CAST_Leave
+ SND ALeaveCastle LVLN_WRLD ENTPT_WRLD_FROM_CAST
+ CALL UTIL_GoNoGo
+ RET
+END
+
+# Throne room.
+PROC CAST_ThroneRoom
+ VAR choice
+
+ TEST GM_R_SK_LIGHT; JNZ .quest_r
+ TEST GM_C_SK_LIGHT; JNZ .quest_c
+ TEST GM_A_SK_LIGHT; JNZ .quest_a
+
+ # Assign quest.
+ OR GM_A_SK_LIGHT
+ # Ensure Lyla is awake so she can take part in dialogue.
+ SND 3; CALL UTIL_Ensure1Hp
+ # Dialogue...
+ SND 208 SKing .a_welcome; SYS SYSC_SPEAK
+ SND 209 SQueen .a_welcome2; SYS SYSC_SPEAK
+ SND 209 SQueen .a_what_lyla; SYS SYSC_SPEAK
+ SND 0 0 .a_narr_lyla; SYS SYSC_SPEAK
+ SND 241 SLyla .a_lyla_ans; SYS SYSC_SPEAK
+.ask_mission:
+ SND 209 SQueen .a_what_mission; SYS SYSC_SPEAK
+ SND 0 .a_mission_choices; SYS SYSC_CHOICE; REC choice
+ CMP choice 1; JE .ans_save_world
+ CMP choice 2; JE .ans_save_world
+ CMP choice 3; JE .ans_shareholder
+ JMP .ans_your_mission
+.ans_save_world:
+ JMP .cont
+.ans_shareholder:
+ SND 209 SQueen .a_shareholder_what; SYS SYSC_SPEAK
+ JMP .ask_mission
+.ans_your_mission:
+ SND 209 SQueen .a_your_mission; SYS SYSC_SPEAK
+ SND 0 0 .a_your_mission_narr; SYS SYSC_SPEAK
+ JMP .ask_mission
+.cont:
+ SND 209 SQueen .a_how; SYS SYSC_SPEAK
+ SND 241 SLyla .a_how_ans; SYS SYSC_SPEAK
+ SND 0 0 .a_narr_haha; SYS SYSC_SPEAK
+ SND 209 SQueen .a_haha; SYS SYSC_SPEAK
+ SND 208 SKing .a_serious; SYS SYSC_SPEAK
+ SND 241 SLyla .a_yes_im_serious; SYS SYSC_SPEAK
+ SND 209 SQueen .a_forgive; SYS SYSC_SPEAK
+ SND 208 SKing .a_forgive2; SYS SYSC_SPEAK
+ SND 209 SQueen .a_forgive3; SYS SYSC_SPEAK
+ SND 208 SKing .a_free_east; SYS SYSC_SPEAK
+ SND 209 SQueen .a_monastery; SYS SYSC_SPEAK
+ # fall through
+.quest_a:
+ SND 209 SQueen .a_reminder; SYS SYSC_SPEAK
+ SND 208 SKing .a_reminder2; SYS SYSC_SPEAK
+ RET
+
+.quest_c:
+ # TODO
+ SND 209 SQueen .a_complete; SYS SYSC_SPEAK
+ SND 208 SKing .a_complete2; SYS SYSC_SPEAK
+ SND 209 SQueen .a_complete3; SYS SYSC_SPEAK
+ SND 208 SKing .a_complete4; SYS SYSC_SPEAK
+ SND 209 SQueen .a_complete5; SYS SYSC_SPEAK
+ # Reward the quest.
+ OR GM_R_SK_LIGHT
+ SND 7000; CALL REW_GiveQuestReward #@q_SK_LIGHT
+ SND ITID_SAIL_PERMIT; SYS SYSC_GIVE
+ RET
+
+.quest_r:
+ SND 208 SKing .a_already_rewarded; SYS SYSC_SPEAK
+ RET
+
+.a_welcome:
+ DT Welcome, subjects!
+.a_welcome2:
+ DT We rule the South Kingdom.
+ .. What do... wait... Lyla?
+.a_what_lyla:
+ DT Lyla! Why are you in the
+ .. company of these people?
+.a_narr_lyla:
+ DT You all turn to Lyla. She
+ .. seems embarassed yet
+ .. amused by your surprise.
+.a_lyla_ans:
+ DT I don't recall any of you
+ .. *asking* if I was Princess
+ .. of the South Kingdom.
+ ..
+ .. It does not affect our
+ .. mission.
+.a_what_mission:
+ DT What is your mission?
+.a_mission_choices:
+ DT To defeat the Sorcerer King.
+ .. To save the world.
+ .. To maximize shareholder value.
+ .. I don't know, what is *your* mission?
+.a_shareholder_what:
+ DT The South Kindom is a 
+ .. non-profit.
+.a_your_mission:
+ DT *Our* mission?
+ .. Interesting, nobody ever
+ .. asked us that...
+.a_your_mission_narr:
+ DT You observe as they consider
+ .. the possibility that they
+ .. are shallow characters with
+ .. limited dialogue.
+.a_how:
+ DT And how will you do that?
+.a_how_ans:
+ DT We will get all four
+ .. crystals, then go east
+ .. to Ignis and defeat Markus,
+ .. the Sorcerer King.
+.a_narr_haha:
+ DT The king and queen start
+ .. laughing loudly.
+.a_haha:
+ DT Lyla, always the comedian.
+.a_serious:
+ DT Yes, always!
+ .. ..
+ .. Er.. are you serious, Lyla?
+.a_yes_im_serious:
+ DT Yes. We will get the four
+ .. crystals and defeat Markus.
+.a_forgive:
+ DT Well, forgive the skepticism
+ .. but... you will save the
+ .. world?
+.a_forgive2:
+ DT Come on dear, saving the
+ .. world is a perfectly
+ .. acceptable way to spend her
+ .. time.
+.a_forgive3:
+ DT All right, all right.
+.a_free_east:
+ DT First you must free the
+ .. eastern half of the
+ .. kingdom from darkness.
+.a_monastery:
+ DT The Curse of Night comes
+ .. from the Monastery to the
+ .. east. Enter it and break
+ .. the ancient curse.
+.a_reminder:
+ DT Good luck! You can now go
+ .. to dark side of the island.
+.a_reminder2:
+ DT Remember: go the monastery
+ .. to the east.
+.a_complete:
+ DT You did it! You restored
+ .. daylight to the kingdom!
+.a_complete2:
+ DT We never doubted you.
+.a_complete3:
+ DT No, not for a second.
+.a_complete4:
+ DT Well, maybe for a second.
+ .. But we were wrong.
+.a_complete5:
+ DT Here is a Sailing Permit.
+ .. Show it to the boatman
+ .. in Riverside.
+.a_already_rewarded:
+ DT Good luck!
+END
+
+PROC CAST_Training
+ SND 9; CALL Train #@train_CAST
+END
+
+PROC CAST_ArmorShop
+ SND *; CALL SHOP_ArmorShop
+ {
+  DB 6
+  DB ITID_SCALE_ARMOR #@wares_CAST
+  DB ITID_RING_ARMOR #@wares_CAST
+  DB ITID_IRON_SHIELD #@wares_CAST
+  DB ITID_STEEL_SHIELD #@wares_CAST
+  DB ITID_STEEL_BOOTS #@wares_CAST
+  DB ITID_IRON_HELM #@wares_CAST
+ }
+END
+
+PROC CAST_Inn
+ SND 255 .a_welcome 30; CALL UTIL_Inn
+ RET
+.a_welcome:
+ DB 1
+ DS Welcome to Castle Inn.
+END
+
+# CAST INTERACTIBLES LIST
+# (position, title, proc)
+CAST_Interactibles:
+ DW LOHI(187,51)   CAST_Leave
+ DW LOHI(187,65)   CAST_ThroneRoom
+ DW LOHI(192,56)   CAST_Training
+ DW LOHI(182,54)   SHOP_GeneralStore
+ DW LOHI(182,58)   CAST_ArmorShop
+ DW LOHI(192,53)   SHOP_Expert
+ DW LOHI(182,61)   CAST_Inn
+ DW 0
+

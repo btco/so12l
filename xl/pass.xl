@@ -1,0 +1,82 @@
+# Mountain pass
+
+EXPORT PROC PASS_EnterFromWrldS
+ # Checks if the player has the Myra quest as they enter the
+ # mountain path. If they don't, don't let them.
+ TEST GM_A_MYRA
+ JZ .deny
+ # Ask if the player wants to enter
+ SND AEnterMountainPass LVLN_PASS ENTPT_PASS_SOUTH; CALL UTIL_GoNoGo
+ RET
+ RET
+.deny:
+ # Say that "you got lost".
+ SND 0 0 .a_deny; SYS SYSC_SPEAK
+ RET
+.a_deny:
+ DB 4
+ DS Without directions, you get
+ DS completely lost in the mountain
+ DS path. But you eventually find
+ DS your way back.
+END
+
+EXPORT PROC PASS_EnterFromWrldN
+ SND AEnterMountainPass LVLN_PASS ENTPT_PASS_NORTH; CALL UTIL_GoNoGo
+ RET
+END
+
+EXPORT PROC PASS_Interact
+ PARAM rawcr xz sid kf
+
+ # Exits:
+ CMP rawcr LOHI(233,65); JE .exit_south
+ CMP rawcr LOHI(237,53); JE .exit_north
+
+ # Looting chest?
+ CMP sid 40; JE .loot_chest
+
+ # Hut?
+ CMP rawcr LOHI(236,57); CE PASS_Hut
+
+ RET
+
+ .exit_south:; CALL PASS_ExitSouth; RET
+ .exit_north:; CALL PASS_ExitNorth; RET
+ .loot_chest:;
+  SND rawcr LOL_A; CALL LOOT_ChestRandom; RET #@q_MYRA loot_count=3
+END
+
+PROC PASS_ExitSouth
+ SND ALeaveMountainPass LVLN_WRLD ENTPT_WRLD_FROM_PASS_S; CALL UTIL_GoNoGo
+ RET
+END
+
+PROC PASS_ExitNorth
+ SND ALeaveMountainPass LVLN_WRLD ENTPT_WRLD_FROM_PASS_N; CALL UTIL_GoNoGo
+ RET
+END
+
+PROC PASS_Walk
+ PARAM rawcr
+ # Check for triggers:
+ SND 1 rawcr UTIL_Battle EID_RAT EID_BUG EID_FBUG #@q_MYRA
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_RAT EID_RAT EID_FBUG EID_FBUG #@q_MYRA
+ CALL TRIG_Check
+END
+
+PROC PASS_Hut
+ SND 250 SVillager .a_msg
+ SYS SYSC_SPEAK
+ RET
+
+.a_msg:
+ DB 5
+ DS Are you looking for Myra?
+ DS Continue to follow the
+ DS trail the west. When you
+ DS arrive at the beach, go
+ DS north.
+END
+

@@ -1,0 +1,115 @@
+# ICEM - Ice Maze
+
+PROC ICEM_EnterFromWrld
+ # Ask the player if they want to enter.
+ SND .msg LVLN_ICEM ENTPT_ICEM; CALL UTIL_GoNoGo
+ RET 0
+
+.msg:
+ DB 2
+ DS Enter the
+ DS Ice Maze?
+END
+
+# Interaction proc
+EXPORT PROC ICEM_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr ICEM_Interactibles; CALL UTIL_CheckInteract
+ RET
+END
+
+# Leave.
+PROC ICEM_Leave
+ SND ALeave LVLN_WRLD ENTPT_WRLD_FROM_ICEM
+ CALL UTIL_GoNoGo
+ RET
+END
+
+PROC ICEM_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ SND 1 rawcr UTIL_Battle EID_IGOLEM #@q_KINGS_RING
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_ISNAKE EID_IGOLEM #@q_KINGS_RING
+ CALL TRIG_Check
+ SND 3 rawcr UTIL_Battle EID_IGOLEM EID_IGOLEM #@q_KINGS_RING
+ CALL TRIG_Check
+END
+
+# Hut
+PROC ICEM_Hut
+ VAR has itid
+ # Already have the King's ring?
+ SND ITID_KINGS_RING; SYS SYSC_GET_ITEM_COUNT; REC has
+ CMP has 0; JG .already
+ # Maybe wearing it? (SYSC_GET_ITEM_COUNT does not return it)
+ SND 1 ITK_RING; SYS SYSC_CHAR_EQ; REC itid
+ CMP itid ITID_KINGS_RING; JE .already
+ DIA_GHOST
+ {
+  DT Your Majesty! 
+  ..
+  .. That is... are you King
+  .. Vahn?
+  ..
+  .. The resemblance is uncanny.
+ }
+ DIA_GHOST
+ {
+  DT I am Igor, the King's former
+  .. advisor. When he went mad
+  .. with power, corrupted by
+  .. Sorcerer King, I escaped
+  .. and hid in this maze.
+ }
+ DIA_GHOST
+ {
+  DT I died centuries ago but
+  .. my spirit remained to
+  .. watch over the King's Ring
+  .. until a worthy party came
+  .. to retrieve it.
+ }
+ DIA_GHOST
+ {
+  DT It seems this day has
+  .. arrived. Take this ring.
+ }
+ SND ITID_KINGS_RING; SYS SYSC_GIVE
+ # fall through
+.already:
+ DIA_GHOST
+ {
+  DT With the King's ring, sword
+  .. and crown, you will be able
+  .. to take the King's throne.
+  ..
+  .. I only ask that you be a
+  .. better king than King Vahn.
+ }
+ DIA_GHOST
+ {
+  DT I mean, if you don't sell
+  .. out your whole kingdom to
+  .. an evil villain, that's
+  .. already a good start.
+  ..
+  .. Good luck!
+ }
+ DIA_GHOST
+ {
+  DT I will now teleport you
+  .. to the outside.
+ }
+ SET TGV_WRLD_REW_QUEST_XP 4000 #@q_KINGS_RING
+ SND LVLN_WRLD ENTPT_WRLD_FROM_ICEM; SYS SYSC_CHANGE_LVL
+END
+
+# ICEM INTERACTIBLES LIST
+# (position, title, proc)
+ICEM_Interactibles:
+ DW LOHI(185,103); DW ICEM_Leave
+ DW LOHI(193,117); DW ICEM_Hut
+ DW 0
+

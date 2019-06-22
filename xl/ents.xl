@@ -1,0 +1,694 @@
+# ENTITIES DB
+
+EXPORT EntDB:
+
+# Slime.
+DB ENT_DEF_HDR; DB EID_SLIME   # @eid_EID_SLIME
+ DS Green slime                # @name
+ DB 0                          # Flags
+ DW 272                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  3  4  5  6  7    # Pal map
+ #DB  8  9 10 11 12 13 14 15    # Pal map
+ DB 30                         # @speed score
+ DW 14                         # @maxHp
+ DW 20                         # @xp
+ DW 3                          # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 1                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 10                         # BatAttackDef: att score @att
+ DB 0                          # BatAttackDef: projectile sprite
+ DS The slime attacks          # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Red slime.
+DB ENT_DEF_HDR; DB EID_RSLIME   # @eid_EID_RSLIME
+ DS Red slime                  # @name
+ DB ENTF_HAS_PALMAP            # Flags
+ DW 272                        # SID
+ DB     1  2  3  4  6  6  7    # Pal map
+ DB  8  9 10  9 12 13 14 15    # Pal map
+ DB 40                         # @speed score
+ DW 14                         # @maxHp
+ DW 40                         # @xp
+ DW 6                          # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 10                         # BatAttackDef: att score @att
+ DB 0                          # BatAttackDef: projectile sprite
+ DS The red slime attacks      # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Rat.
+DB ENT_DEF_HDR; DB EID_RAT      # @eid_EID_RAT
+ DS Rat                        # @name
+ DB 0                          # Flags
+ DW 336                        # SID
+ DB 40                         # @speed score
+ DW 30                         # @maxHp
+ DW 40                         # @xp
+ DW 6                          # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 1                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 18                         # BatAttackDef: att score @att
+ DB 0                          # BatAttackDef: projectile sprite
+ DS The rat bites              # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Gray bug.
+DB ENT_DEF_HDR; DB EID_BUG   # @eid_EID_BUG
+ DS Gray bug                   # @name
+ DB 0                          # Flags
+ DW 288                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  3  4  5  6  7    # Pal map
+ #DB  8  9 10 11 12 13 14 15    # Pal map
+ DB 40                         # @speed score
+ DW 25                         # @maxHp
+ DW 65                         # @xp
+ DW 10                         # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 1                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 25                         # BatAttackDef: att score @att
+ DB 0                          # BatAttackDef: projectile sprite
+ DS The bug bites              # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Fire bug.
+DB ENT_DEF_HDR; DB EID_FBUG   # @eid_EID_FBUG
+ DS Fire bug                   # @name
+ DB ENTF_HAS_PALMAP            # Flags
+ DW 288                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ DB     1  2  9  4  5  6 15    # Pal map
+ DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 50                         # @speed score
+ DW 40                         # @maxHp
+ DW 90                         # @xp
+ DW 20                         # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 25                         # BatAttackDef: att score @att
+ DB 228                        # BatAttackDef: projectile sprite
+ DS The fire bug spits         # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Snake.
+DB ENT_DEF_HDR; DB EID_SNAKE   # @eid_EID_SNAKE
+ DS Snake                      # @name
+ DB 0                          # Flags
+ DW 304                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  9  4  5  6 15    # Pal map
+ #DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 50                         # @speed score
+ DW 30                         # @maxHp
+ DW 120                        # @xp
+ DW 30                         # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 1                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 35                         # BatAttackDef: att score @att
+ DB 0                          # BatAttackDef: projectile sprite
+ DS The snake bites            # BatAttackDef: attack narration
+ DW BAT_AF_CEF_POISON          # BatAttackDef: flags
+
+# Bandit
+DB ENT_DEF_HDR; DB EID_BANDIT   # @eid_EID_BANDIT
+ DS Bandit                     # @name
+ DB 0                          # Flags
+ DW 320                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  9  4  5  6 15    # Pal map
+ #DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 50                         # @speed score
+ DW 35                         # @maxHp
+ DW 250                        # @xp
+ DW 80                         # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 50                         # BatAttackDef: att score @att
+ DB 0                          # BatAttackDef: projectile sprite
+ DS The bandit hits            # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Spider
+DB ENT_DEF_HDR; DB EID_SPIDER   # @eid_EID_SPIDER
+ DS Spider                     # @name
+ DB 0                          # Flags
+ DW 384                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  9  4  5  6 15    # Pal map
+ #DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 50                         # @speed score
+ DW 60                         # @maxHp
+ DW 140                        # @xp
+ DW 25                         # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 1                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 35                         # BatAttackDef: att score @att
+ DB 0                          # BatAttackDef: projectile sprite
+ DS The spider bites           # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Blue Spider
+DB ENT_DEF_HDR; DB EID_BSPIDR   # @eid_EID_BSPIDR
+ DS Blue Spider                # @name
+ DB ENTF_HAS_PALMAP            # Flags
+ DW 384                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ DB     1  2  3 10  5 15  2    # Pal map
+ DB  8  9 13 11 12 13 14 14    # Pal map
+ DB 70                         # @speed score
+ DW 50                         # @maxHp
+ DW 210                        # @xp
+ DW 50                         # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 35                         # BatAttackDef: att score @att
+ DB 220                        # BatAttackDef: projectile sprite
+ DS The spider attacks         # BatAttackDef: attack narration
+ DW BAT_AF_STUN                # BatAttackDef: flags
+
+# Imp (large).
+DB ENT_DEF_HDR; DB EID_IMP   # @eid_EID_IMP
+ DS Imp                        # @name
+ DB ENTF_LARGE                 # Flags
+ DW 392                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  9  4  5  6 15    # Pal map
+ #DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 100                        # @speed score
+ DW 180                        # @maxHp
+ DW 500                        # @xp
+ DW 200                        # @gold
+ DB 50                         # Magic resistance (0-100)
+ DB 4                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 55                         # BatAttackDef: att score @att
+ DB 228                        # BatAttackDef: projectile sprite
+ DS The imp attacks            # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Sand worm.
+DB ENT_DEF_HDR; DB EID_WORM   # @eid_EID_WORM
+ DS Sand worm                  # @name
+ DB 0                          # Flags
+ DW 400                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  9  4  5  6 15    # Pal map
+ #DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 50                         # @speed score
+ DW 45                         # @maxHp
+ DW 80                         # @xp
+ DW 20                         # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 40                         # BatAttackDef: att score @att
+ DB 0                          # BatAttackDef: projectile sprite
+ DS The worm bites             # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Ghost (boss of OTO)
+DB ENT_DEF_HDR; DB EID_GHOST   # @eid_EID_GHOST
+ DS Ghost                      # @name
+ DB 0                          # Flags
+ DW 416                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  9  4  5  6 15    # Pal map
+ #DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 100                        # @speed score
+ DW 110                        # @maxHp
+ DW 1000                       # @xp
+ DW 100                        # @gold
+ DB 40                         # Magic resistance (0-100)
+ DB 3                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 30                         # BatAttackDef: att score @att
+ DB 228                        # BatAttackDef: projectile sprite
+ DS The ghost attacks          # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Dark Cleric
+DB ENT_DEF_HDR; DB EID_DCLER   # @eid_EID_DCLER
+ DS Dark Cleric                # @name
+ DB 0                          # Flags
+ DW 432                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  9  4  5  6 15    # Pal map
+ #DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 60                         # @speed score
+ DW 100                        # @maxHp
+ DW 300                        # @xp
+ DW 100                        # @gold
+ DB 25                         # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 60                         # BatAttackDef: att score @att
+ DB 228                        # BatAttackDef: projectile sprite
+ DS The cleric attacks         # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Temple Guard
+DB ENT_DEF_HDR; DB EID_TGUARD   # @eid_EID_TGUARD
+ DS Temple Guard               # @name
+ DB 0                          # Flags
+ DW 448                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  9  4  5  6 15    # Pal map
+ #DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 50                         # @speed score
+ DW 80                         # @maxHp
+ DW 120                        # @xp
+ DW 50                         # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 1                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 50                         # BatAttackDef: att score @att
+ DB 0                          # BatAttackDef: projectile sprite
+ DS The guard attacks          # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Forest demon.
+DB ENT_DEF_HDR; DB EID_FDEMON   # @eid_EID_FDEMON
+ DS Forest demon               # @name
+ DB 0                          # Flags
+ DW 352                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  9  4  5  6 15    # Pal map
+ #DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 60                         # @speed score
+ DW 100                        # @maxHp
+ DW 200                        # @xp
+ DW 50                         # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 1                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 55                         # BatAttackDef: att score @att
+ DB 228                        # BatAttackDef: projectile sprite
+ DS The demon attacks          # BatAttackDef: attack narration
+ DW BAT_AF_PUSH                # BatAttackDef: flags
+
+# Red snake.
+DB ENT_DEF_HDR; DB EID_RSNAKE   # @eid_EID_RSNAKE
+ DS Red snake                  # @name
+ DB ENTF_HAS_PALMAP            # Flags
+ DW 304                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ DB     1  2  3  6  5  6  7    # Pal map
+ DB  8  1 10 11 12 13 14 15    # Pal map
+ DB 70                         # @speed score
+ DW 90                         # @maxHp
+ DW 150                        # @xp
+ DW 40                         # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 55                         # BatAttackDef: att score @att
+ DB 228                        # BatAttackDef: projectile sprite
+ DS The red snake bites        # BatAttackDef: attack narration
+ DW BAT_AF_CEF_POISON          # BatAttackDef: flags
+
+# Scorpion
+DB ENT_DEF_HDR; DB EID_SCORPI   # @eid_EID_SCORPI
+ DS Scorpion                   # @name
+ DB 0                          # Flags
+ DW 464                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  3  6  5  6  7    # Pal map
+ #DB  8  1 10 11 12 13 14 15    # Pal map
+ DB 60                         # @speed score
+ DW 175                        # @maxHp
+ DW 250                        # @xp
+ DW 50                         # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 65                         # BatAttackDef: att score @att
+ DB 228                        # BatAttackDef: projectile sprite
+ DS The scorpion strikes       # BatAttackDef: attack narration
+ DW BAT_AF_CEF_POISON          # BatAttackDef: flags
+
+# Desert bug
+DB ENT_DEF_HDR; DB EID_DESBUG   # @eid_EID_DESBUG
+ DS Desert bug                 # @name
+ DB 0                          # Flags
+ DW 480                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  3  6  5  6  7    # Pal map
+ #DB  8  1 10 11 12 13 14 15    # Pal map
+ DB 60                         # @speed score
+ DW 150                        # @maxHp
+ DW 220                        # @xp
+ DW 60                         # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 1                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 70                         # BatAttackDef: att score @att
+ DB 228                        # BatAttackDef: projectile sprite
+ DS The desert bug bites       # BatAttackDef: attack narration
+ DW BAT_AF_STUN                # BatAttackDef: flags
+
+# Twister
+DB ENT_DEF_HDR; DB EID_TWIST   # @eid_EID_TWIST
+ DS Twister                    # @name
+ DB 0                          # Flags
+ DW 496                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  3  6  5  6  7    # Pal map
+ #DB  8  1 10 11 12 13 14 15    # Pal map
+ DB 60                         # @speed score
+ DW 120                        # @maxHp
+ DW 300                        # @xp
+ DW 100                        # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 60                         # BatAttackDef: att score @att
+ DB 216                        # BatAttackDef: projectile sprite
+ DS The twister attacks        # BatAttackDef: attack narration
+ DW BAT_AF_PUSH                # BatAttackDef: flags
+
+# Undead Guardian
+DB ENT_DEF_HDR; DB EID_UGUARD   # @eid_EID_UGUARD
+ DS Undead Guardian            # @name
+ DB 0                          # Flags
+ DW 276                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  3  6  5  6  7    # Pal map
+ #DB  8  1 10 11 12 13 14 15    # Pal map
+ DB 80                         # @speed score
+ DW 150                        # @maxHp
+ DW 400                        # @xp
+ DW 100                        # @gold
+ DB 15                         # Magic resistance (0-100)
+ DB 1                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 70                         # BatAttackDef: att score @att
+ DB 228                        # BatAttackDef: projectile sprite
+ DS The guardian strikes       # BatAttackDef: attack narration
+ DW BAT_AF_STUN                # BatAttackDef: flags
+
+# Undead Mage
+DB ENT_DEF_HDR; DB EID_UMAGE   # @eid_EID_UMAGE
+ DS Undead Mage                # @name
+ DB 0                          # Flags
+ DW 292                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  3  6  5  6  7    # Pal map
+ #DB  8  1 10 11 12 13 14 15    # Pal map
+ DB 80                         # @speed score
+ DW 150                        # @maxHp
+ DW 550                        # @xp
+ DW 120                        # @gold
+ DB 50                         # Magic resistance (0-100)
+ DB 1                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 70                         # BatAttackDef: att score @att
+ DB 228                        # BatAttackDef: projectile sprite
+ DS The undead mage attacks    # BatAttackDef: attack narration
+ DW BOR(BAT_AF_CEF_ASLEEP,BAT_AF_SPELL)      # BatAttackDef: flags
+
+# Undead King (large).
+DB ENT_DEF_HDR; DB EID_UKING   # @eid_EID_UKING
+ DS Undead Prince              # @name
+ DB ENTF_LARGE                 # Flags
+ DW 424                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  9  4  5  6 15    # Pal map
+ #DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 100                        # @speed score
+ DW 380                        # @maxHp
+ DW 3000                       # @xp
+ DW 1000                       # @gold
+ DB 30                         # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 80                         # BatAttackDef: att score @att
+ DB 228                        # BatAttackDef: projectile sprite
+ DS The undead prince strikes  # BatAttackDef: attack narration
+ DW BOR(BAT_AF_STUN,BAT_AF_PUSH)  # BatAttackDef: flags
+
+# Sea monster (large).
+DB ENT_DEF_HDR; DB EID_SEAMON  # @eid_EID_SEAMON
+ DS Sea Monster                # @name
+ DB ENTF_LARGE                 # Flags
+ DW 456                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  9  4  5  6 15    # Pal map
+ #DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 80                         # @speed score
+ DW 260                        # @maxHp
+ DW 500                        # @xp
+ DW 200                        # @gold
+ DB 25                         # Magic resistance (0-100)
+ DB 4                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 60                         # BatAttackDef: att score @att
+ DB 214                        # BatAttackDef: projectile sprite
+ DS The monster attacks        # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Marshes Golem
+DB ENT_DEF_HDR; DB EID_MGOLEM  # @eid_EID_MGOLEM
+ DS Marshes Golem              # @name
+ DB 0                          # Flags
+ DW 368                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  9  4  5  6 15    # Pal map
+ #DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 70                         # @speed score
+ DW 120                        # @maxHp
+ DW 200                        # @xp
+ DW 50                         # @gold
+ DB 15                         # Magic resistance (0-100)
+ DB 4                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 65                         # BatAttackDef: att score @att
+ DB 213                        # BatAttackDef: projectile sprite
+ DS The golem attacks          # BatAttackDef: attack narration
+ DW BAT_AF_CEF_POISON          # BatAttackDef: flags
+
+# Forest Wind
+DB ENT_DEF_HDR; DB EID_FWIND   # @eid_EID_FWIND
+ DS Forest Wind                # @name
+ DB 0                          # Flags
+ DW 308                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  3  6  5  6  7    # Pal map
+ #DB  8  1 10 11 12 13 14 15    # Pal map
+ DB 80                         # @speed score
+ DW 120                        # @maxHp
+ DW 300                        # @xp
+ DW 150                        # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 3                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 90                         # BatAttackDef: att score @att
+ DB 216                        # BatAttackDef: projectile sprite
+ DS The forest wind strikes    # BatAttackDef: attack narration
+ DW BAT_AF_PUSH                # BatAttackDef: flags
+
+# Night Demon
+DB ENT_DEF_HDR; DB EID_NDEMON  # @eid_EID_NDEMON
+ DS Night Demon                # @name
+ DB 0                          # Flags
+ DW 324                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  9  4  5  6 15    # Pal map
+ #DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 80                         # @speed score
+ DW 240                        # @maxHp
+ DW 300                        # @xp
+ DW 60                         # @gold
+ DB 30                         # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 100                        # BatAttackDef: att score @att
+ DB 213                        # BatAttackDef: projectile sprite
+ DS The night demon attacks    # BatAttackDef: attack narration
+ DW BAT_AF_CEF_ASLEEP          # BatAttackDef: flags
+
+# Ice Snake.
+DB ENT_DEF_HDR; DB EID_ISNAKE  # @eid_EID_ISNAKE
+ DS Ice Snake                  # @name
+ DB 0                          # Flags
+ DW 340                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  9  4  5  6 15    # Pal map
+ #DB  8  9  6 11 12 13 14 14    # Pal map
+ DB 50                         # @speed score
+ DW 90                         # @maxHp
+ DW 400                        # @xp
+ DW 80                         # @gold
+ DB 30                         # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 90                         # BatAttackDef: att score @att
+ DB 213                        # BatAttackDef: projectile sprite
+ DS The snake bites            # BatAttackDef: attack narration
+ DW BAT_AF_CEF_POISON          # BatAttackDef: flags
+
+# Ice Golem.
+DB ENT_DEF_HDR; DB EID_IGOLEM  # @eid_EID_IGOLEM
+ DS Ice Golem                  # @name
+ DB 0                          # Flags
+ DW 356                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  3  6  5  6  7    # Pal map
+ #DB  8  1 10 11 12 13 14 15    # Pal map
+ DB 80                         # @speed score
+ DW 220                        # @maxHp
+ DW 700                        # @xp
+ DW 200                        # @gold
+ DB 20                         # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 120                        # BatAttackDef: att score @att
+ DB 216                        # BatAttackDef: projectile sprite
+ DS The ice golem strikes      # BatAttackDef: attack narration
+ DW BAT_AF_CEF_FROZEN          # BatAttackDef: flags
+
+# Paper Golem.
+DB ENT_DEF_HDR; DB EID_PGOLEM  # @eid_EID_PGOLEM
+ DS Paper Golem                # @name
+ DB 0                          # Flags
+ DW 372                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  3  6  5  6  7    # Pal map
+ #DB  8  1 10 11 12 13 14 15    # Pal map
+ DB 90                         # @speed score
+ DW 180                        # @maxHp
+ DW 300                        # @xp
+ DW 150                        # @gold
+ DB 20                         # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 100                        # BatAttackDef: att score @att
+ DB 216                        # BatAttackDef: projectile sprite
+ DS The paper golem strikes    # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Flame.
+DB ENT_DEF_HDR; DB EID_FLAME   # @eid_EID_FLAME
+ DS Flame                      # @name
+ DB 0                          # Flags
+ DW 388                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  3  6  5  6  7    # Pal map
+ #DB  8  1 10 11 12 13 14 15    # Pal map
+ DB 60                         # @speed score
+ DW 120                        # @maxHp
+ DW 200                        # @xp
+ DW 50                         # @gold
+ DB 20                         # Magic resistance (0-100)
+ DB 3                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 90                         # BatAttackDef: att score @att
+ DB 216                        # BatAttackDef: projectile sprite
+ DS The flame strikes          # BatAttackDef: attack narration
+ DW BAT_AF_STUN                # BatAttackDef: flags
+
+# Fire Cleric
+DB ENT_DEF_HDR; DB EID_FCLER   # @eid_EID_FCLER
+ DS Ignis Cleric               # @name
+ DB 0                          # Flags
+ DW 404                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  3  6  5  6  7    # Pal map
+ #DB  8  1 10 11 12 13 14 15    # Pal map
+ DB 70                         # @speed score
+ DW 230                        # @maxHp
+ DW 300                        # @xp
+ DW 150                        # @gold
+ DB 30                         # Magic resistance (0-100)
+ DB 2                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 140                        # BatAttackDef: att score @att
+ DB 216                        # BatAttackDef: projectile sprite
+ DS The fire cleric strikes    # BatAttackDef: attack narration
+ DW BAT_AF_CEF_ASLEEP          # BatAttackDef: flags
+
+# Sorcerer King
+DB ENT_DEF_HDR; DB EID_SRKING  # @eid_EID_SRKING
+ DS Sorcerer King              # @name
+ DB ENTF_LARGE                 # Flags
+ DW 488                        # SID
+ # (if ENTF_HAS_PALMAP is set, insert 15 bytes here for pal map)
+ #DB     1  2  3  6  5  6  7    # Pal map
+ #DB  8  1 10 11 12 13 14 15    # Pal map
+ DB 120                        # @speed score
+ DW 500                        # @maxHp
+ DW 5000                       # @xp
+ DW 2000                       # @gold
+ DB 40                         # Magic resistance (0-100)
+ DB 4                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 120                        # BatAttackDef: att score @att
+ DB 216                        # BatAttackDef: projectile sprite
+ DS The Sorcerer King attacks  # BatAttackDef: attack narration
+ DW BOR(BAT_AF_STUN,BAT_AF_PUSH,BAT_AF_CEF_ASLEEP,BAT_AF_CEF_FROZEN,BAT_AF_CEF_POISON)  # BatAttackDef: flags
+
+# Leon (last battle).
+DB ENT_DEF_HDR; DB EID_LEON    # @eid_EID_ALEX
+ DS Leon                       # @name
+ DB 0                          # Flags
+ DW 436                        # SID
+ DB 0                          # @speed score
+ DW 60                         # @maxHp
+ DW 500                        # @xp
+ DW 0                          # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 1                          # @numAttacks.
+ DB BAT_AK_MELEE               # BatAttackDef: @attType
+ DB 50                         # BatAttackDef: att score @att
+ DB 216                        # BatAttackDef: projectile sprite
+ DS Leon attacks               # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Lyla (last battle).
+DB ENT_DEF_HDR; DB EID_LYLA    # @eid_EID_ALEX
+ DS Lyla                       # @name
+ DB 0                          # Flags
+ DW 420                        # SID
+ DB 0                          # @speed score
+ DW 60                         # @maxHp
+ DW 500                        # @xp
+ DW 0                          # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 1                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 50                         # BatAttackDef: att score @att
+ DB 227                        # BatAttackDef: projectile sprite
+ DS Lyla fires                 # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# Vic (last battle)
+DB ENT_DEF_HDR; DB EID_VIC     # @eid_EID_ALEX
+ DS Vic                        # @name
+ DB 0                          # Flags
+ DW 452                        # SID
+ DB 0                          # @speed score
+ DW 40                         # @maxHp
+ DW 500                        # @xp
+ DW 0                          # @gold
+ DB 0                          # Magic resistance (0-100)
+ DB 1                          # @numAttacks.
+ DB BAT_AK_RANGED              # BatAttackDef: @attType
+ DB 50                         # BatAttackDef: att score @att
+ DB 214                        # BatAttackDef: projectile sprite
+ DS Vic attacks                # BatAttackDef: attack narration
+ DW 0                          # BatAttackDef: flags
+
+# End of DB
+ DB 0
+

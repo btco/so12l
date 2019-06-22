@@ -1,0 +1,50 @@
+# SID of the tile that represents trigger#1
+DEFINE TRIG_SID_1 128
+# How many possible trigger tiles there are.
+DEFINE TRIG_COUNT 6
+
+# Checks to see if player stepped on a given trigger, and, if so, calls
+# the provided handler function with the provided arguments.
+#
+# n: the trigger# to check against
+# rawcr: the tile the player stepped on
+# handler: the handler function to call
+# a1..a6: arguments to the handler function.
+#
+# If the handler function returns non-zero, the tile will be killed
+# so that it doesn't trigger again.
+PROC TRIG_Check
+ PARAM n rawcr handler a1 a2 a3 a4 a5 a6
+ VAR expected_sid actual_sid kf
+
+ # Is the tile the right trigger?
+ SET expected_sid TRIG_SID_1
+ ADD expected_sid n
+ SUB expected_sid 1
+ SND rawcr TINFO_SID
+ SYS SYSC_TINFO
+ REC actual_sid
+ CMP expected_sid actual_sid; JNE .nope
+
+ # Has this trigger already fired? If so, ignore.
+ SND rawcr TINFO_IS_KILLED
+ SYS SYSC_TINFO
+ REC kf
+ CMP kf 0; JNE .nope
+
+ # Call the handler.
+ SND a1 a2 a3 a4 a5 a6
+ CALL handler
+ REC kf
+
+ # If handler returned 0, don't kill the tile (preserve trigger).
+ CMP kf 0; JE .nope
+
+ # Kill the tile.
+ SND rawcr
+ SYS SYSC_KILL_TILE
+
+.nope:
+ RET
+END
+

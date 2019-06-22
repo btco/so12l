@@ -1,0 +1,84 @@
+# INTX: Town of Indigo (ruins)
+
+EXPORT PROC INTX_Interact
+ PARAM rawcr xz sid kf
+
+ # Trying to enter a store?
+ CMP sid 56; JE .store
+ CMP sid 57; JE .store
+
+ # Mayor's hut?
+ CMP rawcr LOHI(188,5); JE .mayor
+ # Leaving?
+ CMP rawcr LOHI(187,0); JE .leave
+
+ RET
+
+ .mayor:; CALL INTX_TalkToMayor; RET
+ .leave:
+  # TODO: fix
+  SND ALeaveTown LVLN_WRLD ENTPT_WRLD_FROM_INTO; CALL UTIL_GoNoGo
+  RET
+ .store:
+  SND .a_store_closed; SYS SYSC_ALERT
+  RET
+ .a_store_closed:
+  DB 1
+  DS The building is abandoned.
+END
+
+EXPORT PROC INTX_Walk
+ PARAM rawcr
+END
+
+PROC INTX_TalkToMayor
+ VAR has
+ # Brought back the statuette?
+ SND ITID_STATUETTE; SYS SYSC_GET_ITEM_COUNT; REC has
+ CMP has 0; JG .thanks
+ # State quest.
+ SND 254 SGrtoMayor .a_quest; SYS SYSC_SPEAK
+ SND 254 SGrtoMayor .a_quest2; SYS SYSC_SPEAK
+ SND 254 SGrtoMayor .a_quest3; SYS SYSC_SPEAK
+ RET
+.thanks:
+ SND 254 SGrtoMayor .a_thanks; SYS SYSC_SPEAK
+ SND 0 0 .a_thanks2; SYS SYSC_SPEAK
+ SND 254 SGrtoMayor .a_thanks3; SYS SYSC_SPEAK
+ # Switch to alive version of city (INTO). The boot logic in INTO
+ # will take care of giving out the reward.
+ SND LVLN_INTO ENTPT_INTO_QUEST; SYS SYSC_CHANGE_LVL
+ RET
+.a_quest:
+ DT I am the mayor of the Town
+ .. of Indigo. As you can see,
+ .. it's in ruins.
+.a_quest2:
+ DT A minion of the Sorcerer
+ .. King stole an Indigo
+ .. Statuette from us. Its
+ .. energy is what kept our
+ .. town alive.
+.a_quest3:
+ DT It was taken to the Bamboo
+ .. Grove east of Riverside,
+ .. and is guarded by powerful
+ .. monsters.
+ ..
+ .. Can you recover it?
+.a_thanks:
+ DT You brought back the Indigo
+ .. Statuette! We can restore
+ .. our town to life!
+.a_thanks2:
+ DT The mayor places the statue
+ .. on its pedestal. Grass and
+ .. flowers sprout everywhere in
+ .. and around the city.
+.a_thanks3:
+ DB 3
+ DT The shops in town are now
+ .. open. Be sure to browse
+ .. for useful items and spells.
+END
+

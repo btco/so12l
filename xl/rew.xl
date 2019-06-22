@@ -1,0 +1,35 @@
+
+DEFINE REW_MIN 500
+
+PROC REW_GiveQuestReward
+ PARAM xp
+ VAR due
+ SND xp; CALL REW_CalcDue_; REC due
+ DIV due 50; MUL due 50
+ CMP due REW_MIN; JG .greater
+ SET due REW_MIN
+.greater:
+ SND due; SYS SYSC_GIVE_GOLD
+ SND xp; SYS SYSC_GIVE_XP
+END
+
+PROC REW_AdjustLootGold
+ PARAM gp extra_xp
+ VAR min max due
+ SET min 5
+ SET max gp; MUL max 2
+ SND extra_xp; CALL REW_CalcDue_; REC due
+ ADD gp due
+ SND gp min max; CALL UTIL_Clamp; REC gp
+ RET gp
+END
+
+PROC REW_CalcDue_
+ PARAM extra_xp
+ VAR x y
+ SND PINFO_XP; SYS SYSC_PINFO; REC x; ADD x extra_xp; DIV x 2
+ SND PINFO_NET_WORTH; SYS SYSC_PINFO; REC y
+ SUB x y
+ RET x
+END
+

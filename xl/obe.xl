@@ -1,0 +1,324 @@
+# Obelisk dungeon.
+
+# OBE1 INTERACTIBLES LIST
+# (position, title, proc)
+OBE1_Interactibles:
+ #DW LOHI(180,82) OBE1_Leave
+ DW LOHI(193,83) OBE1_GoDown
+ DW LOHI(189,82) OBE1_FirstBook
+ DW 0
+
+# OBE2 INTERACTIBLES LIST
+# (position, title, proc)
+OBE2_Interactibles:
+ DW LOHI(195,69) OBE2_GoUp
+ DW LOHI(208,73) OBE2_GoDown
+ DW 0
+
+# OBE3 INTERACTIBLES LIST
+# (position, title, proc)
+OBE3_Interactibles:
+ DW LOHI(206,76) OBE3_GoUp
+ DW LOHI(196,76) OBE3_Lever
+ DW LOHI(207,80) OBE3_Gate
+ DW LOHI(197,81) OBE3_Sarcophagus
+ DW LOHI(195,82) OBE3_Exit
+ DW 0
+
+# --------------------------------------------------------------
+
+PROC OBE1_EnterFromWrld
+ VAR choice
+ # Ask the player if they want to read the inscription.
+ SND .msg ChoiceNoYes; SYS SYSC_CHOICE; REC choice
+ CMP choice 2; JE .read
+ RET
+.read:
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND 0 0 .a_narr2; SYS SYSC_SPEAK
+ SND 0 0 .a_narr3; SYS SYSC_SPEAK
+ SND 0 0 .a_narr4; SYS SYSC_SPEAK
+ SND 0 0 .a_narr5; SYS SYSC_SPEAK
+ SND LVLN_OBE1 ENTPT_OBE1_FROM_WRLD; SYS SYSC_CHANGE_LVL
+ RET
+.msg:
+ DB 2
+ DS Read the inscription
+ DS on the Obelisk?
+.a_narr:
+ DB 6
+ DS The inscription on the Obelisk
+ DS is written in a language you
+ DS don't understand, but somehow
+ DS you can read the words.
+ DS
+ DS You speak them aloud.
+.a_narr2:
+ DB 2
+ DS Nothing happens. So much for
+ DS superstition.
+.a_narr3:
+ DB 5
+ DS But suddenly the ground
+ DS disappears from beneath your
+ DS feet.
+ DS
+ DS You fall...
+.a_narr4:
+ DB 3
+ DS You keep falling...
+ DS For what seems like an
+ DS eternity.
+.a_narr5:
+ DB 6
+ DS All goes dark.
+ DS
+ DS When you wake, you are
+ DS deep underground in what
+ DS looks like a tomb dug
+ DS long ago.
+END
+
+# Interaction proc
+EXPORT PROC OBE1_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr OBE1_Interactibles; CALL UTIL_CheckInteract
+ # Looting a chest?
+ CMP sid 40; SND rawcr ITID_POTION_AWAKE; CE LOOT_ChestItem
+ RET
+END
+
+# Walk proc (if needed):
+EXPORT PROC OBE1_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ SND 1 rawcr UTIL_Battle EID_UGUARD #@q_OBELISK
+ CALL TRIG_Check
+ RET
+END
+
+# Leave.
+#PROC OBE1_Leave
+# SND .a_leave LVLN_SAHA ENTPT_SAHA_FROM_OBE1
+# CALL UTIL_GoNoGo
+# RET
+#.a_leave:
+# DB 1
+# DS Leave?
+#END
+
+# Down
+PROC OBE1_GoDown
+ SND AStairsDown LVLN_OBE2 ENTPT_OBE2_FROM_OBE1
+ CALL UTIL_GoNoGo
+END
+
+PROC OBE1_FirstBook
+ SND 0 0 .a_narr1; SYS SYSC_SPEAK
+ SND 0 0 .a_narr2; SYS SYSC_SPEAK
+ SND 0 0 .a_narr3; SYS SYSC_SPEAK
+ RET
+.a_narr1:
+ DB 5
+ DS The book tells the story
+ DS of the Prince of Sand Haven,
+ DS who, a thousand years go,
+ DS made a pact with the
+ DS Sorcerer King.
+.a_narr2:
+ DB 3
+ DS The Prince was given great
+ DS powers, and became the
+ DS custodian of the Red Crystal.
+.a_narr3:
+ DB 5
+ DS The Prince was buried with
+ DS the Red Crystal.
+ DS
+ DS The burial chamber is at the
+ DS bottom level of this complex.
+END
+
+# --------------------------------------------------------------
+
+# Interaction proc
+EXPORT PROC OBE2_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr OBE2_Interactibles; CALL UTIL_CheckInteract
+ # Looting a chest?
+ CMP sid 40; SND rawcr LOL_D; CE LOOT_ChestRandom #@q_OBELISK loot_count=2
+ RET
+END
+
+# Walk proc (if needed):
+EXPORT PROC OBE2_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ SND 1 rawcr UTIL_Battle EID_UGUARD EID_UGUARD #@q_OBELISK
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_UMAGE #@q_OBELISK
+ CALL TRIG_Check
+ RET
+END
+
+# Down
+PROC OBE2_GoDown
+ SND AStairsDown LVLN_OBE3 ENTPT_OBE3_FROM_OBE2
+ CALL UTIL_GoNoGo
+END
+
+# Up
+PROC OBE2_GoUp
+ SND AStairsUp LVLN_OBE1 ENTPT_OBE1_FROM_OBE2
+ CALL UTIL_GoNoGo
+END
+
+# --------------------------------------------------------------
+
+# Interaction proc
+EXPORT PROC OBE3_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr OBE3_Interactibles; CALL UTIL_CheckInteract
+ # Looting a chest?
+ CMP sid 40; SND rawcr LOL_D; CE LOOT_ChestRandom #@q_OBELISK loot_count=1
+ RET
+END
+
+# Walk proc (if needed):
+EXPORT PROC OBE3_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ SND 1 rawcr UTIL_Battle EID_UGUARD EID_UGUARD #@q_OBELISK
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_UGUARD EID_UGUARD EID_UMAGE #@q_OBELISK
+ CALL TRIG_Check
+ RET
+END
+
+# Up
+PROC OBE3_GoUp
+ SND AStairsUp LVLN_OBE2 ENTPT_OBE2_FROM_OBE3
+ CALL UTIL_GoNoGo
+END
+
+PROC OBE3_Lever
+ PARAM rawcr kf
+ # Lever already used?
+ SND rawcr TINFO_IS_KILLED; SYS SYSC_TINFO; REC kf
+ CMP kf 0; JNE .ret
+ # Mark lever as used.
+ SND rawcr; SYS SYSC_KILL_TILE
+ # Open gate
+ SND LOHI(207,80); SYS SYSC_KILL_TILE
+ SND 0 0 .a_msg; SYS SYSC_SPEAK
+ # (fall through)
+.ret:
+ RET
+.a_msg:
+ DB 4
+ DS You pull the lever.
+ DS The centuries-old mechanism
+ DS turns. You hear a gate
+ DS opening far away.
+END
+
+PROC OBE3_Gate
+ SND .a_msg; SYS SYSC_ALERT
+ RET
+.a_msg:
+ DB 2
+ DS This gate opens
+ DS elsewhere.
+END
+
+PROC OBE3_Sarcophagus
+ VAR choice
+ TEST GM_C_OBELISK; JNZ .already
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND .a_prompt ChoiceNoYes; SYS SYSC_CHOICE; REC choice
+ CMP choice 2; JNE .ret
+ SND 0 0 .a_open_narr; SYS SYSC_SPEAK
+ SND 0 0 .a_open_narr2; SYS SYSC_SPEAK
+ SND 0 0 .a_open_narr3; SYS SYSC_SPEAK
+ SET TGV_BATTLE_END_CB OBE3_Finale
+ SND EID_UKING; SYS SYSC_BATTLE #@q_OBELISK
+.ret:
+ RET
+.already:
+ SND .a_msg_already; SYS SYSC_ALERT
+ RET
+.a_narr:
+ DB 4
+ DS An ornate sarcophagus
+ DS rests at the center of
+ DS the room. It is huge,
+ DS as if made for a giant.
+.a_prompt:
+ DB 1
+ DS Open the sarcophagus?
+.a_open_narr:
+ DB 3
+ DS When you push the lid,
+ DS the sarcophagus begins
+ DS to rumble and shake.
+.a_open_narr2:
+ DB 3
+ DS You watch in terror
+ DS as a giant skeletal
+ DS figure rises from it.
+.a_open_narr3:
+ DT You have disturbed the
+ .. Prince of Sand Haven.
+ .. He is angry.
+.a_msg_already:
+ DB 4
+ DS You don't find anything else
+ DS in the sarcophagus. It was
+ DS just the one giant undead
+ DS skeleton prince, nothing else.
+END
+
+PROC OBE3_Finale
+ OR GM_C_OBELISK
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND 0 0 .a_narr2; SYS SYSC_SPEAK
+ SND ITID_CRYSTAL_RED; SYS SYSC_GIVE
+ SND 8000; CALL REW_GiveQuestReward #@q_OBELISK
+ # Close the path out with a water tile, to prevent
+ # player from going back.
+ SND LOHI(201,82) 23; SYS SYSC_CHANGE_SID
+ # Secret stairs.
+ SND LOHI(195,82) 12; SYS SYSC_CHANGE_SID
+ RET
+.a_narr:
+ DB 4
+ DS You watch as the huge
+ DS skeleton figure collapses.
+ DS In the sarcophagus, you
+ DS find a shining Red Crystal.
+.a_narr2:
+ DB 3
+ DS A compartment opens on the
+ DS west wall, revealing a secret
+ DS staircase.
+END
+
+PROC OBE3_Exit
+ TEST GM_C_OBELISK; JZ .ret
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND LVLN_SAHA ENTPT_SAHA_FROM_OBE1; SYS SYSC_CHANGE_LVL
+ # (fall through)
+.ret:
+ RET
+.a_narr:
+ DB 5
+ DS You climb up the steep
+ DS stairs back to the outside.
+ DS You find that the Obelisk
+ DS has collapsed, and in its
+ DS place there is now a portal.
+END
+

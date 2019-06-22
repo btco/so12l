@@ -1,0 +1,477 @@
+# OLD TOWER LEVEL (OTOn)
+
+# ---------------------------------------------------------------
+# Old tower, entrance from world.
+PROC OTO1_EnterFromWrld
+ VAR count
+ # If the tower was already completed, it can't
+ # be entered (it disappeared).
+ TEST GM_C_OTO_GHOST; JNZ .ret
+
+ # Has Vic joined the party?
+ SND PINFO_NUM_CHARS; SYS SYSC_PINFO; REC count
+ CMP count 4; JNE .nope
+ # Ok to enter.
+ SND .enter LVLN_OTO1 ENTPT_OTO1_FROM_WRLD
+ CALL UTIL_GoNoGo
+ RET
+
+.nope:
+ SND .nope_msg; SYS SYSC_ALERT 
+.ret:
+ RET
+
+.nope_msg:
+ DB 3
+ DS The Old Tower is protected
+ DS by a spell. You do not how
+ DS to enter.
+
+.enter:
+ DB 1
+ DS Enter the Old Tower?
+END
+
+# ---------------------------------------------------------------
+# Old tower, level 1.
+PROC OTO1_Interact
+ PARAM rawcr xz sid kf
+
+ # Leave tower?
+ CMP rawcr LOHI(232,101); JE .leave
+ # Special chest with Wizard's robes?
+ CMP rawcr LOHI(232,91); JE .robes_chest
+ # Looting a chest?
+ CMP sid 40; JE .loot_chest
+ # Climb to level 2?
+ CMP sid 12; JE .go_up
+
+ RET
+
+ .leave:; CALL OTO1_Leave; RET
+ .loot_chest:;
+  SND rawcr LOL_B; CALL LOOT_ChestRandom; RET #@q_OTO_GHOST loot_count=4
+ .go_up:
+  SND AStairsUp LVLN_OTO2 ENTPT_OTO2_FROM_OTO1; CALL UTIL_GoNoGo
+  RET
+ .robes_chest:
+  SND rawcr ITID_WIZARD_ROBES; CALL LOOT_ChestItem; RET
+  #@q_OTO_GHOST giveItem=ITID_WIZARD_ROBES chi=4
+ RET
+END
+
+# Try to leave the tower.
+PROC OTO1_Leave
+ SND .leave_msg LVLN_WRLD ENTPT_WRLD_FROM_OTO1; CALL UTIL_GoNoGo
+ RET
+ 
+.leave_msg:
+ DB 1
+ DS Leave the tower?
+END
+
+PROC OTO1_Walk
+ PARAM rawcr pdir
+ SND 1 rawcr UTIL_Battle EID_SPIDER #@q_OTO_GHOST
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_SPIDER EID_SPIDER #@q_OTO_GHOST
+ CALL TRIG_Check
+END
+
+
+# ---------------------------------------------------------------
+# Old tower, level 2
+
+PROC OTO2_Interact
+ PARAM rawcr xz sid kf
+
+ # Food chest?
+ CMP rawcr LOHI(211,117); JE .rations_chest
+ # Loot chest?
+ CMP sid 40; JE .loot_chest
+ # Go down to level 1?
+ CMP rawcr LOHI(224,104); JE .go_down
+ # Go up to level 3?
+ CMP rawcr LOHI(211,104); JE .go_up
+ # Activate lever that extends the bridge?
+ CMP sid 52; JE .lever
+ 
+ RET
+
+ .loot_chest:;
+  SND rawcr LOL_B; CALL LOOT_ChestRandom; RET #@q_OTO_GHOST loot_count=6
+ .lever:; SND rawcr sid kf; CALL OTO2_Lever; RET
+ .go_down:
+  SND AStairsDown LVLN_OTO1 ENTPT_OTO1_FROM_OTO2; CALL UTIL_GoNoGo
+  RET
+ .go_up:
+  SND AStairsUp LVLN_OTO3 ENTPT_OTO3_FROM_OTO2; CALL UTIL_GoNoGo
+  RET
+ .rations_chest:
+  SND rawcr ITID_RATION; CALL LOOT_ChestItem; RET #@q_OTO_GHOST
+END
+
+PROC OTO2_Boot
+ # If the bridge is extended, make the necessary changes:
+ TEST GM_OTO2_BRIDGE_EXTENDED
+ JNZ .extend
+ RET
+ .extend:
+  CALL OTO2_ExtendBridge; RET
+END
+
+PROC OTO2_Walk
+ PARAM rawcr
+
+ SND 1 rawcr UTIL_Battle EID_SPIDER EID_SPIDER EID_SPIDER #@q_OTO_GHOST
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_SPIDER EID_SPIDER EID_FBUG #@q_OTO_GHOST
+ CALL TRIG_Check
+
+ # If the player is crossing the bridge and hasn't heard the voice
+ # yet, do it now.
+ CMP rawcr LOHI(218,104); JE .voice1
+ CMP rawcr LOHI(216,104); JE .voice2
+ RET
+
+ .voice1:
+  # If we already did the voice, don't do it again.
+  TEST GM_OTO2_VOICE_SPOKE
+  JNZ .ret
+  SND .msg_pre
+  SYS SYSC_ALERT
+  SND 0 .name .msg1
+  SYS SYSC_SPEAK
+  RET
+ 
+ .voice2:
+  # If we already did the voice, don't do it again.
+  TEST GM_OTO2_VOICE_SPOKE
+  JNZ .ret
+  OR GM_OTO2_VOICE_SPOKE
+  SND 0 .name .msg2
+  SYS SYSC_SPEAK
+  RET
+
+ .ret:
+  RET
+ 
+ .name:
+  DS Voice
+ .msg1:
+  DB 1
+  DS I can see you...
+ .msg2:
+  DB 1
+  DS Why do you disturb me?
+ .msg_pre:
+  DB 1
+  DS You hear a whisper...
+END
+
+# Pull lever that extends the bridge.
+PROC OTO2_Lever
+ PARAM rawcr sid kf
+ # If lever was already pulled, do nothing.
+ CMP kf 0; JNE .ret
+ # Mark that we extended the bridge.
+ OR GM_OTO2_BRIDGE_EXTENDED
+ # Extend the bridge.
+ CALL OTO2_ExtendBridge
+ # Mark lever as killed.
+ SND rawcr; SYS SYSC_KILL_TILE
+ # Tell the player what happened.
+ SND .msg; SYS SYSC_ALERT
+ RET
+.ret:
+ RET
+
+.msg:
+ DB 6
+ DS The mechanism whirls noisily.
+ DS The bridge over the flooded
+ DS room has been extended.
+ DS
+ DS The noise may have attracted
+ DS some attention...
+END
+
+PROC OTO2_ExtendBridge
+ # Extend the bridge:
+ SND LOHI(215,104) LOHI(1,0) 4
+ CALL UTIL_ExtendBridge
+END
+
+# ---------------------------------------------------------------
+# Old tower, level 3
+PROC OTO3_Interact
+ PARAM rawcr xz sid kf
+
+ # Go down to level 2?
+ CMP rawcr LOHI(239,104); JE .go_down
+ # Rations chest?
+ CMP rawcr LOHI(238,117); JE .rations_chest
+ # Loot chest?
+ CMP sid 40; JE .loot_chest
+ # Activate lever that opens gate?
+ CMP sid 52; JE .lever
+ # Go up to level 4?
+ CMP rawcr LOHI(226,117); JE .go_up
+
+ RET
+
+ .loot_chest:;
+  SND rawcr LOL_B; CALL LOOT_ChestRandom; RET #@q_OTO_GHOST loot_count=2
+ .lever:; SND rawcr kf; CALL OTO3_Lever; RET
+ .go_down:
+  SND AStairsDown LVLN_OTO2 ENTPT_OTO2_FROM_OTO3; CALL UTIL_GoNoGo
+  RET
+ .go_up:
+  SND AStairsUp LVLN_OTO4 ENTPT_OTO4_FROM_OTO3; CALL UTIL_GoNoGo
+  RET
+ .rations_chest:
+  SND rawcr ITID_RATION; CALL LOOT_ChestItem; RET #@q_OTO_GHOST
+END
+
+PROC OTO3_Lever
+ PARAM rawcr kf
+ # Lever already pulled?
+ CMP kf 0; JNE .ret
+ # Kill gate tile (which converts it into an open gate).
+ SND LOHI(228,104)
+ SYS SYSC_KILL_TILE
+ # Kill lever
+ SND rawcr; SYS SYSC_KILL_TILE
+ # Explain to player what happened.
+ SND .msg
+ SYS SYSC_ALERT
+.ret:
+ RET
+.msg:
+ DB 2
+ DS You pull the lever.
+ DS The gate is now open.
+END
+
+PROC OTO3_Walk
+ PARAM rawcr pdir
+ SND 1 rawcr UTIL_Battle EID_SPIDER EID_SPIDER EID_SPIDER EID_SPIDER #@q_OTO_GHOST
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_SPIDER EID_BSPIDR #@q_OTO_GHOST
+ CALL TRIG_Check
+END
+
+
+# ---------------------------------------------------------------
+# Old tower, level 4
+
+PROC OTO4_Interact
+ PARAM rawcr xz sid kf
+
+ # Go down?
+ CMP rawcr LOHI(224,127); JE .go_down
+ # Rations chest?
+ CMP rawcr LOHI(232,131); JE .rations_chest
+ # Loot chest?
+ CMP sid 40; JE .loot_chest
+ # Lever.
+ CMP sid 52; JE .lever
+ # Enter library (OTO5)?
+ CMP rawcr LOHI(210,127); JE .to_oto5
+
+ RET
+
+ .loot_chest:;
+  SND rawcr LOL_B; CALL LOOT_ChestRandom; RET #@q_OTO_GHOST loot_count=5
+ .go_down:
+  SND AStairsDown LVLN_OTO3 ENTPT_OTO3_FROM_OTO4; CALL UTIL_GoNoGo
+  RET
+ .to_oto5:
+  SND .msg LVLN_OTO5 ENTPT_OTO5; CALL UTIL_GoNoGo
+  RET
+ .lever:; SND rawcr kf; CALL OTO4_Lever; RET
+ .rations_chest:
+  SND rawcr ITID_RATION; CALL LOOT_ChestItem; RET #@q_OTO_GHOST
+ 
+ .title:; DS Library
+ .msg:
+  DB 1
+  DS Enter the Library?
+END
+
+PROC OTO4_Boot
+ TEST GM_OTO4_BRIDGE_EXTENDED
+ JNZ .extend
+ RET
+.extend:
+ CALL OTO4_ExtendBridge
+ RET
+END
+
+# Pull lever that extends center bridge.
+PROC OTO4_Lever
+ PARAM rawcr kf
+ # Lever already pulled?
+ CMP kf 0; JNE .ret
+ # Mark lever as pulled, extend bridge.
+ OR GM_OTO4_BRIDGE_EXTENDED
+ CALL OTO4_ExtendBridge
+ # Kill lever
+ SND rawcr; SYS SYSC_KILL_TILE
+ # Explain what happened.
+ SND .msg; SYS SYSC_ALERT
+.ret:
+ RET
+.msg:
+ DB 2
+ DS The center bridge
+ DS was extended.
+END
+
+PROC OTO4_ExtendBridge
+ # Extend the bridge:
+ SND LOHI(213,127) LOHI(1,0) 9
+ CALL UTIL_ExtendBridge
+END
+
+PROC OTO4_Walk
+ PARAM rawcr pdir
+ SND 1 rawcr UTIL_Battle EID_SPIDER EID_BUG EID_BSPIDR #@q_OTO_GHOST
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_SPIDER EID_SPIDER EID_BSPIDR #@q_OTO_GHOST
+ CALL TRIG_Check
+END
+
+
+# ---------------------------------------------------------------
+# Old tower, level 5
+
+# OTO5 Interact
+PROC OTO5_Interact
+ PARAM rawcr xz sid kf
+ VAR choice
+
+ # Spell book?
+ CMP rawcr LOHI(232,123); JE .spellbook
+ # Trying to leave?
+ CMP rawcr LOHI(232,119); JE .try_leave
+ # Loot chest?
+ CMP sid 40; JE .loot_chest
+ # Read the book?
+ CMP rawcr LOHI(232,133); JE .read_book
+ RET
+
+.loot_chest:
+ SND rawcr ITID_POTION_HEALING; CALL LOOT_ChestItem; RET
+
+.spellbook:
+ SND ZID_TEMPEST; CALL UTIL_ReadSpellbook #@q_OTO_GHOST
+ RET
+
+.try_leave:
+ SND .msg_cant_leave
+ SYS SYSC_ALERT
+ RET
+
+.read_book:
+ SND 0 0 .a_book; SYS SYSC_SPEAK
+ SND 0 0 .a_book2; SYS SYSC_SPEAK
+ SND 0 0 .a_book3; SYS SYSC_SPEAK
+ SND 0 .a_choices; SYS SYSC_CHOICE; REC choice
+ CMP choice 1; JE .ending
+ RET
+
+.ending:
+ SND 0 0 .a_ending; SYS SYSC_SPEAK
+ OR GM_C_OTO_GHOST
+ SND LVLN_WRLD ENTPT_WRLD_FROM_OTO1
+ SYS SYSC_CHANGE_LVL
+ RET
+
+.msg_cant_leave:
+ DB 2
+ DS The door is magically locked.
+ DS You can't leave.
+
+.a_book:
+ DB 3
+ DS Reading the book, you
+ DS discover the location of
+ DS the Red Crystal.
+
+.a_book2:
+ DB 3
+ DS It is hidden beneath
+ DS the Obelisk in Sand Haven,
+ DS a city in Desert Island.
+
+.a_book3:
+ DB 2
+ DS There are strange words
+ DS on the last page.
+
+.a_choices:
+ DB 2
+ DS Say the words aloud.
+ DS Close the book.
+
+.a_ending:
+ DB 5
+ DS When you utter the words,
+ DS the tower begins to 
+ DS collapse.
+ DS
+ DS You barely escape.
+END
+
+# OTO5 Walk
+PROC OTO5_Walk
+ PARAM rawcr
+ SND 1 rawcr OTO5_FinalBattle
+ CALL TRIG_Check
+END
+
+PROC OTO5_FinalBattle
+ SND 0 .title .msg
+ SYS SYSC_SPEAK
+
+ SET TGV_BATTLE_END_CB OTO5_PostFinalBattle
+ SND EID_SPIDER EID_SPIDER EID_BSPIDR EID_GHOST; SYS SYSC_BATTLE #@q_OTO_GHOST
+
+.ret:
+ RET
+
+.title:
+ DS Ghostly voice
+.msg:
+ DB 4
+ DS I warned you.
+ DS
+ DS You will not leave this
+ DS tower alive.
+
+END
+
+PROC OTO5_PostFinalBattle
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND 0 0 .a_narr2; SYS SYSC_SPEAK
+ # Get the yellow crystal.
+ SND ITID_CRYSTAL_YELLOW; SYS SYSC_GIVE
+ SND 5000; CALL REW_GiveQuestReward #@q_OTO_GHOST
+ # Don't flip GM_C_OTO_GHOST just yet -- wait until the
+ # player reads the book.
+ RET
+
+.a_narr:
+ DB 4
+ DS The ghost disappears in
+ DS a cloud of smoke. You feel
+ DS that a great evil has been
+ DS lifted from the world.
+
+.a_narr2:
+ DB 2
+ DS As the smoke clears, you
+ DS find the Yellow Crystal!
+END
+

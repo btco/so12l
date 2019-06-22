@@ -1,0 +1,138 @@
+# FOVI: Forest Village
+
+PROC FOVI_EnterFromWrld
+ # Ask the player if they want to enter.
+ SND .msg LVLN_FOVI ENTPT_FOVI; CALL UTIL_GoNoGo
+ RET 0
+
+.msg:
+ DB 1
+ DS Enter the village?
+END
+
+# Interaction proc
+EXPORT PROC FOVI_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr FOVI_Interactibles; CALL UTIL_CheckInteract
+END
+
+# Healer
+PROC FOVI_Healer
+ # Is any party member poisoned?
+ VAR chi paid
+ SND CEF_POISON; CALL CEF_GetCharWith; REC chi
+ CMP chi 0; JG .found
+ # No characters are poisoned.
+ SND 232 SHealer .a_no_poisoned; SYS SYSC_SPEAK
+ RET
+.found:
+ SND 232 SHealer .a_offer; SYS SYSC_SPEAK
+ SND .a_pay 20; SYS SYSC_PAY; REC paid
+ CMP paid 0; JE .ret
+ # Remove poison from all characters.
+ SND CEF_POISON; CALL CEF_ClearBitAll
+ SND 232 SHealer .a_thanks; SYS SYSC_SPEAK
+.ret:
+ RET
+.a_no_poisoned:
+ DB 2
+ DS If you get poisoned,
+ DS return here.
+.a_offer:
+ DB 4
+ DS You need immediate
+ DS treatment for poison.
+ DS I can cure you for a
+ DS small fee.
+.a_pay:
+ DB 1
+ DS Receive antidote?
+.a_thanks:
+ DB 2
+ DS You should be feeling a
+ DS bit better now!
+END
+
+# Leave.
+PROC FOVI_Leave
+ SND ALeaveTown LVLN_WRLD ENTPT_WRLD_FROM_FOVI
+ CALL UTIL_GoNoGo
+ RET
+END
+
+PROC FOVI_BraceletOwner
+ VAR count
+
+ # Already rewarded?
+ TEST GM_R_BRACELET; JNZ .already_rewarded
+ # Player has the bracelet?
+ SND ITID_GOLDEN_BRACELET; SYS SYSC_GET_ITEM_COUNT; REC count
+ CMP count 0; JG .reward
+ # State the quest.
+ OR GM_A_BRACELET
+ SND 232 SVillager .a_quest; SYS SYSC_SPEAK
+ RET
+
+.already_rewarded:
+ SND 232 SVillager .a_thanks_again; SYS SYSC_SPEAK
+ RET
+
+.reward:
+ SND 232 SVillager .a_reward; SYS SYSC_SPEAK
+ SND 3000; CALL REW_GiveQuestReward #@q_BRACELET
+ SND ITID_GOLDEN_BRACELET; SYS SYSC_REMOVE_ITEM
+ OR GM_R_BRACELET
+ RET
+
+.a_quest:
+ DB 2
+ DS If you find my golden
+ DS bracelet, return it to me.
+
+.a_thanks_again:
+ DB 2
+ DS Thanks again for returning
+ DS my bracelet!
+
+.a_reward:
+ DB 4
+ DS Oh! You found my bracelet!
+ DS
+ DS Thank you so much for
+ DS returning it!
+END
+
+PROC FOVI_Inn
+ SND 255 .a_welcome 15; CALL UTIL_Inn
+ RET
+
+.a_welcome:
+ DB 1
+ DS Welcome to the Forest Inn.
+END
+
+PROC FOVI_ArmorShop
+ SND *; CALL SHOP_ArmorShop
+ {
+  DB 6
+  DB ITID_LEATHER_ARMOR #@wares_FOVI
+  DB ITID_BRIGANDINE #@wares_FOVI
+  DB ITID_WOODEN_SHIELD #@wares_FOVI
+  DB ITID_IRON_SHIELD #@wares_FOVI
+  DB ITID_IRON_BOOTS #@wares_FOVI
+  DB ITID_LEATHER_HELM #@wares_FOVI
+ }
+END
+
+# FOVI INTERACTIBLES LIST
+# (position, title, proc)
+FOVI_Interactibles:
+ DW LOHI(205,49) FOVI_Leave
+ DW LOHI(208,44) FOVI_Healer
+ DW LOHI(206,44) FOVI_Inn
+ DW LOHI(202,47) SHOP_GeneralStore
+ DW LOHI(202,45) FOVI_BraceletOwner
+ DW LOHI(208,47) FOVI_ArmorShop
+ DW 0
+

@@ -1,0 +1,35 @@
+# Scroll usage
+
+PROC SCROLL_Use
+ PARAM itid idx chi
+ # note: chi>=1 means this is being used in combat by the given
+ # character.
+ VAR zid st did rnd
+ # Get the scroll's state byte.
+ SND idx; SYS SYSC_GET_INV; REC itid st
+ # Consume scroll.
+ SND itid idx; SYS SYSC_REMOVE_ITEM
+ # Cursed effect?
+ RND rnd 0 100
+ CMP rnd 70; JL .no_curse
+ TEST st ITSF_CURSED; JNZ .cursed
+.no_curse:
+
+ # A scroll casts a spell whose ZID is offset from its itid
+ # by ITID_WAND_FIRST_MINUS_1, so subtract that from the itid
+ # to figure out the ZID
+ SET zid itid
+ SUB zid ITID_SCROLL_FIRST_MINUS_1
+ # Now cast the spell.
+ # Note that we use chi == 0 to mean that nobody is casting the
+ # spell, as it is being cast by a scroll.
+ SND 0 zid; SYS SYSC_CAST_SPELL; REC did
+ # If the spell was cast, the scroll vanishes.
+ CMPZ did; JE .failed
+ RET 1
+.failed:
+ RET 0
+.cursed:
+ SND itid idx chi; CALL CURSED_Effect
+END
+

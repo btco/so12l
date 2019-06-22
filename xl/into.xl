@@ -1,0 +1,107 @@
+# Town of Indigo (INTO), after town is revived.
+
+# INTO INTERACTIBLES LIST
+# (position, title, proc)
+INTO_Interactibles:
+ DW LOHI(202,0) INTO_Leave
+ DW LOHI(207,3) INTO_FruitShop
+ DW LOHI(207,6) INTO_LearnAcidRes
+ DW LOHI(203,5) INTO_Hut
+ DW LOHI(197,4) INTO_Blacksmith
+ DW LOHI(197,8) INTO_ArmorShop
+ DW 0
+
+EXPORT PROC INTO_Boot
+ VAR has
+ SND ITID_STATUETTE; SYS SYSC_GET_ITEM_COUNT; REC has
+ CMP has 0; CG INTO_Reward
+END
+
+EXPORT PROC INTO_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr INTO_Interactibles; CALL UTIL_CheckInteract
+ RET
+END
+
+EXPORT PROC INTO_Walk
+ PARAM rawcr
+
+END
+
+PROC INTO_Reward
+ SND 7000; CALL REW_GiveQuestReward #@q_INTO
+ # Mark quest as complete.
+ OR GM_C_INTO
+ # Remove statuette from inventory, if it's there.
+ SND ITID_STATUETTE; SYS SYSC_REMOVE_ITEM
+END
+
+PROC INTO_Leave
+ SND ALeaveTown LVLN_WRLD ENTPT_WRLD_FROM_INTO
+ CALL UTIL_GoNoGo
+ RET
+END
+
+# Fruit shop
+PROC INTO_FruitShop
+ SND 252 SFruitShop .msg .wares 100 ITK_FOOD
+ CALL UTIL_ShopUi
+ RET
+.msg:
+ DB 2
+ DS We sell Indigo Blueberries.
+ DS They are delicious.
+.wares:
+ DB 1
+ DB ITID_BLUEBERRY
+END
+
+PROC INTO_LearnAcidRes
+ SND ZID_ACIDRES .a_desc 0 0
+ CALL UTIL_TempleLearnSpell
+ RET
+.a_desc:
+ DB 6
+ DS I teach the spell of
+ DS Acid Resistance.
+ DS
+ DS With this spell, you can
+ DS walk over the purple acid
+ DS swamp areas.
+END
+
+PROC INTO_Hut
+ SND AHutEmpty; SYS SYSC_ALERT
+END
+
+PROC INTO_Blacksmith
+ SND *; CALL SHOP_Blacksmith
+ {
+  DB 7
+  DB ITID_BATTLE_AXE #@wares_INTO
+  DB ITID_TWO_HANDED_SWORD #@wares_INTO
+  DB ITID_AXE #@wares_INTO
+  DB ITID_LONG_SWORD #@wares_INTO
+  DB ITID_SHORT_SWORD #@wares_INTO
+  DB ITID_LONG_BOW #@wares_INTO
+  DB ITID_CROSSBOW #@wares_INTO
+ }
+END
+
+PROC INTO_ArmorShop
+ SND *; CALL SHOP_ArmorShop
+ {
+  DB 9
+  DB ITID_SPLINTED_ARMOR #@wares_INTO
+  DB ITID_CHAIN_ARMOR #@wares_INTO
+  DB ITID_RING_ARMOR #@wares_INTO
+  DB ITID_SCALE_ARMOR #@wares_INTO
+  DB ITID_IRON_SHIELD #@wares_INTO
+  DB ITID_STEEL_SHIELD #@wares_INTO
+  DB ITID_IRON_BOOTS #@wares_INTO
+  DB ITID_STEEL_BOOTS #@wares_INTO
+  DB ITID_STEEL_HELM #@wares_INTO
+ }
+END
+

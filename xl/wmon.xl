@@ -1,0 +1,126 @@
+# Wandering monster proc.
+
+DEFINE WMON_TRIGGER_SEARCH_DIST 3
+
+# Returns 1 if battle started, 0 if not.
+PROC WMON_Step
+ PARAM rawcr
+ VAR trig_no trig_cr rec
+
+ # Is there a trigger nearby?
+ CALL WMON_FindTriggerNearby; REC trig_no trig_cr
+ CMP trig_no 0; JE .ret
+ # Found trigger.
+ SND trig_cr trig_no; CALL WMON_MaybeSpawn; REC rec
+ RET rec
+.ret:
+ RET 0
+END
+
+# Returns 1 if combat started, 0 if not.
+PROC WMON_MaybeSpawn
+ PARAM trig_cr trig_no
+ VAR rec
+
+ # Look up the wandering monster table based on
+ # level page to which the trigger belongs.
+ # The level page is the big 30x17 chunk that we are on.
+ VAR page_c page_r ptr r c entry_ptr
+ SND trig_cr; CALL UTIL_WordToBytes; REC page_c page_r
+ DIV page_c 30; DIV page_r 17
+ # Look this up in WMON_Table
+ SET ptr WMON_Table
+.loop:
+ # Read 4 bytes into c, r, entry_ptr.
+ REAB c ptr;         ADD ptr 1
+ REAB r ptr;         ADD ptr 1
+ REAW entry_ptr ptr; ADD ptr 2
+ # Is it the end-of-table marker? If so, end.
+ CMP c 255; JE .not_found
+ # Is it the entry we are looking for? If not, try the next one.
+ CMP c page_c; JNE .loop
+ CMP r page_r; JNE .loop
+ # It is the one we are looking for.
+ # Spawn monsters.
+ SND entry_ptr trig_no; CALL WMON_Spawn; REC rec
+ RET rec
+ 
+.not_found:
+ # Current area does not have wandering monsters.
+ RET 0
+END
+
+# Spawns wandering monsters. ptr is the WMON_Table
+# entry to spawn from.
+PROC WMON_Spawn
+ PARAM ptr trig_no
+ VAR i vst e1 e2 e3 e4 e5 e6 nbat
+ # Read visual style#
+ REAB vst ptr; ADD ptr 1
+ # Read count of battles
+ REAB nbat ptr; ADD ptr 1
+ # If trigger# > nbat, we're out of bounds.
+ CMP trig_no nbat; JG .ret
+ # Now advance pointer to point to the right battle row.
+ # Each battle row is 6 EIDs (bytes).
+ SET i trig_no; SUB i 1; MUL i 6
+ ADD ptr i
+ # ptr now points to the 6 EIDs.
+ REAB e1 ptr; ADD ptr 1
+ REAB e2 ptr; ADD ptr 1
+ REAB e3 ptr; ADD ptr 1
+ REAB e4 ptr; ADD ptr 1
+ REAB e5 ptr; ADD ptr 1
+ REAB e6 ptr; ADD ptr 1
+ # Start battle.
+ SND e1 e2 e3 e4 e5 e6 vst
+ SYS SYSC_BATTLE
+ RET 1
+.ret:
+ RET 0
+END
+
+# Searches around player for a trigger marker.
+# If found, kills the trigger and returns the trigger# and rawcr.
+# If not found, returns (0, 0)
+PROC WMON_FindTriggerNearby
+ VAR rawcr c0 r0 c1 r1 r c t kf
+ SND PINFO_XZDIR; SYS SYSC_PINFO; REC rawcr
+ SND rawcr; CALL UTIL_WordToBytes; REC c0 r0
+ SET c1 c0; SET r1 r0
+ SUB c0 WMON_TRIGGER_SEARCH_DIST; SUB r0 WMON_TRIGGER_SEARCH_DIST
+ ADD c1 WMON_TRIGGER_SEARCH_DIST; ADD r1 WMON_TRIGGER_SEARCH_DIST
+ SET r r0
+.loop_r:
+ CMP r r1; JG .end_r
+ SET c c0
+.loop_c:
+ CMP c c1; JG .end_c
+ SND c r; CALL UTIL_BytesToWord; REC rawcr
+ # What's the SID of this tile?
+ SND rawcr TINFO_SID; SYS SYSC_TINFO; REC t
+ # Subtract 127 so that 1 = trigger #1, 2 = trigger #2, etc.
+ SUB t 127
+ # If that resulted in something outside the range 1-6, not a trigger.
+ CMP t 0; JLE .not_trigger
+ CMP t 6; JG .not_trigger
+ # Found trigger (t is the triger number, 1 - 6).
+ # Is it killed?
+ SND rawcr TINFO_IS_KILLED; SYS SYSC_TINFO; REC kf
+ CMP kf 0; JNE .not_trigger
+ # It's not killed, so we found a valid trigger.
+ # Let's kill it.
+ SND rawcr; SYS SYSC_KILL_TILE
+ # And return it.
+ RET t rawcr
+.not_trigger:
+ ADD c 1
+ JMP .loop_c
+.end_c:
+ ADD r 1
+ JMP .loop_r
+.end_r:
+ # No trigger found.
+ RET 0 0
+END
+

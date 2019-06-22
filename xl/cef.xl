@@ -1,0 +1,180 @@
+# CHARACTER EFFECTS
+
+# Returns the character effects that are current active for
+# the given character.
+PROC CEF_Get
+ PARAM chi
+ VAR i
+ CMP chi 1; JE .char1
+ CMP chi 2; JE .char2
+ CMP chi 3; JE .char3
+ JMP .char4
+ .char1:; RET GV_CEF_CHAR1
+ .char2:; RET GV_CEF_CHAR2
+ .char3:; RET GV_CEF_CHAR3
+ .char4:; RET GV_CEF_CHAR4
+END
+
+# Sets a bit in the character effects that are active for the given 
+# character.
+PROC CEF_SetBit
+ PARAM chi mask
+ CMP chi 1; JE .char1
+ CMP chi 2; JE .char2
+ CMP chi 3; JE .char3
+ JMP .char4
+ .char1:; OR GV_CEF_CHAR1 mask; RET
+ .char2:; OR GV_CEF_CHAR2 mask; RET
+ .char3:; OR GV_CEF_CHAR3 mask; RET
+ .char4:; OR GV_CEF_CHAR4 mask; RET
+END
+
+# Sets the given bit on all characters.
+PROC CEF_SetBitAll
+ PARAM mask
+ OR GV_CEF_CHAR1 mask
+ OR GV_CEF_CHAR2 mask
+ OR GV_CEF_CHAR3 mask
+ OR GV_CEF_CHAR4 mask
+END
+
+# Clears a bit in the character effects that are active for the given 
+# character.
+PROC CEF_ClearBit
+ PARAM chi mask
+ CMP chi 1; JE .char1
+ CMP chi 2; JE .char2
+ CMP chi 3; JE .char3
+ JMP .char4
+ .char1:; ANDC GV_CEF_CHAR1 mask; RET
+ .char2:; ANDC GV_CEF_CHAR2 mask; RET
+ .char3:; ANDC GV_CEF_CHAR3 mask; RET
+ .char4:; ANDC GV_CEF_CHAR4 mask; RET
+END
+
+# Clears the given bit on all characters.
+PROC CEF_ClearBitAll
+ PARAM mask
+ ANDC GV_CEF_CHAR1 mask
+ ANDC GV_CEF_CHAR2 mask
+ ANDC GV_CEF_CHAR3 mask
+ ANDC GV_CEF_CHAR4 mask
+END
+
+# Draws character effect indicators.
+PROC CEF_DrawIndicators
+ VAR nchars i cef x y
+ # Get number of characters in party.
+ SND PINFO_NUM_CHARS; SYS SYSC_PINFO; REC nchars
+ # For i = 1 .. nchars do:
+ SET i 1
+.loop:
+ CMP i nchars; JG .end_loop
+ # Get character effects for character i
+ SND i; CALL CEF_Get; REC cef
+ # Poisoned?
+ TEST cef CEF_POISON; SND i C_RED SCondPoison 0; CNZ CEF_DrawIndicator 
+ # Alert/Asleep?
+ TEST cef CEF_ALERT; SND i C_YELLOW SCondAlert 1; CNZ CEF_DrawIndicator 
+ TEST cef CEF_ASLEEP; SND i C_YELLOW SCondAsleep 1; CNZ CEF_DrawIndicator 
+ # Frozen?
+ TEST cef CEF_FROZEN; SND i C_BBLUE SCondFrozen 2; CNZ CEF_DrawIndicator 
+ # Strong?
+ TEST cef CEF_STRONG; SND i C_LGREEN SCondStrong 3; CNZ CEF_DrawIndicator 
+ # Invisible?
+ TEST cef CEF_INVIS; SND i C_LGREEN SCondInvis 4; CNZ CEF_DrawIndicator 
+.nothing:
+ # i++, loop.
+ ADD i 1; JMP .loop
+.end_loop:
+ RET
+END
+
+DEFINE CEF_TICKS_PER_EFF 30
+DEFINE CEF_EFF_COUNT 5
+DEFINE CEF_EFF_COUNT_PLUS_1 6
+
+# Draws an effect indicator over the character's box.
+#   chi: which character index
+#   color: effect color
+#   text: the text to show
+#   eff_i: the index of this effect (0 .. CEF_EFF_COUNT - 1)
+PROC CEF_DrawIndicator
+ PARAM chi color text eff_i
+ VAR x y w h i
+ # Are we supposed to draw this effect on this frame?
+ SET i TGV_CLK
+ DIV i CEF_TICKS_PER_EFF
+ MOD i CEF_EFF_COUNT_PLUS_1
+ CMP i eff_i
+ JNE .ret
+ # Figure out the x and y of the character's box.
+ SND chi; CALL UTIL_GetCharBoxXY; REC x y
+ SET w CHAR_BOX_W
+ SET h CHAR_BOX_H
+ # Adjust box.
+ ADD x 2; ADD y 10
+ SUB w 4; SUB h 13
+ # Fill the box.
+ SND x y w h 0; SYS SYSC_RECT
+ # Print text.
+ ADD x 2; ADD y 3
+ SND x y text color; SYS SYSC_PRINT
+.ret:
+END
+
+# Determines if any of the characters in the party has the given
+# condition, and returns its index, or 0 if not found.
+PROC CEF_GetCharWith
+ PARAM mask
+ VAR i n cef
+ # n <- num characters in party.
+ SND PINFO_NUM_CHARS; SYS SYSC_PINFO; REC n
+ # For i = 1 .. n
+ SET i 1; .loop:; CMP i n; JG .end_loop
+  # Get CEF byte for this character.
+  SND i cef; CALL CEF_Get; REC cef
+  # Check against mask.
+  TEST cef mask; JNZ .found
+ ADD i 1; JMP .loop; .end_loop:
+ # Not found
+ RET 0
+.found:
+ # Found
+ RET i
+END
+
+# Called at every step taken, to apply the effects of conditions.
+PROC CEF_Walk
+ VAR n i cef
+ # n <- num characters in party.
+ SND PINFO_NUM_CHARS; SYS SYSC_PINFO; REC n
+ # For i = 1 .. nchars do:
+ SET i 1
+.loop:
+ CMP i n; JG .end_loop
+ # Get character effects for character i
+ SND i; CALL CEF_Get; REC cef
+ # Poisoned?
+ TEST cef CEF_POISON; SND i; CNZ CEF_ProcessPoison
+ # i++, loop.
+ ADD i 1; JMP .loop
+.end_loop:
+END
+
+PROC CEF_ProcessPoison
+ PARAM chi hp
+ # Poison drains 1 hp every 5 steps.
+ VAR mod
+ SET mod TGV_STEP_CLK; MOD mod 5
+ CMP mod 0; JNZ .ret
+ # Get the current HP. 
+ SND chi CINFO_HP; SYS SYSC_CINFO; REC hp
+ # If already 0, do nothing.
+ CMP hp 0; JLE .ret
+ # Subtract one.
+ SUB hp 1
+ SND chi CINFO_HP hp; SYS SYSC_SET_CINFO
+.ret:
+END
+

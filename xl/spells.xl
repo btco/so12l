@@ -1,0 +1,279 @@
+# Spells database
+
+EXPORT SpellsDb:
+
+# -- PALADIN SPELLS ----------------------------------------------
+DB XL_SPELL_HDR; DB ZID_HEAL #@paladinSpell
+  DS Heal                 # Spell name
+  DB 5                    # SP cost @cost
+  DW SPELL_Heal           # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_BATTLE,ZF_OK_NON_BATTLE)
+
+DB XL_SPELL_HDR; DB ZID_LIGHT #@paladinSpell
+  DS Light                # Spell name
+  DB 3                    # SP cost @cost
+  DW SPELL_Light          # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_NON_BATTLE)
+
+DB XL_SPELL_HDR; DB ZID_PROTECT #@paladinSpell
+  DS Protect              # Spell name
+  DB 5                    # SP cost @cost
+  DW SPELL_Protect        # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_BATTLE)
+
+DB XL_SPELL_HDR; DB ZID_STUN #@paladinSpell
+  DS Stun                 # Spell name
+  DB 4                    # SP cost @cost
+  DW SPELL_Stun           # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_BATTLE)
+
+DB XL_SPELL_HDR; DB ZID_ACIDRES #@paladinSpell
+  DS Acid Resistance      # Spell name
+  DB 5                    # SP cost @cost
+  DW SPELL_AcidRes        # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_NON_BATTLE)
+
+DB XL_SPELL_HDR; DB ZID_AWAKEN #@paladinSpell
+  DS Awaken               # Spell name
+  DB 5                    # SP cost @cost
+  DW SPELL_Awaken         # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_BATTLE,ZF_OK_NON_BATTLE)
+
+DB XL_SPELL_HDR; DB ZID_CURE_POISON #@paladinSpell
+  DS Cure Poison          # Spell name
+  DB 10                   # SP cost @cost
+  DW SPELL_CurePoison     # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_BATTLE,ZF_OK_NON_BATTLE)
+
+DB XL_SPELL_HDR; DB ZID_STRENGTHEN  #@paladinSpell
+  DS Strengthen           # Spell name
+  DB 15                   # SP cost @cost
+  DW SPELL_Strengthen     # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_BATTLE,ZF_OK_NON_BATTLE)
+
+# -- WIZARD SPELLS ------------------------------------------------
+DB XL_SPELL_HDR; DB ZID_BURN #@wizardSpell
+  DS Burn                 # Spell name
+  DB 3                    # SP cost @cost
+  DW SPELL_Burn           # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_BATTLE)
+
+DB XL_SPELL_HDR; DB ZID_FORCE_BEAD #@wizardSpell
+  DS Force Bead           # Spell name
+  DB 4                    # SP cost @cost
+  DW SPELL_ForceBead      # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_BATTLE)
+
+DB XL_SPELL_HDR; DB ZID_TEMPEST #@wizardSpell
+  DS Tempest              # Spell name
+  DB 15                   # SP cost @cost
+  DW SPELL_Tempest        # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_BATTLE)
+
+DB XL_SPELL_HDR; DB ZID_LIGHTNING #@wizardSpell
+  DS Lightning blast      # Spell name
+  DB 30                   # SP cost @cost
+  DW SPELL_Lightning      # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_BATTLE)
+
+DB XL_SPELL_HDR; DB ZID_PUSH #@wizardSpell
+  DS Push enemy           # Spell name
+  DB 8                    # SP cost @cost
+  DW SPELL_Push           # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_BATTLE)
+
+DB XL_SPELL_HDR; DB ZID_INVIS #@wizardSpell
+  DS Invisibility         # Spell name
+  DB 18                   # SP cost @cost
+  DW SPELL_Invis          # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_BATTLE,ZF_OK_NON_BATTLE)
+
+DB XL_SPELL_HDR; DB ZID_IDENTIFY #@wizardSpell
+  DS Identify             # Spell name
+  DB 20                   # SP cost @cost
+  DW SPELL_Identify       # Spell proc
+  # Flags:
+  DB BOR(ZF_OK_NON_BATTLE)
+
+
+# -- END OF DB --
+DB 0
+
+# -- SPELL PROCS --------------------------------------------------
+
+PROC SPELL_Heal
+ PARAM chi
+ VAR whom level hp
+ # Heal whom?
+ SND 0 .msg
+ SYS SYSC_ASK_WHO
+ REC whom
+ # Canceled?
+ CMP whom 0; JE .fail
+ # What's the level of the caster?
+ SND PINFO_LEVEL
+ SYS SYSC_PINFO
+ REC level
+ # Amount to heal is 5 + 7*L.
+ SET hp level
+ MUL hp 7
+ ADD hp 5
+ # Heal the indicated character.
+ SND whom hp 0
+ SYS SYSC_HEAL
+ # Success.
+ RET 1
+.fail:
+ RET 0
+.msg:
+ DB 1
+ DS Heal whom?
+END
+
+PROC SPELL_Burn
+ PARAM chi
+ # Request melee attack with that amount of damage.
+ SND BAT_AK_MELEE 40 .narr 228 BOR(BAT_AF_SPELL,BAT_AF_FORCE_HIT)
+ SYS SYSC_BATTLE_ATTACK
+ # Success.
+ RET 1
+.narr:
+ DS casts Burn
+END
+
+PROC SPELL_Light
+ PARAM chi
+ SET GV_PEF_LIGHT 255
+ RET 1
+END
+
+PROC SPELL_Protect
+ # Enable the GM_PEF_PROTECT flag until the end of the battle.
+ OR TGM_PEF_PROTECT 
+ # VFX
+ SND 0 .s_protect C_LGREEN SFX_POWERUP; SYS SYSC_BLINK
+ RET 1
+.s_protect:
+ DS +5 Defense
+END
+
+PROC SPELL_AcidRes
+ OR GM_PEF_ACIDRES
+ SND .a_expl; SYS SYSC_ALERT
+ RET 1
+.a_expl:
+ DB 6
+ DS You are now resistant to
+ DS acid damage, including
+ DS purple acid swamp areas.
+ DS
+ DS The effect wears off when
+ DS you rest!
+END
+
+PROC SPELL_Stun
+ SND BAT_AK_RANGED 1 .narr 233 BOR(BAT_AF_SPELL,BAT_AF_FORCE_HIT,BAT_AF_STUN)
+ SYS SYSC_BATTLE_ATTACK
+ RET 1
+.narr:
+ DS casts Stun
+END
+
+PROC SPELL_ForceBead
+ PARAM chi
+ SND BAT_AK_RANGED 20 .narr 222 BOR(BAT_AF_SPELL,BAT_AF_FORCE_HIT)
+ SYS SYSC_BATTLE_ATTACK
+ # Success.
+ RET 1
+.narr:
+ DS casts Force Bead
+END
+
+PROC SPELL_Tempest
+ PARAM chi
+ # Request area attack with that amount of damage.
+ SND BAT_AK_AREA 40 .narr 219 BOR(BAT_AF_SPELL,BAT_AF_FORCE_HIT)
+ SYS SYSC_BATTLE_ATTACK
+ # Success.
+ RET 1
+.narr:
+ DS casts Tempest
+END
+
+PROC SPELL_Lightning
+ PARAM chi
+ # Request ranged attack with that amount of damage.
+ SND BAT_AK_RANGED 65 .narr 217 BOR(BAT_AF_SPELL,BAT_AF_FORCE_HIT)
+ SYS SYSC_BATTLE_ATTACK
+ # Success.
+ RET 1
+.narr:
+ DS casts Lightning Blast
+END
+
+PROC SPELL_Push
+ PARAM chi
+ SND BAT_AK_RANGED 1 .narr 222 BOR(BAT_AF_SPELL,BAT_AF_FORCE_HIT,BAT_AF_PUSH)
+ SYS SYSC_BATTLE_ATTACK
+ # Success.
+ RET 1
+.narr:
+ DS casts Push
+END
+
+PROC SPELL_Invis
+ PARAM chi
+ SND chi CEF_INVIS; CALL SPELL_SetOrClearCEF
+END
+
+PROC SPELL_Awaken
+ PARAM chi
+ SND chi CEF_ALERT CEF_ASLEEP; CALL SPELL_SetOrClearCEF
+END
+
+PROC SPELL_CurePoison
+ PARAM chi
+ SND chi 0 CEF_POISON; CALL SPELL_SetOrClearCEF
+END
+
+PROC SPELL_Strengthen
+ PARAM chi
+ SND chi CEF_STRONG; CALL SPELL_SetOrClearCEF
+END
+
+PROC SPELL_Identify
+ PARAM chi
+ VAR result
+ SND 0; CALL IDENT_Launch; REC result
+ RET result
+END
+
+PROC SPELL_SetOrClearCEF
+ PARAM chi cef_mask_set cef_mask_clear
+ VAR whom
+ # Cast on whom?
+ # (inactive but alive characters can be targeted too)
+ SND 0 ACastOnWhom CHD_F_CANCELABLE WHOD_INACTIVE_ALIVE; SYS SYSC_ASK_WHO; REC whom
+ # Canceled?
+ CMP whom 0; JE .fail
+ SND whom cef_mask_clear; CALL CEF_ClearBit
+ SND whom cef_mask_set; CALL CEF_SetBit
+ RET 1
+.fail:
+ RET 0
+END
+

@@ -1,0 +1,146 @@
+-- RANGED COMBAT
+
+-- Fires player projectiles forward from the player's current tile.
+-- Projectiles will hit an enemy in that direction, if in range.
+-- This also takes care of playing the animation.
+function RC_Fire()
+ -- Figure out how many projectiles to shoot out.
+ local np=0
+ for _,c in ipairs(PA) do np=c.eq[ITK_RWEAP] and np+1 or np end
+ if np<1 then return 0 end
+ SFX_Play(SFX_SHOOT)
+ -- Figure out what entity we will hit.
+ local x,z=P.x,P.z
+ local targ=nil
+ for r=1,PLAYER_FIRE_RANGE do
+  -- Advance 1 tile.
+  x,z=ApplyDir(P.dir,x,z)
+  -- Are there enemies on this tile?
+  local e=E_GetEntsOnTile(x,z)
+  if #e>0 then
+   -- Hit the first enemy on this tile.
+   targ=e[1]
+   -- Resolve the attack.
+   local netd=GetPlrRangedAttackNetDmg(targ)
+   -- Enqueue projectile animation.
+   StartPlayerFireAnim(np,r)
+   -- Enqueue damage splat effect.
+   A_Enq(ActPlrRangedAttackSplat,{netd=netd})
+   -- After the animation plays, commit the damage.
+   A_Enq(ActCompletePlrRangedAttack,{targ=targ,netd=netd})
+   return np
+  end
+ end
+ -- No target found, so just play the animation with maximum range,
+ -- with no effect.
+ StartPlayerFireAnim(np,PLAYER_FIRE_RANGE)
+ return np
+end
+
+--END OF API-------------------------------------------------------
+-------------------------------------------------------------------
+
+#define PLAYER_FIRE_RANGE 5
+
+#define ARROW_SPR_SIZE 0.5
+#define ARROW_SPR_TID 1224
+
+-- Arrow speed in units per tick.
+#define ARROW_SPEED 0.2
+
+-- Y coordinate of arrow sprites.
+#define ARROW_Y 0.3
+
+-- Arrow sprite displacements, for each possible # of sprites.
+#id ARROW_SPR_DISPL
+ARROW_SPR_DISPL={
+ -- For 1 sprite, use center.
+ {0},
+ -- For 2 sprites:
+ {-0.25,0.25},
+ -- For 3 sprites:
+ {-0.33,0,0.33}
+}
+
+-- Starts the player projectile shoot animation.
+--  np: number of projectiles to shoot.
+--  r: range that the projectile will fly, in tiles.
+function StartPlayerFireAnim(np,r)
+ local s={hs={}}
+ -- Create sprite for each projectile.
+ for i=1,np do
+  local isNS=(P.dir==DIR_N or P.dir==DIR_S)
+  -- If facing North/South, spread the sprites along X axis so
+  -- they are side by side; if East/West, spread long Z axis.
+  local fx,fz=BoolToNum(isNS),BoolToNum(not isNS)
+  local d=ARROW_SPR_DISPL[min(np,#ARROW_SPR_DISPL)][i]
+  local h=R_AddSprite(P.x+0.5+fx*d,ARROW_Y,P.z+0.5+fz*d,
+    ARROW_SPR_SIZE,ARROW_SPR_TID)
+  insert(s.hs,h)
+ end
+ -- Assuming an arrow speed of 1 tile/second.
+ s.dx,s.dz=ApplyDir(P.dir,0,0)
+ s.dx,s.dz=s.dx*ARROW_SPEED,s.dz*ARROW_SPEED
+ s.dur=r/ARROW_SPEED
+ A_Enq(ActProjectileAnim,s)
+end
+
+-- Action for the projectile animation. s:
+--   hs: sprite handles that represent the projectiles.
+--   dx,dz: how much to move the sprites by, at each tick.
+--   dur: duration of animation in ticks.
+function ActProjectileAnim(s)
+ s.dur=s.dur-1
+ for _,h in ipairs(s.hs) do
+  local x,y,z=R_SprGetPos(h)
+  if s.dur<1 then
+   R_Del(h)
+  else
+   R_SprMove(h,x+s.dx,y,z+s.dz)
+  end
+ end
+ return s.dur<1
+end
+
+-- Resolves the player's ranged attack against the given target.
+-- Returns the net damage to be taken by the target.
+function GetPlrRangedAttackNetDmg(targ)
+ local dr=targ.dmgr or {}
+ -- Calculate net damage inflicted.
+ local netd={}
+ for _,c in ipairs(PA) do
+  local it=c.eq[ITK_RWEAP]
+  if it then
+   local itd=IT_LookUp(it.itid)
+   assert(itd.dmg)
+   netd=DmgAdd(netd,DmgCalcNet(DmgRand(itd.dmg),dr))
+  end
+ end
+ return netd
+end
+
+-- Action that renders the "damage splat" for the ranged attack. s:
+--  netd: the net damage (DamageDef)
+function ActPlrRangedAttackSplat(s)
+ RendDmgSplat(VP_CX,VP_CY,s.netd)
+ return s.clk>30
+end
+
+-- Action that completes the result of a ranged attack. s:
+--  targ: the target entity.
+--  netd: the net damage to apply.
+function ActCompletePlrRangedAttack(s)
+ assert(s.targ and s.netd)
+ local dr=s.targ.dmgr or {}
+ -- Apply damage to entity.
+ s.targ.hp=s.targ.hp-DmgTot(s.netd)
+ if s.targ.hp<1 then
+  -- Entity died.
+  E_Kill(s.targ)
+  SFX_Play(SFX_KILL)
+ else
+  SFX_Play(SFX_HIT)
+ end
+ return TRUE
+end
+

@@ -1,0 +1,135 @@
+# WRLD region: THE MARSHES (MA)
+# The swampy areas north of Riverside.
+
+# Interactibles list
+WRLD_MA_Interactibles:
+ # Hut that tells story of King Vahn.
+ DW LOHI(51,48) WRLD_MA_StoryHut
+ # Hut that gives the clue about cemetery.
+ DW LOHI(39,43) WRLD_MA_HintHut
+ # Wizard shop.
+ DW LOHI(58,45) WRLD_MA_WizardShop
+ # North shore inn.
+ DW LOHI(53,14) WRLD_MA_NorthInn
+ # Entrance to NOKE
+ DW LOHI(34,23) NOKE_EnterFromWrld
+ # Scroll shop
+ DW LOHI(47,20) SHOP_ScrollShop
+ # Altar that teaches ZID_CURE_POISON
+ DW LOHI(47,27) WRLD_MA_Altar
+ # Cartographer's hut
+ DW LOHI(44,42) WRLD_MA_Cartographer
+ # -------- End of table marker --------
+ DW 0
+
+PROC WRLD_MA_Walk
+ PARAM rawcr pdir
+END
+
+PROC WRLD_MA_Grave1
+ SND EID_UGUARD EID_UGUARD EID_UGUARD EID_UGUARD
+ SYS SYSC_BATTLE
+END
+
+PROC WRLD_MA_Grave2
+ SND EID_UGUARD EID_UGUARD EID_UMAGE
+ SYS SYSC_BATTLE
+END
+
+PROC WRLD_MA_StoryHut
+ VAR choice
+ SND 253 SVillager .a_offer; SYS SYSC_SPEAK
+ SND 0 ChoiceNoYes; SYS SYSC_CHOICE; REC choice
+ CMP choice 2; JE .yes
+ RET
+.yes:
+ SND 253 SVillager .a_story1; SYS SYSC_SPEAK
+ SND 253 SVillager .a_story2; SYS SYSC_SPEAK
+ SND 253 SVillager .a_story3; SYS SYSC_SPEAK
+ SND 253 SVillager .a_story4; SYS SYSC_SPEAK
+ RET
+.a_offer:
+ DT Do you wish to hear the
+ .. legend of King Vahn?
+.a_story1:
+ DT A thousand years ago, King
+ .. Vahn sold his realm to the
+ .. Sorcerer King in return
+ .. for power.
+.a_story2:
+ DT The part of his realm that
+ .. he sold became this toxic
+ .. swamp north of here.
+.a_story3:
+ DT He repented, and went on
+ .. a quest to destroy the
+ .. Sorcerer King. He died,
+ .. and was buried in the
+ .. graveyard in Night Island.
+.a_story4:
+ DT Night Island lies east
+ .. of the Great Desert, and
+ .. you need an Emerald Key
+ .. to get there.
+END
+
+PROC WRLD_MA_NorthInn
+ SND 255 .a_welcome 50
+ CALL UTIL_Inn
+ RET
+.a_welcome:
+ DT Welcome to North End Inn.
+ .. Stay for the night?
+END
+
+PROC WRLD_MA_HintHut
+ SND 253 SVillager .a_msg; SYS SYSC_SPEAK
+ RET
+.a_msg:
+ DT They say King Vahn is
+ .. buried in Night Isle, east
+ .. of the Great Desert. You
+ .. need an Emerald Key to get
+ .. there.
+END
+
+PROC WRLD_MA_WizardShop
+ SND 251 SWizard .msg * 100 ITK_ARMOR ITK_HELM
+ {
+  DB 3
+  DB ITID_WIZARD_ROBES    #@wares_MA_HUTS
+  DB ITID_WIZARD_ROBES2   #@wares_MA_HUTS
+  DB ITID_WIZARD_HAT      #@wares_MA_HUTS
+ }
+ CALL UTIL_ShopUi
+ RET
+.msg:
+ DT Welcome! We sell refined
+ .. accessories for today's
+ .. discerning sorcerer.
+END
+
+PROC WRLD_MA_Altar
+ SND ZID_CURE_POISON * 3 ASpellRequiresLevel3
+ {
+  DT I teach the Cure Poison
+  .. spell. It is a very
+  .. useful spell for your
+  .. travels.
+ }
+ CALL UTIL_TempleLearnSpell
+
+END
+
+PROC WRLD_MA_Cartographer
+ VAR upd
+ CALL UTIL_CartographerDialogue; REC upd
+ CMP upd 1; JNE .ret
+ OR GV_WMAPREV_COL_B WMAPREV_MASK_ROW_0
+ OR GV_WMAPREV_COL_B WMAPREV_MASK_ROW_1
+ OR GV_WMAPREV_COL_B WMAPREV_MASK_ROW_2
+.ret:
+ RET
+
+END
+

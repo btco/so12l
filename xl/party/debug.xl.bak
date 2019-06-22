@@ -1,0 +1,149 @@
+# DEBUG Party
+# NOTE ABOUT DEBUG PARTIES: Only record the equipment, XP and gold.
+# Do not change any of the levels or attributes, as those are
+# leveled-up automatically when loading the party.
+
+# DESCRIPTION OF THIS DEBUG PARTY:
+# Right after finishing ORCH level, opted for 50% shares reward.
+# Got 2000 XP for finishing ORCH, went to RSTO to train, ended
+# up nearly broke.
+
+EXPORT Party_DEBUG:
+
+DB 187    # Signature for error-checking
+# X, Z, direction (ignored)
+DB 0 0 0
+# Number of party members
+DB 4
+# pclk (DWORD)
+DW 0 0
+
+# Character 1
+DB 186
+DS Alex                    # Name
+DB CLS_FIGHTER              # Class
+DB 240                      # Face
+DB 5                        # Attack score
+DB 4                        # Def score
+DB 10                       # Speed score
+DW 0                        # HP
+DW 19                       # Max HP
+DW 0                        # SP
+DW 0                        # Max SP
+# Equipped items per kind:
+  DB ITID_BRIGANDINE 0                     # ITK_ARMOR
+  DB 0 0                                   # ITK_HELM
+  DB ITID_LONG_SWORD 0                     # ITK_MWEAP
+  DB 0 0                                   # ITK_RWEAP
+  DB ITID_WOODEN_SHIELD 0                  # ITK_SHIELD
+  DB ITID_LEATHER_BOOTS 0                  # ITK_BOOT
+  DB 0 0                                   # ITK_BELT
+  DB 0 0                                   # ITK_AMULET
+  DB 0 0                                   # ITK_RING
+DB 0                        # Count of spells
+
+# Character 2
+DB 186
+DS Leon                    # Name
+DB CLS_PALADIN              # Class
+DB 242                      # Face
+DB 5                        # Attack score
+DB 4                        # Def score
+DB 10                       # Speed score
+DW 100                      # HP
+DW 100                      # Max HP
+DW 5                        # SP
+DW 5                        # Max SP
+# Equipped items per kind:
+  DB ITID_LEATHER_ARMOR 0                  # ITK_ARMOR
+  DB 0 0                                   # ITK_HELM
+  DB ITID_LONG_SWORD 0                     # ITK_MWEAP
+  DB 0 0                                   # ITK_RWEAP
+  DB ITID_WOODEN_SHIELD 0                  # ITK_SHIELD
+  DB ITID_LEATHER_BOOTS 0                  # ITK_BOOT
+  DB 0 0                                   # ITK_BELT
+  DB 0 0                                   # ITK_AMULET
+  DB 0 0                                   # ITK_RING
+DB 3                        # Count of spells
+  DB ZID_HEAL
+  DB ZID_PROTECT
+  DB ZID_STUN
+
+# Character 3
+DB 186
+DS Lyla                     # Name
+DB CLS_ARCHER               # Class
+DB 241                      # Face
+DB 5                        # Attack score
+DB 6                        # Def score
+DB 25                       # Speed score
+DW 0                        # HP
+DW 10                       # Max HP
+DW 0                        # SP
+DW 0                        # Max SP
+# Equipped items per kind:
+  DB ITID_LEATHER_ARMOR; DB 0;                 # ITK_ARMOR
+  DB 0; DB 0                                   # ITK_HELM
+  DB 0; DB 0                                   # ITK_MWEAP
+  DB ITID_SHORT_BOW; DB 0                      # ITK_RWEAP
+  DB 0; DB 0                                   # ITK_SHIELD
+  DB ITID_LEATHER_BOOTS; DB 0                  # ITK_BOOT
+  DB 0; DB 0                                   # ITK_BELT
+  DB 0; DB 0                                   # ITK_AMULET
+  DB 0; DB 0                                   # ITK_RING
+DB 0                        # Count of spells
+
+# Character 4
+DB 186
+DS Vic                      # Name
+DB CLS_WIZARD               # Class
+DB 243                      # Face
+DB 0                        # Attack score
+DB 3                        # Def score.
+DB 99                       # Speed score
+DW 99                       # HP
+DW 99                       # Max HP
+DW 99                       # SP
+DW 99                       # Max SP
+# Equipped items per kind:
+  DB ITID_CLOTHES; DB 0                        # ITK_ARMOR
+  DB 0; DB 0                                   # ITK_HELM
+  DB ITID_DAGGER; DB 0                         # ITK_MWEAP
+  DB 0; DB 0                                   # ITK_RWEAP
+  DB 0; DB 0                                   # ITK_SHIELD
+  DB 0; DB 0                                   # ITK_BOOT
+  DB 0; DB 0                                   # ITK_BELT
+  DB 0; DB 0                                   # ITK_AMULET
+  DB 0; DB 0                                   # ITK_RING
+DB 4                        # Count of spells
+  DB ZID_BURN
+  DB ZID_FORCE_BEAD
+  DB ZID_TEMPEST
+  DB ZID_PUSH
+
+# Count of inventory items
+DB 14
+DB ITID_TORCH 0
+DB ITID_TORCH 0
+DB ITID_TORCH 0
+DB ITID_TORCH 0
+DB ITID_APPLE 0
+DB ITID_APPLE 0
+DB ITID_APPLE 0
+DB ITID_MANA_POTION 0
+DB ITID_RATION 0
+DB ITID_RATION 0
+DB ITID_SHOVEL 0
+DB ITID_LEAPING_STONE 0
+DB ITID_AMULET_OF_HEALTH 0
+DB ITID_WORLD_MAP 0
+
+# Gold (dword)
+DW 10 0
+
+# XP (DWORD)
+DW 0 0
+
+# Level
+DB 1
+

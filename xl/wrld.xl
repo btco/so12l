@@ -1,0 +1,279 @@
+# OVERWORLD
+
+# Region codes (map pages):
+
+#      A  B  C  D  E  F
+#  0  .. .. .. .. NI NI
+#  1  WP MA DE DE NI NI
+#  2  WP MA DE DE NI NI
+#  3  WP RS RS BL NI NI
+#  4  SE SE BL BL FI ..
+#  5  SI SK SK FI FI FI
+#  6  SI SK SK FI FI FI
+#  7  .. SK SK FI FI FI
+#
+# RS: Riverside
+# WP: Westport
+# SE: Serpent Island
+# BL: Blossom Plains (incl Bamboo Grove)
+# SK: Southern Kingdom
+# SI: Sandy Islands
+# MA: The Marshes
+# FI: Frost Island
+# NI: Night Islands
+
+WRLD_RegionNames:
+ #     0      1      2      3      4      5
+ #     A      B      C      D      E      F
+ DW  00000  00000  00000  00000  R_NI   R_NI     #    0
+ DW  R_WP2  R_MA   R_DE   R_DE   R_NI   R_NI     #    1
+ DW  R_WP   R_MA   R_DE   R_DE   R_NI   R_NI     #    2
+ DW  R_WP   R_RS   R_RS   R_BL2  R_NI   R_NI     #    3
+ DW  R_SE   R_SE   R_BL   R_BL   R_FI   R_FI     #    4
+ DW  R_SI   R_SK   R_SK   R_FI   R_FI   R_FI     #    5
+ DW  R_SI   R_SK   R_SK   R_FI   R_FI   R_FI     #    6
+ DW  R_SI   R_SK   R_SK   R_FI   R_FI   R_FI     #    7
+# Bytes per row in the table above.
+DEFINE WRLD_RN_TABLE_ROW_STRIDE 12
+#          _____________
+R_RS:;  DS Riverside    #
+R_SE:;  DS Serpent Isle #
+R_BL:;  DS Blossom Plain#
+R_BL2:; DS Bamboo Grove #
+R_SK:;  DS South Kingdom#
+R_SI:;  DS Sandy Islands#
+R_WP:;  DS Westport     #
+R_WP2:; DS Blue Fields  #
+R_DE:;  DS Great Desert #
+R_MA:;  DS The Marshes  #
+R_FI:;  DS Frostlands   #
+R_NI:;  DS Night islands#
+
+EXPORT PROC WRLD_Interact
+ PARAM rawcr xz sid kf
+
+ # Check region-specific interactibles table.
+ # TODO: would be faster to filter by region instead of checking all
+ SND rawcr WRLD_RS_Interactibles; CALL UTIL_CheckInteract
+ SND rawcr WRLD_SE_Interactibles; CALL UTIL_CheckInteract
+ SND rawcr WRLD_SK_Interactibles; CALL UTIL_CheckInteract
+ SND rawcr WRLD_SI_Interactibles; CALL UTIL_CheckInteract
+ SND rawcr WRLD_DE_Interactibles; CALL UTIL_CheckInteract
+ SND rawcr WRLD_WP_Interactibles; CALL UTIL_CheckInteract
+ SND rawcr WRLD_BL_Interactibles; CALL UTIL_CheckInteract
+ SND rawcr WRLD_MA_Interactibles; CALL UTIL_CheckInteract
+ SND rawcr WRLD_FI_Interactibles; CALL UTIL_CheckInteract
+ SND rawcr WRLD_NI_Interactibles; CALL UTIL_CheckInteract
+
+ RET
+
+ .tree:; SND sid kf; CALL UTIL_Tree; RET
+END
+
+PROC WRLD_UpdateLevelTitle
+ VAR rawcr
+ VAR c r ptr
+ # Where is the party right now?
+ SND PINFO_XZDIR; SYS SYSC_PINFO; REC rawcr
+ # Convert that to map page c,r
+ SND rawcr; CALL UTIL_WordToBytes; REC c r
+ DIV c 30; DIV r 17
+ # ptr = WRLD_RegionNames + r * WRLD_RN_TABLE_ROW_STRIDE + 2 * c
+ # (2 because each entry is a 2 byte address).
+ SET ptr r; MUL ptr WRLD_RN_TABLE_ROW_STRIDE
+ ADD ptr c; ADD ptr c
+ ADD ptr WRLD_RegionNames
+ # Read a pointer from that position, store it in ptr again.
+ REAW ptr ptr
+ # Now ptr is a pointer to a string with the region name.
+ CMP ptr 0; JE .no_name
+ SND ptr; SYS SYSC_SET_LVLT
+ RET
+.no_name:
+ SND .s_no_name; SYS SYSC_SET_LVLT
+ RET
+.s_no_name:; DS ?
+END
+
+EXPORT PROC WRLD_Boot
+ VAR has
+
+ # If there is a requested reward to give on boot, do it now.
+ CMP TGV_WRLD_REW_QUEST_XP 0
+ JE .no_xp
+ SND TGV_WRLD_REW_QUEST_XP; CALL REW_GiveQuestReward
+.no_xp:
+ CMP TGV_WRLD_GIVE_ITEM 0
+ JE .no_item
+ SND TGV_WRLD_GIVE_ITEM; SYS SYSC_GIVE
+.no_item:
+ SET TGV_WRLD_REW_QUEST_XP 0
+ SET TGV_WRLD_GIVE_ITEM 0
+
+ # If OTO is done, remove it from the map.
+ TEST GM_C_OTO_GHOST; CNZ WRLD_RemoveOTO
+ # If Obelisk quest is not done, remove the portal in RS.
+ TEST GM_C_OBELISK; CZ WRLD_RemovePortalRS
+ # If INTO quest is not done, fill island with dirt tiles.
+ TEST GM_C_INTO; CZ WRLD_DirtInBlueFields
+
+ CALL WRLD_UpdateLevelTitle
+
+ # If player already claimed the throne, heal the world.
+ TEST GM_CLAIMED_THRONE; CNZ WRLD_HealLevel
+
+END
+
+PROC WRLD_ShowLLIBEntrance
+ SND LOHI(169,22) 24; SYS SYSC_CHANGE_SID
+END
+
+PROC WRLD_HealLevel
+ # Replace swamp tiles by non-swamp tiles.
+ SND 62 105; SYS SYSC_REPLACE_SID
+ SND 107 61; SYS SYSC_REPLACE_SID
+ SND 108 58; SYS SYSC_REPLACE_SID
+END
+
+PROC WRLD_RemoveOTO
+ SND LOHI(20,113) 23; SYS SYSC_CHANGE_SID
+ SND LOHI(21,113) 23; SYS SYSC_CHANGE_SID
+ SND LOHI(22,113) 23; SYS SYSC_CHANGE_SID
+ SND LOHI(20,114) 23; SYS SYSC_CHANGE_SID
+ SND LOHI(21,114) 23; SYS SYSC_CHANGE_SID
+ SND LOHI(22,114) 23; SYS SYSC_CHANGE_SID
+END
+
+PROC WRLD_RemovePortalRS
+ SND LOHI(72,51) 29; SYS SYSC_CHANGE_SID
+END
+
+# Walk proc.
+EXPORT PROC WRLD_Walk
+ PARAM rawcr pdir
+ VAR did has
+
+ # Update region name.
+ CALL WRLD_UpdateLevelTitle
+
+ # Spawn wandering monsters, if appropriate.
+ SND rawcr; CALL WMON_Step; REC did
+ CMP did 0; JNE .ret
+
+ # WARNING: If the code above starts a battle, the
+ # normal region-specific walk handler will NOT be called!
+ # So WLRD's walk proc should NOT rely on getting called
+ # for every tile walked, unless it's a region without
+ # wandering monsters.
+
+ SND rawcr pdir; CALL WRLD_RS_Walk
+ SND rawcr pdir; CALL WRLD_SE_Walk
+ SND rawcr pdir; CALL WRLD_SK_Walk
+ SND rawcr pdir; CALL WRLD_SI_Walk
+ SND rawcr pdir; CALL WRLD_DE_Walk
+ SND rawcr pdir; CALL WRLD_WP_Walk
+ SND rawcr pdir; CALL WRLD_BL_Walk
+ SND rawcr pdir; CALL WRLD_MA_Walk
+ SND rawcr pdir; CALL WRLD_FI_Walk
+ SND rawcr pdir; CALL WRLD_NI_Walk
+
+ # If player has the Spectacles, show the entrance to the Lost Library.
+ SND ITID_SPECTACLES; SYS SYSC_GET_ITEM_COUNT; REC has
+ CMPZ has; CNE WRLD_ShowLLIBEntrance
+
+.ret:
+END
+
+# Use item proc.
+# MUST RETURN: 1 to say usage was handled, 0 to say not handled.
+EXPORT PROC WRLD_UseItem
+ PARAM itid idx chi
+ VAR ret
+ # Emerald key?
+ CMP itid ITID_EMERALD_KEY; JE .emerald_key
+ # Shovel?
+ CMP itid ITID_SHOVEL; JE .shovel
+ # Did not handle.
+ RET 0
+.emerald_key:
+ # Emerald key.
+ CALL WRLD_UseEmeraldKey; RET 1
+.shovel:
+ # Dig here.
+ SND WRLD_Diggables; CALL DIG_Dig; RET 1
+END
+
+PROC WRLD_UseEmeraldKey
+ VAR rawcr sid
+ # What is right in front of the player?
+ CALL UTIL_GetTileInFrontOfPlayer; REC rawcr
+ # Get SID.
+ SND rawcr TINFO_SID; SYS SYSC_TINFO; REC sid
+ # Is it an emerald gate?
+ CMP sid 15; JNE .nothing
+ # Open it.
+ SND rawcr; SYS SYSC_KILL_TILE
+ SND 0 0 .a_opened; SYS SYSC_SPEAK
+ RET
+.nothing:
+ SND .a_nothing; SYS SYSC_ALERT
+ RET
+.a_nothing:
+ DT The Emerald Key can only
+ .. be used to open Emerald Gates.
+.a_opened:
+ DT You unlock the gate with
+ .. the Emerald Key.
+END
+
+PROC WRLD_DirtInBlueFields
+ VAR c r rawcr sid
+ SET r 18
+.loop_r:
+ CMP r 31; JG .end_r
+ SET c 11
+ .loop_c:
+  CMP c 26; JG .end_c
+  SND c r; CALL UTIL_BytesToWord; REC rawcr
+  # What is the current SID?
+  SND rawcr TINFO_SID; SYS SYSC_TINFO; REC sid
+  # Replace lavender fields tile with dirt.
+  CMP sid 105; JE .replace
+  # Replace tree tile with dirt.
+  CMP sid 39; JE .replace
+  JMP .dont_replace
+  .replace:
+   SND rawcr 55; SYS SYSC_CHANGE_SID
+  .dont_replace:
+  ADD c 1
+  JMP .loop_c
+ .end_c:
+ ADD r 1
+ JMP .loop_r
+.end_r:
+
+END
+
+# Table of all diggable things in the world map:
+WRLD_Diggables:
+ # Beach in Serpent Island.
+ DW LOHI(12,74); DW ITID_AMULET_OF_HEALTH; DW DIG_FindItem
+ # Spell book near apple tree in Southern Kingdom.
+ DW LOHI(70,102); DW ZID_PUSH; DW DIG_FindSpellbook
+ # Right south of the Orchard in RS.
+ DW LOHI(75,58); DW ITID_POTION_MANA; DW DIG_FindItem
+ # Graveyard
+ DW LOHI(140,37); DW 50; DW DIG_FindGold
+ DW LOHI(142,37); DW 0; DW WRLD_MA_Grave1
+ DW LOHI(144,37); DW ITID_KINGS_ARMOR; DW DIG_FindItem
+ DW LOHI(140,39); DW 0; DW WRLD_MA_Grave2
+ DW LOHI(142,39); DW ITID_AMULET_OF_WIZ; DW DIG_FindItem
+ DW LOHI(144,39); DW ITID_KINGS_CROWN; DW DIG_FindItem
+ # Music box in Frost Island
+ DW LOHI(119,111); DW ITID_MUSIC_BOX; DW DIG_FindItem
+ # Spell book east of SAHA
+ DW LOHI(111,39); DW ZID_INVIS; DW DIG_FindSpellbook
+ # Grave in South Kingdom, blocked by emerald gate.
+ DW LOHI(41,132); DW ITID_SPECTACLES; DW DIG_FindItem
+ DW 0
+

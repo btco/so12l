@@ -1,0 +1,404 @@
+# OVERWORLD - RIVERSIDE NORTH ISLAND
+
+PROC WRLD_RS_EnterRstoS
+ # Enter city.
+ SND AEnterTownOfRiverside LVLN_RSTO ENTPT_RSTO_SOUTH_GATE; CALL UTIL_GoNoGo
+END
+
+PROC WRLD_RS_EnterRstoN
+ SND AEnterTownOfRiverside LVLN_RSTO ENTPT_RSTO_NORTH_GATE; CALL UTIL_GoNoGo
+END
+
+# RSC1 entrance.
+PROC WRLD_RS_EnterRsc1
+ # If the governor was already rescued, there's nothing to do
+ # here any more.
+ TEST GM_C_RESCUE_GOV; JNZ .already_rescued
+ 
+ # Enter the cave
+ SND AEnterCave LVLN_RSC1 ENTPT_RSC1_ENTRANCE SFX_STAIRS_DOWN; CALL UTIL_GoNoGo
+ RET
+
+.already_rescued:
+ SND .already_rescued_msg
+ SYS SYSC_ALERT
+ RET
+
+.already_rescued_msg:
+ DT Nothing more to do in
+ .. this cave.
+END
+
+PROC WRLD_RS_Hut1
+ SND 250 SVillager .msg
+ SYS SYSC_SPEAK
+ RET
+.msg:
+ DT That town just east
+ .. of here is Riverside.
+ .. I heard the governor
+ .. went missing.
+END
+
+PROC WRLD_RS_Hut2
+ SND 251 SVillager .msg
+ SYS SYSC_SPEAK
+ RET
+.msg:
+ DT Someone needs to go into
+ .. that cave to the north
+ .. and find the governor!
+END
+
+PROC WRLD_RS_Hut3
+ SND 252 SVillager .msg
+ SYS SYSC_SPEAK
+ RET
+.msg:
+ DT Always carry food and
+ .. torches when adventuring.
+ .. You can buy them in the
+ .. General Store in the city.
+END
+
+PROC WRLD_RS_Hut4
+ SND 253 SVillager .msg
+ SYS SYSC_SPEAK
+ RET
+.msg:
+ DT Caves are dark. Do you
+ .. have a torch? You can buy
+ .. one in the city.
+END
+
+PROC WRLD_RS_Hut5
+ SND 252 SVillager .msg
+ SYS SYSC_SPEAK
+ RET
+.msg:
+ DT The city of Sun Port? It's
+ .. to the south, I think.
+ .. Or was it south-west?
+END
+
+PROC WRLD_RS_Hut6
+ SND 254 SVillager .msg
+ SYS SYSC_SPEAK
+ RET
+.msg:
+ DT The bridge to the south is
+ .. broken. I heard that if you
+ .. have a special stone you
+ .. can use it to jump across.
+END
+
+PROC WRLD_RS_Hut7
+ SND 255 SVillager .msg
+ SYS SYSC_SPEAK
+ RET
+.msg:
+ DT Someone buried a potion 
+ .. next to the boulder just
+ .. south of the orchard. Dig
+ .. with a shovel and you will
+ .. find it.
+END
+
+PROC WRLD_RS_Hut8
+ DIA_VILLAGER_2
+ {
+  DT Think twice before going
+  .. to the north islands. It's
+  .. very dangerous there. I'd
+  .. go south first.
+ }
+END
+
+PROC WRLD_RS_Hut9
+ DIA_VILLAGER_4
+ {
+  DT When you have gained enough
+  .. experience, seek a trainer
+  .. in town to advance to the
+  .. next level.
+ }
+ SND *; SYS SYSC_ALERT
+ {
+  DT Hint: the XP counter (lower
+  .. right in the screen) will
+  .. highlight when you're ready
+  .. to advance levels.
+ }
+END
+
+PROC WRLD_RS_Walk
+ PARAM rawcr pdir
+ CMP rawcr LOHI(51,65); JE .check_leon
+ RET
+
+.check_leon:
+ TEST GM_INTRO_LEON
+ JNZ .end
+ DIA_CS_2
+ {
+  DT I heard rumors that the
+  .. governor is missing. Let's
+  .. ask around.
+ }
+ OR GM_INTRO_LEON
+.end:
+END
+
+# Old Wizard's Hut on Riverside East
+PROC WRLD_RS_OldWizardHut
+ TEST GM_R_MYRA; JNZ .quest_r
+ TEST GM_C_MYRA; JNZ .quest_c
+
+ # Quest not assigned yet, so present it.
+ SND 251 .old_wiz .quest_msg
+ SYS SYSC_SPEAK
+ SND 251 .old_wiz .quest_msg2
+ SYS SYSC_SPEAK
+ SND 0 0 .quest_narr
+ SYS SYSC_SPEAK
+ OR GM_A_MYRA
+ RET 0
+
+.quest_c:
+ # Quest complete, not yet rewarded.
+ SND 253 .myra .quest_c_msg 
+ SYS SYSC_SPEAK
+ # Reward: stone of leaping.
+ SND ITID_LEAPING_STONE; SYS SYSC_GIVE
+ # Plus some XP.
+ SND 3500; CALL REW_GiveQuestReward #@q_MYRA
+ OR GM_R_MYRA
+ RET
+
+.quest_r:
+ # Quest already rewarded.
+ SND AHutEmpty
+ SYS SYSC_ALERT
+ RET 0
+
+.old_wiz:
+ DS Old Wizard
+
+.myra:
+ DS Myra
+
+.quest_msg:
+ DT I have an item that will
+ .. be useful to you. If you
+ .. help me, it is yours.
+
+.quest_msg2:
+ DT Find Myra, my niece. Tell
+ .. her to come. I am very sick.
+ ..
+ .. To find her, start from the
+ .. well and head east into the
+ .. mountain path.
+
+.quest_narr:
+ DT The old man gives you detailed
+ .. directions. Remember: head
+ .. east from the well!
+
+.quest_c_msg:
+ DT My uncle has passed away
+ .. but he left you this strange
+ .. stone as a reward.
+END
+
+PROC WRLD_RS_MyrasHut
+ TEST GM_R_MYRA; JNZ .quest_r
+ TEST GM_C_MYRA; JNZ .quest_c
+ # Quest is now complete.
+ SND 253 .myra .msg_complete; SYS SYSC_SPEAK
+ OR GM_C_MYRA
+ RET 0
+
+.quest_c:
+.quest_r:
+ SND AHutEmpty
+ SYS SYSC_ALERT
+ RET 0
+
+.myra:
+ DS Myra
+
+.msg_complete:
+ DT Hi. I am Myra.
+ .. What? My uncle sent you?
+ .. He is sick? I must go see
+ .. him at once.
+ ..
+ .. Meet me at his hut.
+END
+
+PROC WRLD_RS_AfterSeaMonster
+ SND 0 0 .a_trip_end; SYS SYSC_SPEAK
+ SND LVLN_WRLD ENTPT_WRLD_DESERT; SYS SYSC_CHANGE_LVL
+ RET
+.a_trip_end:
+ DT You arrive at the Great Desert.
+ ..
+ .. The journey should be safe from
+ .. here on. You are certain that
+ .. the dangers of the desert have
+ .. been largely overstated.
+END
+
+PROC WRLD_RS_BoatToDesert
+ VAR choice paid have
+ TEST GM_TOOK_DESERT_BOAT; JNZ .repeat_journey
+ # Does the party have a permit?
+ SND ITID_SAIL_PERMIT; SYS SYSC_GET_ITEM_COUNT; REC have
+ CMP have 0; JE .no_permit
+ # Party has permit.
+ SND 252 SBoatman .a_msg; SYS SYSC_SPEAK
+ SND .a_prompt 200; SYS SYSC_PAY; REC paid #@q_VQ_BOAT_TO_DE price=200
+ CMP paid 1; JNE .ret
+ OR GM_TOOK_DESERT_BOAT
+ SND 252 SBoatman .a_trip1; SYS SYSC_SPEAK
+ SND 0 0 .a_trip2; SYS SYSC_SPEAK
+ SND 0 0 .a_trip3; SYS SYSC_SPEAK
+ # Sea monster battle:
+ SET TGV_BATTLE_END_CB WRLD_RS_AfterSeaMonster
+ # Visual style 5 (water battle)
+ SND EID_SEAMON 0 0 0 0 0 5; SYS SYSC_BATTLE #@q_VQ_BOAT_TO_DE
+ RET
+.ret:
+ RET
+.no_permit:
+ SND 252 SBoatman .a_msg_no_permit; SYS SYSC_SPEAK
+ RET
+.repeat_journey:
+ SND 252 SBoatman .a_msg_repeat; SYS SYSC_SPEAK
+ SND .a_prompt LVLN_WRLD ENTPT_WRLD_DESERT; CALL UTIL_GoNoGo
+ RET
+.a_msg:
+ DT I can take you to the Great
+ .. Desert. I warn you! It's
+ .. very dangerous.
+ .. Passage costs 200gp.
+.a_msg_repeat:
+ DT Return to the Great Desert?
+.a_msg_no_permit:
+ DT If you get a Sailing Permit
+ .. from the King, I can take
+ .. you to the Great Desert.
+.a_prompt:
+ DT Sail to the Great Desert?
+.a_trip1:
+ DT Please relax and enjoy
+ .. the journey. Despite what
+ .. you may have heard, sea
+ .. monsters are extremely
+ .. unlikely nowadays.
+.a_trip2:
+ DT You sail away.
+.a_trip3:
+ DT A sea monster appears!
+END
+
+# Steve, the orchard owner
+PROC StevesHut
+ VAR choice lvl gp
+
+ # Already claimed reward?
+ TEST GM_R_ORCHARD; JNZ .already
+ # Completed mission?
+ TEST GM_C_ORCHARD; JNZ .reward
+ # Accepted mission?
+ TEST GM_A_ORCHARD; JNZ .already_accepted
+ # State mission
+ SND 245 .owner .mission_msg
+ SYS SYSC_SPEAK
+ # Assign mission
+ OR GM_A_ORCHARD
+.ret:
+ RET
+
+.already_accepted:
+ SND 245 .owner .already_accepted_msg
+ SYS SYSC_SPEAK
+ RET
+
+.reward:
+ OR GM_R_ORCHARD
+ SND 245 .owner .reward_msg
+ SYS SYSC_SPEAK
+ SND 2000; CALL REW_GiveQuestReward #@q_ORCHARD
+ RET
+
+.already:
+ # Already gave reward.
+ SND 245 .owner .thanks_again
+ SYS SYSC_SPEAK
+ RET
+
+.owner:
+ DS Steve, the Orchard Keeper
+
+.mission_msg:
+ DT I own the Orchard just east
+ .. of here. Bugs and slimes
+ .. have taken over my property.
+ ..
+ .. If you can get rid of the
+ .. bugs, I will reward you!
+
+.already_accepted_msg:
+ DT There are still some bugs
+ .. in the orchard. Make
+ .. sure to get rid of them all.
+
+.reward_msg:
+ DT Thank you for saving the
+ .. orchard! Here is a reward.
+
+.thanks_again:
+ DT Thanks again for saving the
+ .. orchard!
+END
+
+
+# Interactibles list
+WRLD_RS_Interactibles:
+ # RSTO entrances:
+ DW LOHI(59,61) WRLD_RS_EnterRstoS
+ DW LOHI(60,59) WRLD_RS_EnterRstoN
+ # Riverside West huts:
+ DW LOHI(55,64) WRLD_RS_Hut1
+ DW LOHI(54,61) WRLD_RS_Hut2
+ DW LOHI(60,65) WRLD_RS_Hut3
+ DW LOHI(55,54) WRLD_RS_Hut4
+ # Riverside East huts:
+ DW LOHI(64,55) WRLD_RS_Hut5
+ DW LOHI(71,55) StevesHut
+ DW LOHI(73,64) WRLD_RS_OldWizardHut
+ DW LOHI(79,66) WRLD_RS_Hut6
+ DW LOHI(69,51) WRLD_RS_Hut7
+ # Entrance to Riverside Cave (RSC1)
+ DW LOHI(54,52) WRLD_RS_EnterRsc1
+ # Entrance to South Temple (STMP)
+ DW LOHI(65,62) STMP_EnterFromWrld
+ # Entrance to Orchard (ORCH)
+ DW LOHI(75,56) ORCH_EnterFromWrld
+ # Entrance to Mountain Pass (PASS), south entrance.
+ DW LOHI(82,65) PASS_EnterFromWrldS
+ # Entrance to Mountain Pass (PASS), north entrance
+ DW LOHI(86,64) PASS_EnterFromWrldN
+ # Myra's hut on the eastern coast of Riverside Island
+ DW LOHI(85,56) WRLD_RS_MyrasHut
+ # Boat to desert.
+ DW LOHI(82,50) WRLD_RS_BoatToDesert
+ # Hut warning player about north.
+ DW LOHI(60,52) WRLD_RS_Hut8
+ # Hut to the east of the Orchard
+ DW LOHI(79,57) WRLD_RS_Hut9
+ # -------- End of table marker --------
+ DW 0
+

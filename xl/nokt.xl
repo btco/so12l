@@ -1,0 +1,89 @@
+# NOKT: North Keep Throne Room
+
+PROC NOKT_Enter
+ # Ask the player if they want to enter.
+ SND .msg LVLN_NOKT ENTPT_NOKT; CALL UTIL_GoNoGo
+ RET 0
+
+.msg:
+ DB 1
+ DS Enter Throne Room?
+END
+
+# Interaction proc
+EXPORT PROC NOKT_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles:
+ SND rawcr NOKT_Interactibles; CALL UTIL_CheckInteract
+ RET
+END
+
+# Leave.
+PROC NOKT_Leave
+ SND ALeave LVLN_NOKE ENTPT_NOKE_FROM_NOKT
+ CALL UTIL_GoNoGo
+ RET
+END
+
+# Throne
+PROC NOKT_Throne
+ VAR is
+ CALL NOKE_WearingKingStuff; REC is
+ CMP is 0; JE .not_king
+ # Already claimed?
+ TEST GM_CLAIMED_THRONE; JNZ .already
+
+ DIA_NARR
+ {
+  DT The King has returned!
+  ..
+  .. Your servants bring you a
+  .. precious gem.
+ }
+ SND ITID_CRYSTAL_BLUE; SYS SYSC_GIVE
+ DIA_NARR
+ {
+  DT As you take it in your hands,
+  .. you feel that your kingdom
+  .. has been restored.
+ }
+ DIA_NARR
+ {
+  DT However, you are again bound
+  .. to the same vow you made
+  .. a thousand years ago:
+  .. defeat the Sorcerer King.
+ }
+ OR GM_CLAIMED_THRONE
+ # fall through
+.already:
+ DIA_NARR
+ {
+  DT You feel the great weight of
+  .. your responsibility.
+  ..
+  .. You must journey east to the
+  .. Portal of Ignis, step through
+  .. it and defeat Markus, the
+  .. Sorcerer King.
+ }
+ RET
+.not_king:
+ DIA_NARR
+ {
+  DT A voice says:
+  ..  "Only the King can reclaim
+  ..   the throne. When he arrives
+  ..   wearing his SWORD, RING and
+  ..   CROWN, he shall once again
+  ..   rule the land."
+ }
+END
+
+# NOKT INTERACTIBLES LIST
+# (position, title, proc)
+NOKT_Interactibles:
+ DW LOHI(184,101) NOKT_Leave
+ DW LOHI(184,97)  NOKT_Throne
+ DW 0
+

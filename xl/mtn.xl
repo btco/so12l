@@ -1,0 +1,276 @@
+# MOUNTAIN TOWN (MTNn)
+
+# MTN1 INTERACTIBLES LIST
+# (position, title, proc)
+MTN1_Interactibles:
+ DW LOHI(187,49) MTN1_Leave
+ DW LOHI(180,38) MTN1_GoUp
+ DW LOHI(187,36) MTN1_Blacksmith
+ DW LOHI(182,47) MTN1_PotionShop
+ DW LOHI(182,40) MTN1_FruitShop
+ DW LOHI(185,45) SHOP_GeneralStore
+ DW LOHI(188,39) SHOP_Expert
+ DW LOHI(182,36) MTN1_Inn
+ DW 0
+# MTN2 INTERACTIBLES LIST
+# (position, title, proc)
+MTN2_Interactibles:
+ DW LOHI(199,36) MTN2_GoDown
+ DW LOHI(190,47) MTN2_GoUp
+ DW LOHI(198,45) MTN2_PawnShop
+ DW LOHI(192,37) MTN2_TrainingHall
+ DW LOHI(192,44) MTN2_ArmorShop
+ DW LOHI(198,38) MTN2_Fletcher
+ DW 0
+# MTN3 INTERACTIBLES LIST
+# (position, title, proc)
+MTN3_Interactibles:
+ DW LOHI(209,36) MTN3_GoDown
+ DW LOHI(204,36) MTN3_CartographerHut
+ DW 0
+
+
+#################################################################
+
+PROC MTN1_Interact
+ PARAM rawcr xz sid kf
+ SND rawcr MTN1_Interactibles; CALL UTIL_CheckInteract
+END
+
+PROC MTN1_Leave
+ SND ALeaveTown LVLN_WRLD ENTPT_WRLD_FROM_MTN1; CALL UTIL_GoNoGo
+END
+
+PROC MTN1_GoUp
+ SND AStairsUp LVLN_MTN2 ENTPT_MTN2_FROM_MTN1; CALL UTIL_GoNoGo
+END
+
+PROC MTN1_Blacksmith
+ SND *; CALL SHOP_Blacksmith
+ {
+  DB 4
+  DB ITID_AXE #@wares_MTN
+  DB ITID_LONG_SWORD #@wares_MTN
+  DB ITID_DAGGER #@wares_MTN
+  DB ITID_MACE #@wares_MTN
+ }
+END
+
+PROC MTN1_FruitShop
+ SND 252 SFruitShop .msg .wares 100 ITK_FOOD
+ CALL UTIL_ShopUi
+ RET
+.msg:
+ DB 4
+ DS Welcome! We sell famous
+ DS Southern pears. Apart from
+ DS delicious, they cure most
+ DS poisons.
+.wares:
+ DB 1
+ DB ITID_PEAR
+END
+
+PROC MTN1_Inn
+ SND 255 .a_welcome 25
+ CALL UTIL_Inn
+ RET
+.a_welcome:
+ DB 3
+ #  |--------------------------|
+ DS Welcome to Pinnacle Inn.
+ DS Do you wish to stay for
+ DS the night?
+END
+
+PROC MTN1_PotionShop
+ SND SHOP_Wares_Potions2; CALL SHOP_PotionShop
+END
+
+############################################################
+
+PROC MTN2_Interact
+ PARAM rawcr xz sid kf
+ SND rawcr MTN2_Interactibles; CALL UTIL_CheckInteract
+END
+
+PROC MTN2_GoUp
+ SND AStairsUp LVLN_MTN3 ENTPT_MTN3; CALL UTIL_GoNoGo
+END
+
+PROC MTN2_GoDown
+ SND AStairsDown LVLN_MTN1 ENTPT_MTN1_FROM_MTN2; CALL UTIL_GoNoGo
+END
+
+PROC MTN2_PawnShop
+ VAR count choice paid
+ # Check quest status.
+ TEST GM_R_BRACELET; JNZ .closed
+ SND ITID_GOLDEN_BRACELET; SYS SYSC_GET_ITEM_COUNT; REC count
+ CMP count 0; JG .closed
+ TEST GM_A_BRACELET; JNZ .quest_a
+ SND 246 SShopkeeper .a_nothing_to_see; SYS SYSC_SPEAK
+ RET
+
+.quest_a:
+ # Quest assigned, not yet fulfilled.
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND 246 SShopkeeper .a_bracelet_show; SYS SYSC_SPEAK
+ SND 0 .a_bracelet_choices; SYS SYSC_CHOICE; REC choice
+ CMP choice 1; JE .accuse
+ CMP choice 2; JE .offer
+ CMP choice 3; JE .accuse
+ RET
+
+.offer:
+ SND .a_buy_msg 150; SYS SYSC_PAY; REC paid
+ CMP paid 0; JG .paid
+ RET
+
+.paid:
+ SND ITID_GOLDEN_BRACELET; SYS SYSC_GIVE
+ RET
+
+.accuse:
+ SND 246 SShopkeeper .a_accuse; SYS SYSC_SPEAK
+ SND 0 .a_accuse_choices; SYS SYSC_CHOICE; REC choice
+ CMP choice 1; JE .confront
+ RET
+
+.confront:
+ SND 246 SShopkeeper .a_confront; SYS SYSC_SPEAK
+ # Register a callback for after the battle.
+ SET TGV_BATTLE_END_CB MTN2_AfterBattle
+ # Start battle.
+ SND EID_BANDIT EID_BANDIT EID_BANDIT; SYS SYSC_BATTLE #@q_BRACELET
+ RET
+
+.closed:
+ SND .a_closed; SYS SYSC_ALERT
+ RET
+
+.a_closed:
+ DB 1
+ DS The shop is closed.
+
+.a_nothing_to_see:
+ DB 2
+ DS Nothing to see here.
+ DS We are closed.
+
+.a_narr:
+ DB 4
+ DS As you walk into the store
+ DS the owner looks at you
+ DS suspiciously. You see a
+ DS golden bracelet on display.
+
+.a_bracelet_show:
+ DB 3
+ DS This golden bracelet just
+ DS got in. Nice, isn't it?
+ DS It's only 200gp.
+
+.a_bracelet_choices:
+ DB 4
+ DS Ask where he got it
+ DS Ask to buy it for 150gp
+ DS Accuse him of stealing it
+ DS Walk away
+
+.a_buy_msg:
+ DB 1
+ DS Buy bracelet?
+
+.a_accuse:
+ DB 4
+ DS I got this bracelet from...
+ DS my... suppliers.
+ DS I assure you they are
+ DS perfectly honest.
+
+.a_accuse_choices:
+ DB 2
+ DS We know it's stolen.
+ DS All right then. Nevermind.
+
+.a_confront:
+ DB 3
+ DS Well then. Perhaps you
+ DS would like to discuss this
+ DS with my bodyguards.
+END
+
+PROC MTN2_AfterBattle
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND ITID_GOLDEN_BRACELET; SYS SYSC_GIVE
+ RET
+.a_narr:
+ DB 3
+ DS After defeating the bodyguards,
+ DS you recover the stolen bracelet.
+ DS The shopkeeper runs away.
+END
+
+PROC MTN2_TrainingHall
+ SND 7; CALL Train #@train_MTN
+END
+
+PROC MTN2_ArmorShop
+ SND *; CALL SHOP_ArmorShop
+ {
+  DB 7
+  DB ITID_BRIGANDINE #@wares_MTN
+  DB ITID_SCALE_ARMOR #@wares_MTN
+  DB ITID_WOODEN_SHIELD #@wares_MTN
+  DB ITID_IRON_SHIELD #@wares_MTN
+  DB ITID_IRON_BOOTS #@wares_MTN
+  DB ITID_STEEL_BOOTS #@wares_MTN
+  DB ITID_IRON_HELM #@wares_MTN
+ }
+END
+
+PROC MTN2_Fletcher
+ SND *; CALL SHOP_Fletcher
+ {
+  DB 2
+  DB ITID_SHORT_BOW #@wares_MTN
+  DB ITID_LONG_BOW #@wares_MTN
+ }
+END
+
+############################################################
+
+PROC MTN3_Interact
+ PARAM rawcr xz sid kf
+ SND rawcr MTN3_Interactibles; CALL UTIL_CheckInteract
+END
+
+PROC MTN3_GoDown
+ SND AStairsDown LVLN_MTN2 ENTPT_MTN2_FROM_MTN3; CALL UTIL_GoNoGo
+END
+
+PROC MTN3_Walk
+ PARAM rawcr pdir
+ # Check for triggers:
+ SND 1 rawcr UTIL_CharSpeak 2 .a_view
+ CALL TRIG_Check
+ RET
+.a_view:
+ DB 2
+ DS Wow, it's a nice view from
+ DS up here!
+END
+
+PROC MTN3_CartographerHut
+ VAR upd
+ CALL UTIL_CartographerDialogue; REC upd
+ CMP upd 1; JNE .ret
+ # Update map with Southern Kingdom, west side.
+ OR GV_WMAPREV_COL_B WMAPREV_MASK_ROW_5
+ OR GV_WMAPREV_COL_B WMAPREV_MASK_ROW_6
+ OR GV_WMAPREV_COL_B WMAPREV_MASK_ROW_7
+.ret:
+ RET
+END
+

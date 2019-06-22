@@ -1,0 +1,259 @@
+# RIVERSIDE CAVE (levels RSC1, RSC2)
+
+# -----------------------------------------------------------------
+# CAVE LEVEL 1 ----------------------------------------------------
+EXPORT PROC RSC1_Interact
+ PARAM rawcr xz sid kf
+
+ # Cave exit?
+ CMP sid 12; JE .cave_exit
+ # Down to level 2?
+ CMP sid 28; JE .down_to_l2
+ # Altar?
+ CMP sid 47; JE .altar
+
+ # Chests with torch:
+ CMP rawcr LOHI(219,7); JE .torches_chest
+ CMP rawcr LOHI(230,14); JE .torches_chest
+ # Chests with healing potion:
+ CMP rawcr LOHI(231,2); JE .healing_chest
+
+ # Looting a chest?
+ CMP sid 40; JE .loot_chest
+
+ RET
+
+ .cave_exit:; CALL RSC1_Leave; RET
+ .loot_chest:;
+  SND rawcr LOL_A; CALL LOOT_ChestRandom; RET #@q_RESCUE_GOV loot_count=3
+ .down_to_l2:; CALL RSC1_GoDown; RET
+ .torches_chest:;
+  SND rawcr ITID_TORCH; CALL LOOT_ChestItem; RET
+ .healing_chest:;
+  SND rawcr ITID_POTION_HEALING; CALL LOOT_ChestItem; RET
+ .altar:; SND rawcr kf; CALL UTIL_Altar; RET
+END
+
+# Called when player is trying to leave cave.
+PROC RSC1_Leave
+ SND AExitCave LVLN_WRLD ENTPT_WRLD_FROM_RSC1 SFX_STAIRS_UP; CALL UTIL_GoNoGo
+ RET
+END
+
+# Go down to level 2.
+PROC RSC1_GoDown
+ SND AStairsDown LVLN_RSC2 ENTPT_RSC2_FROM_L1 SFX_STAIRS_DOWN; CALL UTIL_GoNoGo
+ RET
+END
+
+# Walk procedure.
+PROC RSC1_Walk
+ PARAM rawcr pdir
+ 
+ # Check for triggers:
+ SND 1 rawcr RSC1_LightCheck
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_SLIME EID_SLIME # @q_RESCUE_GOV
+ CALL TRIG_Check
+ SND 3 rawcr UTIL_Battle EID_RSLIME # @q_RESCUE_GOV
+ CALL TRIG_Check
+END
+
+PROC RSC1_LightCheck
+ VAR light
+ # Does the player have a light source?
+ CMP GV_PEF_LIGHT 0
+ JG .ret
+ # No light. Warn.
+ SND 2 .a_warn
+ CALL UTIL_CharSpeak
+.ret:
+ RET
+
+.a_warn:
+ DB 2
+ DS It's dark. We should light
+ DS a torch to see our way.
+END
+
+# -----------------------------------------------------------------
+# CAVE LEVEL 2 ----------------------------------------------------
+EXPORT PROC RSC2_Interact
+ PARAM rawcr xz sid kf
+
+ # Chests with torches:
+ CMP rawcr LOHI(218,23); JE .torches_chest
+
+ # Stairs up?
+ CMP sid 12; JE .go_up
+ # Looting a chest?
+ CMP sid 40; JE .loot_chest
+ # Lever?
+ CMP sid 52; JE .lever
+ # Tried to walk through bars?
+ CMP sid 51; JE .bars
+ # Stairs down? (End of level)
+ CMP sid 28; JE .rescue
+
+ RET
+
+ .go_up:; CALL RSC2_GoUp; RET
+ .loot_chest:;
+  SND rawcr LOL_A; CALL LOOT_ChestRandom; RET #@q_RESCUE_GOV loot_count=3
+ .lever:; SND rawcr kf; CALL RSC2_Lever; RET
+ .bars:; CALL RSC2_Bars; RET
+ .rescue:; CALL RSC2_Rescue; RET
+ .torches_chest:;
+  SND rawcr ITID_TORCH; CALL LOOT_ChestItem; RET
+END
+
+# Walk procedure.
+PROC RSC2_Walk
+ PARAM rawcr pdir
+ 
+ # Check for triggers:
+ SND 1 rawcr UTIL_Battle EID_RSLIME #@q_RESCUE_GOV
+ CALL TRIG_Check
+ SND 2 rawcr UTIL_Battle EID_SLIME EID_RSLIME #@q_RESCUE_GOV
+ CALL TRIG_Check
+ SND 3 rawcr UTIL_Battle EID_RSLIME EID_RSLIME #@q_RESCUE_GOV
+ CALL TRIG_Check
+END
+
+# Offer to go up to level 1.
+PROC RSC2_GoUp
+ # Prompt.
+ SND AStairsUp ChoiceNoYes; SYS SYSC_CHOICE
+ VAR choice
+ REC choice
+ CMP choice 2; JNE .ret
+ # Go up.
+ SND SFX_STAIRS_UP
+ SYS SYSC_SFX
+ SND LVLN_RSC1 ENTPT_RSC1_FROM_L2
+ SYS SYSC_CHANGE_LVL
+.ret:
+ RET
+END
+ 
+# Interact with the iron bars.
+PROC RSC2_Bars
+ SND .bars_msg
+ SYS SYSC_ALERT
+ RET
+.bars_msg:
+ DB 3
+ DS You cannot open the
+ DS iron bars. Maybe they
+ DS open elsewhere?
+END
+
+# Pull the lever.
+PROC RSC2_Lever
+ PARAM rawcr kf
+ # Player pulled the lever.
+ CMP kf 0; JNE .lever_already
+ # Open the iron bars (kill the iron bars tile, which transforms
+ # it into the non-solid "open iron bars" tile).
+ SND LOHI(226,29)
+ SYS SYSC_KILL_TILE
+ # Also kill the lever so it goes into its pulled state.
+ SND rawcr
+ SYS SYSC_KILL_TILE
+ # Explain what happened.
+ SND .lever_pulled_msg
+ SYS SYSC_ALERT
+ RET
+
+.lever_already:
+ SND .lever_already_msg
+ SYS SYSC_ALERT
+ RET
+
+.lever_already_msg:
+ DB 2
+ DS The lever is already pulled.
+ DS The iron gates are open.
+
+.lever_pulled_msg:
+ DB 3
+ DS You pull the lever.
+ DS The iron bars to the
+ DS west are now open.
+END
+
+# Rescue governor.
+PROC RSC2_Rescue
+ # Narration:
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ SND 0 0 .a_narr2; SYS SYSC_SPEAK
+ SND 255 .s_lucas .a_speech; SYS SYSC_SPEAK
+ SND 0 0 .a_narr3; SYS SYSC_SPEAK
+ # Give the four crystals
+ SND ITID_CRYSTAL_RED; SYS SYSC_GIVE
+ SND ITID_CRYSTAL_GREEN; SYS SYSC_GIVE
+ SND ITID_CRYSTAL_BLUE; SYS SYSC_GIVE
+ SND ITID_CRYSTAL_YELLOW; SYS SYSC_GIVE
+ # Continue narration
+ SND 0 0 .a_narr4; SYS SYSC_SPEAK
+ SND 255 .s_lucas .a_speech2; SYS SYSC_SPEAK
+ SND 0 0 .a_narr5; SYS SYSC_SPEAK
+ # Mark governor rescue as complete.
+ OR GM_C_RESCUE_GOV
+ # Schedule reward (for after LVLN_WRLD loads).
+ SET TGV_WRLD_REW_QUEST_XP 2000 #@q_RESCUE_GOV
+ # Exit cave.
+ SND SFX_STAIRS_UP
+ SYS SYSC_SFX
+ SND LVLN_WRLD ENTPT_WRLD_FROM_RSC1
+ SYS SYSC_CHANGE_LVL
+ RET
+
+.s_lucas:
+ DS Lucas, the governor
+
+.a_narr:
+ DB 3
+ DS As you descend the stairs, you come
+ DS across an unconscious man. He is
+ DS gravely wounded.
+
+.a_narr2:
+ DB 2
+ DS He awakens, and speaks with
+ DS much difficulty.
+
+.a_speech:
+ DB 6
+ DS I am Lucas... governor...
+ DS of Riverside...
+ DS
+ DS I have... failed.
+ DS You must complete my
+ DS mission now...
+
+.a_narr3:
+ DB 2
+ DS He extends his hand and
+ DS gives you four crystals.
+ 
+.a_narr4:
+ DB 4
+ DS As you receive the crystals,
+ DS you feel a great sense of
+ DS responsibility weighing
+ DS upon you.
+
+.a_speech2:
+ DB 3
+ DS Return to Riverside...
+ DS See Markus... vice-governor.
+ DS He will.. help...
+
+.a_narr5:
+ DB 2
+ DS Despite your best efforts, the
+ DS governor dies from his wounds.
+END
+
+

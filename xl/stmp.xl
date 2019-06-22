@@ -1,0 +1,110 @@
+# South Temple level.
+
+PROC STMP_EnterFromWrld
+ VAR count
+ # Figure out what state the temple is in.
+ # Was the quest already rewarded?
+ TEST GM_R_RSTO_INCENSE; JNZ .state_r
+ # Does the player have the incense in the inventory?
+ SND ITID_INCENSE
+ SYS SYSC_GET_ITEM_COUNT
+ REC count
+ CMP count 0; JG .state_c
+ # Was the quest already assigned?
+ TEST GM_A_RSTO_INCENSE; JNZ .state_a
+ # Quest not yet assigned. Assign it.
+ SND 230 SCleric .msg_na
+ SYS SYSC_SPEAK
+ OR GM_A_RSTO_INCENSE
+ # (fall through to continue message)
+.state_a:
+ # Quest is assigned. Repeat message.
+ SND 230 SCleric .msg_a
+ SYS SYSC_SPEAK
+ RET
+.state_c:
+ # Quest was just completed.
+ # Remove the incense from the inventory.
+ SND ITID_INCENSE; SYS SYSC_REMOVE_ITEM
+ # Say thanks.
+ SND 230 SCleric .msg_c
+ SYS SYSC_SPEAK
+ # Give some gold and XP.
+ SND 500; CALL REW_GiveQuestReward #@q_RSTO_INCENSE
+ # Mark the reward as given.
+ OR GM_R_RSTO_INCENSE
+ RET
+.state_r:
+ # Quest finished and rewarded, so player can enter the temple.
+ SND .msg_enter LVLN_STMP ENTPT_STMP; CALL UTIL_GoNoGo
+ RET
+.msg_enter:
+ DB 1
+ DS Enter the temple?
+.msg_na:
+ DT The temple is closed due
+ .. to a lack of incense.
+ .. Perhaps you can help.
+.msg_a:
+ DT If you bring us incense from
+ .. the town cellar, we will
+ .. reopen. The cellar is in
+ .. the south-eastern corner of
+ .. the city of Riverside.
+.msg_c:
+ DT You brought us incense!
+ .. We can now reopen. You are
+ .. welcome to step inside at
+ .. any time.
+END
+
+EXPORT PROC STMP_Interact
+ PARAM rawcr xz sid kf
+ # Interactibles:
+ SND rawcr STMP_Interactibles; CALL UTIL_CheckInteract
+END
+
+PROC STMP_Leave
+ SND .msg LVLN_WRLD ENTPT_WRLD_FROM_STMP; CALL UTIL_GoNoGo
+ RET
+.msg:
+ DB 1
+ DS Leave the temple?
+END
+
+# HEAL SPELL -----------------------------------------------------
+PROC STMP_LearnHeal
+ SND ZID_HEAL .a_desc 0 0
+ CALL UTIL_TempleLearnSpell
+ RET 0
+
+.a_desc:
+ DB 4
+ DS I teach the spell of Heal.
+ DS
+ DS This spell allows you to 
+ DS heal yourself or others.
+END
+
+# PROTECT SPELL --------------------------------------------------
+PROC STMP_LearnProtect
+ SND ZID_PROTECT .a_desc 3 ASpellRequiresLevel3
+ CALL UTIL_TempleLearnSpell
+ RET 0
+
+.a_desc:
+ DB 5
+ DS I teach the Protect spell.
+ DS
+ DS This spell reduces the
+ DS damage from enemies in
+ DS battle.
+END
+
+# INTERACTIBLES TABLE --------------------------------------------
+STMP_Interactibles:
+ DW LOHI(186,17) STMP_Leave
+ DW LOHI(182,21) STMP_LearnHeal
+ DW LOHI(190,21) STMP_LearnProtect
+ DW 0
+

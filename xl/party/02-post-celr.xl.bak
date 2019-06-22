@@ -1,0 +1,121 @@
+# DEBUG Party
+# NOTE ABOUT DEBUG PARTIES: Only record the equipment, XP and gold.
+# Do not change any of the levels or attributes, as those are
+# leveled-up automatically when loading the party.
+
+# DESCRIPTION OF THIS DEBUG PARTY:
+# Right after finishing CELR level, claimed reward, and did some
+# shopping in RSTO for equipment, and learned the ZID_HEAL spell
+# from the temple.
+
+EXPORT Party_PostCELR:
+
+DB 187    # Signature for error-checking
+# X, Z, direction (ignored)
+DB 0 0 0
+# Number of party members
+DB 3
+# pclk (DWORD)
+DW 0 0
+
+# Character 1
+DB 186
+DS Alex                    # Name
+DB CLS_FIGHTER              # Class
+DB 240                      # Face
+DB 5                        # Attack score
+DB 4                        # Def score
+DB 10                       # Speed score
+DW 19                       # HP
+DW 19                       # Max HP
+DW 0                        # SP
+DW 0                        # Max SP
+# Equipped items per kind:
+  DB ITID_BRIGANDINE 0                     # ITK_ARMOR
+  DB 0 0                                   # ITK_HELM
+  DB ITID_LONG_SWORD 0                     # ITK_MWEAP
+  DB 0 0                                   # ITK_RWEAP
+  DB ITID_WOODEN_SHIELD 0                  # ITK_SHIELD
+  DB ITID_LEATHER_BOOTS 0                  # ITK_BOOT
+  DB 0 0                                   # ITK_BELT
+  DB 0 0                                   # ITK_AMULET
+  DB 0 0                                   # ITK_RING
+DB 0                        # Count of spells
+
+# Character 2
+DB 186
+DS Leon                    # Name
+DB CLS_PALADIN              # Class
+DB 242                      # Face
+DB 5                        # Attack score
+DB 4                        # Def score
+DB 10                       # Speed score
+DW 18                       # HP
+DW 18                       # Max HP
+DW 5                        # SP
+DW 5                        # Max SP
+# Equipped items per kind:
+  DB ITID_LEATHER_ARMOR 0                  # ITK_ARMOR
+  DB 0 0                                   # ITK_HELM
+  DB ITID_LONG_SWORD 0                     # ITK_MWEAP
+  DB 0 0                                   # ITK_RWEAP
+  DB ITID_WOODEN_SHIELD 0                  # ITK_SHIELD
+  DB ITID_LEATHER_BOOTS 0                  # ITK_BOOT
+  DB 0 0                                   # ITK_BELT
+  DB 0 0                                   # ITK_AMULET
+  DB 0 0                                   # ITK_RING
+DB 1                        # Count of spells
+  DB ZID_HEAL
+
+# Character 3
+DB 186
+DS Lyla                     # Name
+DB CLS_ARCHER               # Class
+DB 241                      # Face
+DB 5                        # Attack score
+DB 6                        # Def score
+DB 25                       # Speed score
+DW 14                       # HP
+DW 14                       # Max HP
+DW 0                        # SP
+DW 0                        # Max SP
+# Equipped items per kind:
+  DB ITID_LEATHER_ARMOR; DB 0;                 # ITK_ARMOR
+  DB 0; DB 0                                   # ITK_HELM
+  DB 0; DB 0                                   # ITK_MWEAP
+  DB ITID_SHORT_BOW; DB 0                      # ITK_RWEAP
+  DB 0; DB 0                                   # ITK_SHIELD
+  DB 0; DB 0                                   # ITK_BOOT
+  DB 0; DB 0                                   # ITK_BELT
+  DB 0; DB 0                                   # ITK_AMULET
+  DB 0; DB 0                                   # ITK_RING
+DB 0                        # Count of spells
+
+
+# Count of inventory items
+DB 15
+DB ITID_TORCH 0
+DB ITID_TORCH 0
+DB ITID_TORCH 0
+DB ITID_TORCH 0
+DB ITID_APPLE 0
+DB ITID_APPLE 0
+DB ITID_APPLE 0
+DB ITID_APPLE 0
+DB ITID_MANA_POTION 0
+DB ITID_RATION 0
+DB ITID_RATION 0
+DB ITID_RATION 0
+DB ITID_RATION 0
+DB ITID_RATION 0
+DB ITID_RATION 0
+
+# Gold (dword)
+DW 33 0
+
+# XP (DWORD)
+DW 3340 0
+
+# Level
+DB 1
+

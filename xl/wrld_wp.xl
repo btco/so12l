@@ -1,0 +1,86 @@
+# WRLD region: WESTPORT (WP)
+# Westport island (west of Riverside).
+
+# Interactibles list
+WRLD_WP_Interactibles:
+ # Entrance to WPTO (Westport Town).
+ DW LOHI(6,52) WPTO_EnterFromWrld
+ # Entrance to INTO
+ DW LOHI(19,22) WRLD_WP_EnterInto
+ # Helm shop
+ DW LOHI(22,66) WRLD_WP_HelmShop
+ # Fletcher
+ DW LOHI(15,64) WRLD_WP_Fletcher
+ # Altar that teaches ZID_AWAKEN
+ DW LOHI(12,60) WRLD_WP_Altar
+ # Cartographer
+ DW LOHI(8,58) WRLD_WP_Cartographer
+ # -------- End of table marker --------
+ DW 0
+
+PROC WRLD_WP_Walk
+ PARAM rawcr pdir
+END
+
+PROC WRLD_WP_EnterInto
+ TEST GM_C_INTO; JNZ .alive
+ SND .a_dead_prompt LVLN_INTX ENTPT_INTX_FROM_WRLD; CALL UTIL_GoNoGo
+ RET
+.alive:
+ SND .a_alive_prompt LVLN_INTO ENTPT_INTO_FROM_WRLD; CALL UTIL_GoNoGo
+ RET
+.a_dead_prompt:
+ DB 2
+ DS Enter the ruins of
+ DS the Town of Indigo?
+.a_alive_prompt:
+ DB 2
+ DS Enter the town
+ DS of Indigo?
+END
+
+PROC WRLD_WP_HelmShop
+ SND 250 SMerchant .msg * 100 ITK_HELM; CALL UTIL_ShopUi
+ {
+  DB 3
+  DB ITID_BATTLE_HELM  #@wares_WPTO
+  DB ITID_STEEL_HELM   #@wares_WPTO
+  DB ITID_IRON_HELM    #@wares_WPTO
+ }
+ RET
+.msg:
+ DT Hi! I sell the best
+ .. helmets in the region.
+END
+
+PROC WRLD_WP_Fletcher
+ SND *; CALL SHOP_Fletcher
+ {
+  DB 2
+  DB ITID_CROSSBOW  #@wares_WPTO
+  DB ITID_LONG_BOW  #@wares_WPTO
+ }
+END
+
+PROC WRLD_WP_Altar
+ SND ZID_AWAKEN * 3 ASpellRequiresLevel3
+ {
+  DT I teach the Awaken spell.
+  .. It awakens anyone who
+  .. gets put under magical
+  .. sleep.
+ }
+ CALL UTIL_TempleLearnSpell
+END
+
+PROC WRLD_WP_Cartographer
+ VAR upd
+ CALL UTIL_CartographerDialogue; REC upd
+ CMP upd 1; JNE .ret
+ OR GV_WMAPREV_COL_A WMAPREV_MASK_ROW_0
+ OR GV_WMAPREV_COL_A WMAPREV_MASK_ROW_1
+ OR GV_WMAPREV_COL_A WMAPREV_MASK_ROW_2
+ OR GV_WMAPREV_COL_A WMAPREV_MASK_ROW_3
+.ret:
+ RET
+END

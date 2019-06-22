@@ -1,0 +1,61 @@
+# Training venue logic
+
+PROC Train
+ PARAM max_level
+ # Welcome...
+ SND 246 STrainingHall .welcome_msg
+ SYS SYSC_SPEAK
+ # What's the party's current level?
+ VAR lvl
+ SND PINFO_LEVEL
+ SYS SYSC_PINFO
+ REC lvl
+ # Is the party at cap level?
+ CMP lvl MAX_LEVEL; JGE .maxed_out
+ # Level too high for this facility?
+ CMP lvl max_level; JGE .maxed_out
+ # Is party eligible to train?
+ VAR can
+ SND PINFO_ELIGIBLE
+ SYS SYSC_PINFO
+ REC can
+ CMP can 0; JE .not_yet
+ # Calculate cost of training.
+ # cost = (lvl+1)^2 * 10
+ VAR cost; SET cost lvl; ADD cost 1; MUL cost cost; MUL cost 10
+ # Do you want to train? (Confirm player is OK with cost).
+ SND AConfirmTrain cost; SYS SYSC_PAY
+ VAR paid
+ REC paid
+ # No payment, no training.
+ CMP paid 0; JE .ret
+ # Ok, training has been paid, so level up.
+ SYS SYSC_LEVEL_UP
+ RET
+
+.welcome_msg:
+ DB 3
+ DS For a small fee, we can
+ DS train you to advance to the
+ DS next level.
+
+.maxed_out:
+ # Already at maximum level (globally, or for this facility).
+ SND 246 STrainingHall ATrainMaxedOut
+ SYS SYSC_SPEAK
+ RET
+
+.not_yet:
+ # Can't train yet (not enough XP).
+ SND 246 STrainingHall STrainNotReady
+ SYS SYSC_SPEAK
+ RET
+
+.ret:
+ RET
+
+.who_msg:
+ DB 1
+ DS Who will train?
+END
+

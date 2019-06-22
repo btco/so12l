@@ -1,0 +1,170 @@
+# WRLD region: Serpent Island (SE)
+# This is the island just south of Riverside Island.
+
+# Interactibles list
+WRLD_SE_Interactibles:
+ # North hut, next to the bridge to Riverside.
+ DW LOHI(47,73) WRLD_SE_Hut1
+ # Hut near entrance to tunnel.
+ DW LOHI(59,82) WRLD_SE_Hut2
+ # Hut near broken bridge.
+ DW LOHI(41,83) WRLD_SE_Hut3
+ # Entrance to Forest Village (FOVI)
+ DW LOHI(55,77) FOVI_EnterFromWrld
+ # Entrance to tunnel (TUNN)
+ DW LOHI(58,84) TUNN_EnterFromSE
+ # Altar where player learns the Light spell.
+ DW LOHI(58,69) WRLD_SE_LearnLight
+ # Altar where player learns the Stun spell.
+ DW LOHI(19,79) WRLD_SE_LearnStun
+ # Hut next to Serpent Woods
+ DW LOHI(38,74) WRLD_SE_Hut4
+ # -------- End of table marker --------
+ DW 0
+
+PROC WRLD_SE_Hut1
+ SND 250 SVillager .a_msg; SYS SYSC_SPEAK
+ RET
+.a_msg:
+ DT Watch out for snakes! If you
+ .. get bitten, seek the old
+ .. man in the forest village.
+END
+
+PROC WRLD_SE_Hut2
+ SND 253 SVillager .a_msg; SYS SYSC_SPEAK
+ RET
+.a_msg:
+ DT That cave leads to the South
+ .. Kingdom. There is a city
+ .. there called Pinnacle, at
+ .. the top of the mountains.
+END
+
+PROC WRLD_SE_Hut3
+ SND 254 SVillager .a_msg; SYS SYSC_SPEAK
+ RET
+.a_msg:
+ DT To the south lies the South
+ .. Kingdom. This bridge is
+ .. broken but you can use the
+ .. tunnel to the east.
+END
+
+PROC WRLD_SE_Hut4
+ SND 254 SVillager .a_msg; SYS SYSC_SPEAK
+ RET
+.a_msg:
+ DT These woods are called
+ .. Serpent Woods.
+ ..
+ .. I heard there is an altar
+ .. in a clearing where you can
+ .. learn a spell.
+END
+
+PROC WRLD_SE_Walk
+ PARAM rawcr pdir
+ VAR match
+
+ # Trigger for the bracelet quest.
+ SND rawcr LOHI(48,80); CALL UTIL_AreAdjacent; REC match
+ CMP match 0; CNE WRLD_SE_CheckBraceletQuest
+.skip_bracelet:
+
+END
+
+PROC WRLD_SE_CheckBraceletQuest
+ VAR choice
+
+ # Already triggered?
+ TEST GM_A_BRACELET
+ JNZ .ret
+ # Mark it as triggered.
+ OR GM_A_BRACELET
+ # Narration.
+ SND 0 0 .a_narr; SYS SYSC_SPEAK
+ # What will you do?
+ SND .a_what .a_choices; SYS SYSC_CHOICE; REC choice
+ CMP choice 2; JE .help_man
+ CMP choice 3; JE .run_after_thief
+ CMP choice 4; JE .kill_thief
+ RET
+
+.help_man:
+ JMP .thief_runs_away
+.run_after_thief:
+ SND 0 0 .a_run_fail; SYS SYSC_SPEAK
+ JMP .thief_runs_away
+.kill_thief:
+ # You miss the thief...
+ SND 0 0 .a_kill_miss; SYS SYSC_SPEAK
+ # (fall through)
+.thief_runs_away:
+ SND 0 0 .a_thief_runs; SYS SYSC_SPEAK
+ SND 232 SVillager .a_villager; SYS SYSC_SPEAK
+ RET
+
+.a_narr:
+ DT You see a thief stealing a
+ .. golden bracelent from a
+ .. helpless man.
+
+.a_choices:
+ DT Ignore them.
+ .. Help the man.
+ .. Run after the thief.
+ .. Kill thief with an arrow.
+
+.a_what:
+ DT What will you do?
+
+.a_kill_miss:
+ DT You fire an arrow but you
+ .. miss the thief.
+
+.a_run_fail:
+ DT Yoy try to run but the
+ .. thief gets away.
+
+.a_thief_runs:
+ DT The thief disappears to
+ .. the east with the bracelet.
+
+.a_villager:
+ DT Thank you for helping me!
+ .. The bracelet is of great
+ .. sentimental value. If you
+ .. recover it, visit me in
+ .. the village just east of
+ .. here.
+.ret:
+END
+
+# LIGHT SPELL ----------------------------------------------------
+PROC WRLD_SE_LearnLight
+ SND ZID_LIGHT .a_desc 0 0
+ CALL UTIL_TempleLearnSpell
+ RET 0
+
+.a_desc:
+ DT I teach the spell of Light.
+ ..
+ .. The spell of Light brings
+ .. light to dark places.
+END
+
+# STUN SPELL -----------------------------------------------------
+PROC WRLD_SE_LearnStun
+ SND ZID_STUN .a_desc 4 ASpellRequiresLevel4
+ CALL UTIL_TempleLearnSpell
+ RET 0
+
+.a_desc:
+ DT I teach the Stun spell.
+ ..
+ .. This spell stuns an enemy,
+ .. rendering it unable to act
+ .. for a short while.
+END
+

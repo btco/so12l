@@ -1,0 +1,136 @@
+# WRLD region: BLOSSOM PLAINS (BL)
+# Three quadrants: the one just south of Eastern Riverside Island,
+# the one to the east of it with the entrance to Bamboo Grove,
+# and then the one north of that (Bamboo Grove itself).
+
+# Interactibles list
+WRLD_BL_Interactibles:
+ # Hut at the entrance to Bamboo Grove.
+ DW LOHI(100,70) WRLD_BL_BambooEntranceHut
+ # Hut at the end of the Bamboo Grove.
+ DW LOHI(107,65) WRLD_BL_BambooHut
+ # Cartographer's hut
+ DW LOHI(84,75) WRLD_BL_CartographerHut
+ # Cartographer's hut, east
+ DW LOHI(115,73) WRLD_BL_CartographerHutEast
+ # Ring shop
+ DW LOHI(63,82) WRLD_BL_RingShop
+ # -------- End of table marker --------
+ DW 0
+
+PROC WRLD_BL_BambooHut
+ VAR count
+ # If already finished quest, or already have item
+ # player finds nothing here.
+ TEST GM_C_INTO; JNZ .nothing
+ SND ITID_STATUETTE; SYS SYSC_GET_ITEM_COUNT; REC count
+ CMP count 0; JG .nothing
+ # Give the Indigo Statuette.
+ SND 0 0 .a_found; SYS SYSC_SPEAK
+ SND ITID_STATUETTE; SYS SYSC_GIVE
+ RET
+.nothing:
+ SND ANothing; SYS SYSC_ALERT
+ RET
+.a_found:
+ DT Searching the hut, you find
+ .. an ornate Indigo Statuette.
+ ..
+ .. It belongs to the city of
+ .. Indigo, in the northwest.
+END
+
+PROC WRLD_BL_BambooEntranceHut
+ SND 250 SVillager .a_msg; SYS SYSC_SPEAK
+ RET
+.a_msg:
+ DT This is the Bamboo Grove.
+ .. Careful! It is full of very
+ .. dangerous monsters. If you
+ .. can't beat them now, return
+ .. when you are more powerful.
+END
+
+PROC WRLD_BL_Walk
+ PARAM rawcr pdir
+END
+
+PROC WRLD_BL_CartographerHut
+ VAR has
+ # Does the party already have the world map?
+ SND ITID_WORLD_MAP; SYS SYSC_GET_ITEM_COUNT; REC has
+ CMP has 0; JG .already_has
+ # Does the party have the Purple Squid ink?
+ SND ITID_SQUID_INK; SYS SYSC_GET_ITEM_COUNT; REC has
+ CMP has 0; JG .has_ink
+ # State the quest.
+ SND 223 SCartographer .a_quest; SYS SYSC_SPEAK
+ RET
+
+.has_ink:
+ # Party brought the squid ink.
+ SND 223 SCartographer .a_receive_ink; SYS SYSC_SPEAK
+ SND ITID_SQUID_INK; SYS SYSC_REMOVE_ITEM
+ SND 0 0 .a_map_narr; SYS SYSC_SPEAK
+ SND 223 SCartographer .a_few_minutes; SYS SYSC_SPEAK
+ SND 0 0 .a_map_narr2; SYS SYSC_SPEAK
+ SND 223 SCartographer .a_here_is_map; SYS SYSC_SPEAK
+ SND ITID_WORLD_MAP; SYS SYSC_GIVE
+ SND 1000; CALL REW_GiveQuestReward #@q_VQ_WORLD_MAP
+ # Reveal the initial areas.
+ CALL WMAP_RevealInitialAreas
+ RET
+
+.already_has:
+ SND 223 SCartographer .a_already; SYS SYSC_SPEAK
+ RET
+
+.a_quest:
+ DT I'm making a World Map.
+ .. To finish it I need Purple
+ .. Squid Ink. It's very rare!
+ .. If you find any, bring it
+ .. to me!
+
+.a_already:
+ DT I hope you are enjoying the
+ .. World Map! Bring it to
+ .. other cartographers so they
+ .. can update it for you.
+
+.a_receive_ink:
+ DT Ah! You brought me a vial
+ .. of Purple Squid Ink!
+
+.a_map_narr:
+ DT You hand over the vial of
+ .. ink to the cartographer.
+
+.a_few_minutes:
+ DT This will only take a
+ .. few minutes...
+
+.a_map_narr2:
+ DT Two hours later...
+
+.a_here_is_map:
+ DT As I said, it only took a
+ .. few hours. As a reward,
+ .. here is a copy of the map!
+END
+
+PROC WRLD_BL_CartographerHutEast
+ VAR upd
+ CALL UTIL_CartographerDialogue; REC upd
+ CMP upd 1; JNE .ret
+ # Update map with Blossom Fields region
+ OR GV_WMAPREV_COL_D WMAPREV_MASK_ROW_3
+ OR GV_WMAPREV_COL_D WMAPREV_MASK_ROW_4
+.ret:
+ RET
+END
+
+PROC WRLD_BL_RingShop
+ SND SHOP_Wares_Rings1; CALL SHOP_RingShop
+END
+

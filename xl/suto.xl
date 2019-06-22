@@ -1,0 +1,414 @@
+# SUTO (Sun Port town)
+
+# SUTO INTERACTIBLES LIST
+# (position, title, proc)
+SUTO_Interactibles:
+ DW LOHI(212,93) SUTO_LenasHouse
+ DW LOHI(218,101) SUTO_Leave
+ DW LOHI(223,95) SUTO_VicsHouse
+ DW LOHI(223,99) SUTO_Inn
+ DW LOHI(215,99) SHOP_GeneralStore
+ DW LOHI(221,99) SUTO_TrainingHall
+ DW LOHI(221,95) SUTO_Blacksmith
+ DW LOHI(214,93) SUTO_ArmorShop
+ DW 0
+
+PROC SUTO_EnterFromWrld
+ # Ask the player if they want to enter.
+ SND .msg LVLN_SUTO ENTPT_SUTO; CALL UTIL_GoNoGo
+ RET 0
+.msg:
+ DB 2
+ DS Enter the town of
+ DS Sun Port?
+END
+
+
+PROC SUTO_Interact
+ PARAM rawcr xz sid kf
+ # Check interactibles
+ SND rawcr SUTO_Interactibles; CALL UTIL_CheckInteract
+END
+
+# Leave town?
+PROC SUTO_Leave
+ SND ALeaveTown LVLN_WRLD ENTPT_WRLD_FROM_SUTO; CALL UTIL_GoNoGo
+ RET
+END
+
+# Lena's house.
+PROC SUTO_LenasHouse
+ VAR count
+
+ TEST GM_R_JEWELRY_BOX; JNZ .already_rewarded
+ TEST GM_F_JEWELRY_BOX; JNZ .failed
+
+ # Does the player have the jewelry box?
+ SND ITID_JEWELRY_BOX
+ SYS SYSC_GET_ITEM_COUNT
+ REC count
+ CMP count 0; JG .has_box
+ # Player does not have box. State mission.
+ OR GM_A_JEWELRY_BOX
+ SND 250 .name .mission
+ SYS SYSC_SPEAK
+ RET
+
+.has_box:
+ # Player just brought back the box.
+ OR GM_R_JEWELRY_BOX
+ SND 250 .name .thanks
+ SYS SYSC_SPEAK
+ SND 2000; CALL REW_GiveQuestReward #@q_JEWELRY_BOX
+ RET
+
+.already_rewarded:
+ # Player had already returned the box.
+ SND 250 .name .thanks_again
+ SYS SYSC_SPEAK
+ RET
+
+.failed:
+ # Player sold the box.
+ SND 250 .name .disappointed
+ SYS SYSC_SPEAK
+ RET
+
+.name:
+ DS Lena
+
+.mission:
+ DT My name is Lena. Years ago
+ .. a thief stole a Jewelry Box
+ .. from me. If you find it,
+ .. bring it back to me!
+
+.thanks:
+ DT Oh! My jewelry box! It has
+ .. been so long since I lost
+ .. it. Thank you!
+
+.thanks_again:
+ DT Thanks again!
+
+.disappointed:
+ DT I cannot believe you sold my
+ .. jewelry box. I thought you
+ .. were honorable heroes.
+END
+
+# Walk callback
+EXPORT PROC SUTO_Walk
+ PARAM rawcr
+ VAR count choice
+
+ # Check for triggers:
+ SND 1 rawcr SUTO_InFrontOfVicsHouse; CALL TRIG_Check
+
+ # Offer to sell jewelry box.
+ CMP rawcr LOHI(218,99); JNE .skip
+ TEST GM_JEWELRY_BOX_SELL_OFFERED; JNZ .skip
+ SND ITID_JEWELRY_BOX
+ SYS SYSC_GET_ITEM_COUNT
+ REC count
+ CMP count 0; JE .skip
+ # Player has jewelry box, and hasn't been offered to sell it yet.
+ OR GM_JEWELRY_BOX_SELL_OFFERED
+ SND 225 .thief_name .thief_msg
+ SYS SYSC_SPEAK
+ SND .will_you_sell ChoiceNoYes; SYS SYSC_CHOICE
+ REC choice
+ CMP choice 2; JNE .skip
+ # Sell it.
+ SND 500
+ SYS SYSC_GIVE_GOLD
+ SND ITID_JEWELRY_BOX
+ SYS SYSC_REMOVE_ITEM
+ # Mark that the jewelry box quest has been failed.
+ OR GM_F_JEWELRY_BOX
+ RET
+
+.skip:
+ RET
+
+.thief_name:
+ DS Hooded figure
+
+.thief_msg:
+ DT Psst. Nice jewelry box. I
+ .. heard it belongs to Lena.
+ ..
+ .. Instead of returning it to
+ .. her, how about you sell it
+ .. to me for 500 gp?
+
+.will_you_sell:
+ DT Sell Lena's jewelry box
+ .. for 500 gp?
+END
+
+PROC SUTO_InFrontOfVicsHouse
+ VAR is
+ # Only say something if Lyla is conscious (she has to be the one
+ # to say it).
+ SND 3 CINFO_IS_ACTIVE; SYS SYSC_CINFO; REC is
+ CMP is 0; JE .skip
+ # Lyla says this is the place.
+ SND 3 0 .a_msg; SYS SYSC_SPEAK
+
+.skip:
+ RET 1  # Consume trigger
+
+.a_msg:
+ DT This is it! This is Vic's
+ .. house. He will help us.
+END
+
+PROC SUTO_VicsHouse
+ VAR choice
+ TEST GM_VICS_HOUSE; JNZ .empty
+
+ OR GM_VICS_HOUSE
+ SND 0 0 .a_narr1; SYS SYSC_SPEAK
+ SND 0 0 .a_narr2; SYS SYSC_SPEAK
+ SND 243 SVic .a_whos_there; SYS SYSC_SPEAK
+ SND 0 .a_intro_choices; SYS SYSC_CHOICE; REC choice
+ CMP choice 1; JE .intro1
+ CMP choice 2; JE .intro1
+ CMP choice 3; JE .intro2
+ JMP .intro3
+.intro1:
+ SND 243 SVic .a_intro_ans1; SYS SYSC_SPEAK
+ JMP .spiders_question
+.intro2:
+ SND 243 SVic .a_intro_ans2; SYS SYSC_SPEAK
+ JMP .spiders_question
+.intro3:
+ SND 243 SVic .a_intro_ans3; SYS SYSC_SPEAK
+ JMP .spiders_question
+.spiders_question:
+ SND 0 .a_spider_choices; SYS SYSC_CHOICE; REC choice
+ CMP choice 1; JE .not_afraid
+ CMP choice 2; JE .yes_afraid
+ JMP .no_opinion
+.not_afraid:
+ SND 243 SVic .a_ans_not_afraid; SYS SYSC_SPEAK
+ JMP .upstairs
+.yes_afraid:
+ SND 243 SVic .a_ans_afraid; SYS SYSC_SPEAK
+ JMP .upstairs
+.no_opinion:
+ SND 243 SVic .a_ans_no_opinion; SYS SYSC_SPEAK
+ JMP .upstairs
+.upstairs:
+ SND 0 0 .a_narr_upstairs; SYS SYSC_SPEAK
+ SND 243 SVic .a_spiders; SYS SYSC_SPEAK
+ # Vic joins the party
+ SND VicChar; SYS SYSC_ADD_CHAR
+ # Callback to be called after battle.
+ SET TGV_BATTLE_END_CB SUTO_AfterSpiderBattle
+ SND EID_SPIDER EID_SPIDER EID_SPIDER
+ SYS SYSC_BATTLE
+# TODO
+ RET
+
+.empty:
+ SND .a_empty; SYS SYSC_ALERT
+ RET
+
+.a_empty:
+ DB 1
+ DS There is no one here.
+
+.a_narr1:
+ DT Something is wrong.
+ ..
+ .. The interior is destroyed
+ .. as if there was a recent
+ .. fight.
+.a_narr2:
+ DT There is noise from upstairs.
+ .. Someone shouts from there.
+
+.a_whos_there:
+ DT Who is it?
+
+.a_intro_choices:
+ DB 4
+ DS We are friends.
+ DS We are here to help.
+ DS We need your help.
+ DS Sorry, wrong house.
+
+.a_intro_ans1:
+ DB 4
+ DS Excellent. Let me ask you
+ DS one question, friends.
+ DS
+ DS Are you afraid of spiders?
+
+.a_intro_ans2:
+ DB 5
+ DS You need my help? Well,
+ DS as it happens, I need YOUR
+ DS help at the moment.
+ DS
+ DS Are you afraid of spiders?
+
+.a_intro_ans3:
+ DT Be that as it may, before
+ .. you leave, let me ask you.
+ ..
+ .. Are you afraid of spiders?
+
+.a_spider_choices:
+ DB 3
+ DS No, we are not afraid of spiders.
+ DS Yes, we are afraid of spiders.
+ DS We have no opinion of spiders.
+
+.a_ans_afraid:
+ DT Well, I am a bit of an
+ .. aracnophobic myself too.
+ ..
+ .. In any case, could you 
+ .. perhaps come upstairs for
+ .. a second?
+
+.a_ans_not_afraid:
+ DT Excellent! What great luck
+ .. to receive non-aracnophobic
+ .. visitors.
+ .. 
+ .. Could you come upstairs?
+
+.a_ans_no_opinion:
+ DT No opinion of spiders at
+ .. all? That's unusual.
+ ..
+ .. I'm sure you will have one
+ .. soon. Could you come
+ .. upstairs?
+
+.a_narr_upstairs:
+ DT As you ascend the stairs
+ .. you see a man with gray
+ .. hair dressed in blue robes.
+ ..
+ .. He is surrounded by three
+ .. giant spiders who are about
+ .. to attack him.
+.a_spiders:
+ DT Well, don't just stand there.
+ .. Help me!
+ ..
+ .. Don't you know that it's
+ .. impolite to stand by
+ .. helplessly as your host is
+ .. killed by giant spiders?
+END
+
+PROC SUTO_AfterSpiderBattle
+ VAR choice
+ # Vic must be awake to speak, so ensure at least 1 hp.
+ SND 4; CALL UTIL_Ensure1Hp
+ # Intro.
+ SND 243 SVic .a_intro; SYS SYSC_SPEAK
+.back:
+ SND 0 .a_intro_choices; SYS SYSC_CHOICE; REC choice
+ CMP choice 2; JE .about_sorcerer
+ CMP choice 3; JE .about_4_crystals
+ # About the spiders. 
+ SND 243 SVic .a_spiders; SYS SYSC_SPEAK
+ JMP .back
+.about_sorcerer:
+ SND 243 SVic .a_about_sorcerer; SYS SYSC_SPEAK
+ JMP .back
+.about_4_crystals:
+ SND 243 SVic .a_about_4_crystals; SYS SYSC_SPEAK
+ SND 243 SVic .a_mission; SYS SYSC_SPEAK
+ SND 243 SVic .a_mission2; SYS SYSC_SPEAK
+ RET
+  
+.a_intro:
+ DT Thank you for your help.
+
+.a_intro_choices:
+ DT About the spiders...
+ .. About the Sorcerer King...
+ .. About the Four Crystals...
+
+.a_spiders:
+ DT Yes, this area has giant
+ .. spiders that occasionally
+ .. try to kill you.
+ ..
+ .. But the weather is great.
+
+.a_about_sorcerer:
+ DT The Sorcerer King Markus
+ .. rules over all the land
+ .. and is wreaking havoc
+ .. everywhere. The spiders
+ .. and monsters are his doing.
+
+.a_about_4_crystals:
+ DT I heard that ten years ago
+ .. someone simply handed over
+ .. the four crystals to the
+ .. Sorcerer King!!
+ ..
+ .. Can you believe someone
+ .. would be that clueless?
+
+.a_mission:
+ DT Anyway, it's up to us now to
+ .. recover the crystals and
+ .. defeat the Sorcerer King.
+
+.a_mission2:
+ DT Let's start at the Old Tower
+ .. further south. I know how
+ .. to enter.
+
+END
+
+PROC SUTO_Inn
+ SND 255 .a_welcome 20; CALL UTIL_Inn
+ RET
+
+.a_welcome:
+ DT Welcome to the Seaside Inn.
+END
+
+PROC SUTO_TrainingHall
+ SND 5; CALL Train #@train_SUTO
+END
+
+PROC SUTO_Blacksmith
+ SND *; CALL SHOP_Blacksmith
+ {
+  DB 6
+  DB ITID_AXE #@wares_SUTO
+  DB ITID_BROAD_SWORD #@wares_SUTO
+  DB ITID_LONG_SWORD #@wares_SUTO
+  DB ITID_SHORT_SWORD #@wares_SUTO
+  DB ITID_DAGGER #@wares_SUTO
+  DB ITID_MACE #@wares_SUTO
+ }
+END
+
+PROC SUTO_ArmorShop
+ SND *; CALL SHOP_ArmorShop
+ {
+  DB 6
+  DB ITID_IRON_HELM #@wares_SUTO
+  DB ITID_LEATHER_HELM #@wares_SUTO
+  DB ITID_IRON_BOOTS #@wares_SUTO
+  DB ITID_LEATHER_BOOTS #@wares_SUTO
+  DB ITID_BRIGANDINE #@wares_SUTO
+  DB ITID_LEATHER_ARMOR #@wares_SUTO
+ }
+END
+
+
